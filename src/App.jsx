@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { sb } from "./lib/supabase";
 
 // ─── DESIGN TOKENS ───
 const T = {
@@ -310,8 +311,88 @@ const Screen = ({ children, noPad }) => (
   }}>{children}</div>
 );
 
+// ─── AUTH SCREEN ───
+const AuthScreen = ({ onAuth }) => {
+  const [mode, setMode] = useState("signin");
+  const [email, setEmail] = useState("");
+  const [pass, setPass] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState("");
+
+  const handleSubmit = async () => {
+    if (!email || !pass) { setErr("Please fill in both fields"); return; }
+    setLoading(true); setErr("");
+    const { data, error } = mode === "signup"
+      ? await sb.signUp(email, pass)
+      : await sb.signIn(email, pass);
+    setLoading(false);
+    if (error) { setErr(error.message); return; }
+    if (mode === "signup") { setMode("check_email"); return; }
+    if (data?.user) onAuth(data.user);
+  };
+
+  if (mode === "check_email") return (
+    <div style={{ minHeight: "100vh", background: T.bg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 40 }}>
+      <span style={{ fontSize: 48, marginBottom: 16 }}>📬</span>
+      <h2 style={{ color: T.text, fontSize: 22, fontFamily: T.fontDisplay, fontWeight: 700, marginBottom: 8, textAlign: "center" }}>Check Your Email</h2>
+      <p style={{ color: T.textMuted, fontSize: 14, fontFamily: T.font, textAlign: "center", lineHeight: 1.6 }}>
+        We sent a confirmation link to <strong style={{ color: T.text }}>{email}</strong>. Click it to activate your account, then come back and sign in.
+      </p>
+      <div style={{ marginTop: 24, width: "100%", maxWidth: 300 }}>
+        <Btn variant="ghost" onClick={() => setMode("signin")}>Back to Sign In</Btn>
+      </div>
+    </div>
+  );
+
+  return (
+    <div style={{ minHeight: "100vh", background: T.bg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 24px" }}>
+      <h1 className="fade-up" style={{ color: T.text, fontSize: 36, fontFamily: T.fontDisplay, fontWeight: 700, marginBottom: 4 }}>AI Fluent</h1>
+      <p className="fade-up stagger-1" style={{ color: T.accent, fontSize: 14, fontFamily: T.font, fontStyle: "italic", marginBottom: 6 }}>Learn AI. Simply.</p>
+      <div className="fade-up stagger-2" style={{ marginBottom: 32 }}><ClaudeBadge /></div>
+
+      <div style={{ width: "100%", maxWidth: 340 }}>
+        <div className="fade-up stagger-3" style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+          {["signin", "signup"].map(m => (
+            <button key={m} onClick={() => { setMode(m); setErr(""); }} style={{
+              flex: 1, padding: "10px 0", borderRadius: 10,
+              border: `1px solid ${mode === m ? T.borderActive : T.border}`,
+              background: mode === m ? T.accentDim : T.surface,
+              color: mode === m ? T.text : T.textMuted,
+              fontSize: 13, fontWeight: 600, fontFamily: T.font, cursor: "pointer",
+            }}>{m === "signin" ? "Sign In" : "Sign Up"}</button>
+          ))}
+        </div>
+
+        <div className="fade-up stagger-4" style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
+          <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email address" type="email"
+            style={{ width: "100%", background: T.surface, borderRadius: 12, border: `1px solid ${T.border}`, padding: "12px 14px", color: T.text, fontSize: 14, fontFamily: T.font, outline: "none" }} />
+          <input value={pass} onChange={e => setPass(e.target.value)} placeholder="Password" type="password"
+            onKeyDown={e => e.key === "Enter" && handleSubmit()}
+            style={{ width: "100%", background: T.surface, borderRadius: 12, border: `1px solid ${T.border}`, padding: "12px 14px", color: T.text, fontSize: 14, fontFamily: T.font, outline: "none" }} />
+        </div>
+
+        {err && <p className="fade-in" style={{ color: T.red, fontSize: 12, fontFamily: T.font, marginBottom: 12, textAlign: "center" }}>{err}</p>}
+
+        <Btn onClick={handleSubmit} disabled={loading}>
+          {loading ? "..." : mode === "signin" ? "Sign In" : "Create Account"}
+        </Btn>
+
+        <div style={{ marginTop: 16, textAlign: "center" }}>
+          <p style={{ color: T.textDim, fontSize: 11, fontFamily: T.font }}>
+            {mode === "signin" ? "Don't have an account?" : "Already have an account?"}
+            <button onClick={() => { setMode(mode === "signin" ? "signup" : "signin"); setErr(""); }}
+              style={{ background: "none", border: "none", color: T.accent, fontSize: 11, fontFamily: T.font, cursor: "pointer", marginLeft: 4 }}>
+              {mode === "signin" ? "Sign Up" : "Sign In"}
+            </button>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ─── ONBOARDING ───
-const Onboarding = ({ onDone }) => {
+const Onboarding = ({ uid, onDone }) => {
   const [step, setStep] = useState(0);
   const [ans, setAns] = useState({});
   const [building, setBuilding] = useState(false);
@@ -322,6 +403,21 @@ const Onboarding = ({ onDone }) => {
     { q: "What do you want to do with AI?", opts: ["Write better & faster", "Create images & content", "Boost my business", "Stay informed on AI news", "Automate boring tasks", "Just explore"], key: "goals", multi: true },
   ];
 
+  const finish = async (finalAns) => {
+    setBuilding(true);
+    const a = finalAns || ans;
+    // Save to Supabase if user is authenticated
+    if (uid) {
+      await sb.updateProfile(uid, {
+        role: a.role,
+        experience_level: a.exp,
+        goals: a.goals || [],
+        onboarded: true,
+      });
+    }
+    setTimeout(() => onDone(a), 1800);
+  };
+
   const pick = (val) => {
     const s = steps[step];
     if (s.multi) {
@@ -331,7 +427,7 @@ const Onboarding = ({ onDone }) => {
       const newAns = { ...ans, [s.key]: val };
       setAns(newAns);
       if (step < 2) setTimeout(() => setStep(step + 1), 250);
-      else { setBuilding(true); setTimeout(() => onDone(newAns), 2000); }
+      else finish(newAns);
     }
   };
 
@@ -367,7 +463,7 @@ const Onboarding = ({ onDone }) => {
       </div>
       {s.multi && (ans[s.key] || []).length > 0 && (
         <div className="fade-up" style={{ marginTop: 16 }}>
-          <Btn onClick={() => { setBuilding(true); setTimeout(() => onDone(ans), 2000); }}>Continue →</Btn>
+          <Btn onClick={() => finish(ans)}>Continue →</Btn>
         </div>
       )}
     </div>
@@ -434,12 +530,13 @@ const LearnScreen = ({ progress, onOpen }) => {
 };
 
 // ─── LESSON VIEW ───
-const LessonView = ({ pathId, onBack, onComplete, apiKey }) => {
+const LessonView = ({ pathId, uid, onBack, onComplete }) => {
   const lesson = LESSONS[pathId] || LESSONS.basics;
   const [showTutor, setShowTutor] = useState(false);
   const [msgs, setMsgs] = useState([]);
   const [typing, setTyping] = useState(false);
   const [inputVal, setInputVal] = useState("");
+  const [sessionId, setSessionId] = useState(null);
   const scrollRef = useRef(null);
 
   useEffect(() => { scrollRef.current?.scrollTo(0, scrollRef.current.scrollHeight); }, [msgs, typing]);
@@ -447,26 +544,21 @@ const LessonView = ({ pathId, onBack, onComplete, apiKey }) => {
   const ask = async (q) => {
     setMsgs(m => [...m, { from: "user", text: q }]);
     setTyping(true);
-    if (apiKey) {
-      try {
-        const res = await fetch("https://api.anthropic.com/v1/messages", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
-          body: JSON.stringify({
-            model: "claude-sonnet-4-6", max_tokens: 800,
-            system: `You are an AI tutor inside the app "AI Fluent," teaching the lesson "${lesson.title}". The user is a beginner with no tech background. Explain everything in simple, everyday language. Use analogies. Keep responses under 200 words. Be warm, encouraging, and never condescending.`,
-            messages: [...msgs.map(m => ({ role: m.from === "user" ? "user" : "assistant", content: m.text })), { role: "user", content: q }],
-          }),
-        });
-        const data = await res.json();
-        const txt = data.content?.map(c => c.text || "").join("") || "I had trouble responding. Try asking again!";
-        setTyping(false);
-        setMsgs(m => [...m, { from: "claude", text: txt }]);
-      } catch {
-        setTyping(false);
-        setMsgs(m => [...m, { from: "claude", text: DEMO_RESPONSES[q] || DEMO_RESPONSES.default }]);
-      }
-    } else {
+    try {
+      const r = await sb.callClaude({
+        feature: "tutor",
+        system: `You are an AI tutor inside "AI Fluent" teaching "${lesson.title}". The user is a beginner with no tech background. Explain in simple everyday language. Use analogies. Keep responses under 200 words. Be warm and never condescending.`,
+        messages: [...msgs.map(m => ({ role: m.from === "user" ? "user" : "assistant", content: m.text })), { role: "user", content: q }],
+        session_id: sessionId,
+        context_type: "tutor",
+        context_id: pathId,
+        context_title: lesson.title,
+      });
+      setSessionId(r.session_id || sessionId);
+      setTyping(false);
+      setMsgs(m => [...m, { from: "claude", text: r.text }]);
+    } catch {
+      // Fall back to demo responses when Supabase Edge Function is unavailable
       setTimeout(() => {
         setTyping(false);
         setMsgs(m => [...m, { from: "claude", text: DEMO_RESPONSES[q] || DEMO_RESPONSES.default }]);
@@ -533,18 +625,23 @@ const LessonView = ({ pathId, onBack, onComplete, apiKey }) => {
         </div>
         <p style={{ color: T.textMuted, fontSize: 12, fontFamily: T.font, margin: 0, lineHeight: 1.5 }}>Confused about anything? Chat with Claude – ask in plain language, get simple answers.</p>
       </button>
-      <Btn onClick={() => { onComplete(pathId); onBack(); }}>✓ Complete Lesson & Continue</Btn>
+      <Btn onClick={async () => {
+        if (uid) await sb.completeLesson(uid, pathId, 0);
+        onComplete(pathId);
+        onBack();
+      }}>✓ Complete Lesson & Continue</Btn>
     </div>
   );
 };
 
 // ─── NEWS SCREEN ───
-const NewsScreen = ({ apiKey }) => {
+const NewsScreen = ({ uid }) => {
   const [open, setOpen] = useState(null);
   const [chat, setChat] = useState(false);
   const [msgs, setMsgs] = useState([]);
   const [typing, setTyping] = useState(false);
   const [inputVal, setInputVal] = useState("");
+  const [sessionId, setSessionId] = useState(null);
   const scrollRef = useRef(null);
 
   useEffect(() => { scrollRef.current?.scrollTo(0, scrollRef.current.scrollHeight); }, [msgs, typing]);
@@ -554,25 +651,21 @@ const NewsScreen = ({ apiKey }) => {
   const ask = async (q) => {
     setMsgs(m => [...m, { from: "user", text: q }]);
     setTyping(true);
-    if (apiKey) {
-      try {
-        const res = await fetch("https://api.anthropic.com/v1/messages", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
-          body: JSON.stringify({
-            model: "claude-sonnet-4-6", max_tokens: 600,
-            system: `You are a friendly AI news explainer inside "AI Fluent." The user is reading: "${article.title}". Summary: ${article.eli5}. Explain follow-up questions in simple everyday language. Keep answers under 150 words.`,
-            messages: [...msgs.map(m => ({ role: m.from === "user" ? "user" : "assistant", content: m.text })), { role: "user", content: q }],
-          }),
-        });
-        const data = await res.json();
-        setTyping(false);
-        setMsgs(m => [...m, { from: "claude", text: data.content?.[0]?.text || "Let me try again – could you rephrase?" }]);
-      } catch {
-        setTyping(false);
-        setMsgs(m => [...m, { from: "claude", text: "I'm in demo mode right now! Try tapping one of the suggested questions." }]);
-      }
-    } else {
+    try {
+      const r = await sb.callClaude({
+        feature: "news",
+        system: `You are a friendly AI news explainer inside "AI Fluent." The user is reading: "${article.title}". Summary: ${article.eli5}. Explain follow-up questions in simple everyday language. Keep answers under 150 words.`,
+        messages: [...msgs.map(m => ({ role: m.from === "user" ? "user" : "assistant", content: m.text })), { role: "user", content: q }],
+        session_id: sessionId,
+        context_type: "news",
+        context_id: String(article.id),
+        context_title: article.title,
+      });
+      setSessionId(r.session_id || sessionId);
+      setTyping(false);
+      setMsgs(m => [...m, { from: "claude", text: r.text }]);
+    } catch {
+      // Demo fallback
       setTimeout(() => {
         setTyping(false);
         setMsgs(m => [...m, { from: "claude", text: `Great question about "${article.title}"!\n\nIn simple terms: ${article.eli5}\n\n${article.why}\n\nWant me to break down any specific part further?` }]);
@@ -585,7 +678,7 @@ const NewsScreen = ({ apiKey }) => {
   if (chat && article) return (
     <div style={{ height: "100vh", display: "flex", flexDirection: "column", background: T.bg }}>
       <div style={{ padding: "12px 16px", borderBottom: `1px solid ${T.border}`, display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
-        <button onClick={() => { setChat(false); setMsgs([]); }} style={{ background: "none", border: "none", color: T.accent, fontSize: 14, cursor: "pointer", fontFamily: T.font }}>← Story</button>
+        <button onClick={() => { setChat(false); setMsgs([]); setSessionId(null); }} style={{ background: "none", border: "none", color: T.accent, fontSize: 14, cursor: "pointer", fontFamily: T.font }}>← Story</button>
         <div style={{ flex: 1, textAlign: "center" }}><span style={{ color: T.text, fontSize: 14, fontWeight: 600, fontFamily: T.font }}>Ask About This</span></div>
         <ClaudeBadge small />
       </div>
@@ -677,7 +770,7 @@ const NewsScreen = ({ apiKey }) => {
 };
 
 // ─── TOOLS SCREEN ───
-const ToolsScreen = ({ apiKey }) => {
+const ToolsScreen = ({ uid }) => {
   const [wf, setWf] = useState(null);
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState([]);
@@ -687,34 +780,33 @@ const ToolsScreen = ({ apiKey }) => {
 
   const reset = () => { setWf(null); setStep(0); setAnswers([]); setFreeText(""); setResult(null); };
 
+  const DEMO_RESULTS = {
+    email: `Subject: Time Off Request – Friday, March 14th\n\nDear [Manager's Name],\n\nI hope this message finds you well. I'm writing to request a day off on Friday, March 14th.\n\nI've made sure my current projects are on track and have coordinated with the team to cover any urgent matters while I'm away.\n\nPlease let me know if this date works or if you need any additional information.\n\nThank you for your consideration.\n\nBest regards,\n[Your Name]`,
+    prompt: `Here's your crafted prompt:\n\n"You are an expert [topic] advisor. I need help with [task]. My audience is [who]. Please be [tone] and format your response as [format]. Keep it [length]. Avoid jargon and explain any technical terms."\n\n💡 Why this works:\n• "You are an expert" → gives the AI a clear role\n• Specifying audience → ensures the right language level\n• Format request → gets structured, usable output\n• "Avoid jargon" → keeps it accessible`,
+    summarize: `📋 Key Takeaways:\n\n1. The main point of this content is [X]\n2. The most important action item is [Y]\n3. The key data/evidence shows [Z]\n\n⚡ Bottom Line:\nIn one sentence, this means [simplified conclusion].\n\n🎯 What You Should Do:\n• [Specific action 1]\n• [Specific action 2]`,
+    image: `Here are 3 prompts you can use:\n\n🎨 Prompt 1 (Detailed):\n"A cozy autumn coffee shop interior, warm golden light streaming through rain-spotted windows, watercolor illustration style, soft amber and cream tones, steaming cup on a wooden table"\n\n🎨 Prompt 2 (Dramatic):\n"Dramatic overhead shot of a coffee shop in fall, cinematic lighting, rain outside, warm interior glow, photorealistic, 35mm film grain"\n\n🎨 Prompt 3 (Minimal):\n"Minimalist line drawing of a coffee cup with autumn leaves, clean white background, single continuous line, elegant and simple"\n\n💡 Tip: The more specific you are about lighting, mood, and style, the better your results.`,
+    finder: `Based on your needs, here are my top recommendations:\n\n1. 🤖 Claude (claude.ai) – Best for writing, analysis, and learning. Free tier available. Perfect for beginners.\n\n2. 🎨 Canva AI – Best for creating images, social posts, and presentations. Free tier with paid upgrade ($12.99/mo).\n\n3. 📊 Google Sheets + AI – Built-in AI features for spreadsheets. Free with a Google account.\n\n4. 📝 Notion AI – Best for organizing notes and documents with AI assistance. Free tier available.\n\n5. 🎙️ Otter.ai – Best for meeting notes and transcription. Free tier with 300 min/month.`,
+  };
+
   const doGenerate = async (allAnswers) => {
     setGenerating(true);
-    const prompt = `User's answers to the workflow "${wf.name}":\n${wf.steps.map((s, i) => `${s.q}: ${allAnswers[i]}`).join("\n")}\n\nGenerate a helpful, ready-to-use result.`;
-    if (apiKey) {
-      try {
-        const res = await fetch("https://api.anthropic.com/v1/messages", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
-          body: JSON.stringify({
-            model: "claude-sonnet-4-6", max_tokens: 1000,
-            system: wf.systemPrompt + "\n\nYou are part of the app AI Fluent. Keep output practical and ready to use. The user is a non-technical beginner.",
-            messages: [{ role: "user", content: prompt }],
-          }),
-        });
-        const data = await res.json();
-        setResult(data.content?.[0]?.text || "Something went wrong. Please try again.");
-      } catch {
-        setResult("Demo mode: In the full version, Claude would generate a personalized result here based on your inputs. Connect your API key in settings to enable live generation!");
-      }
-    } else {
-      const demos = {
-        email: `Subject: Time Off Request – Friday, March 14th\n\nDear [Manager's Name],\n\nI hope this message finds you well. I'm writing to request a day off on Friday, March 14th.\n\nI've made sure my current projects are on track and have coordinated with the team to cover any urgent matters while I'm away.\n\nPlease let me know if this date works or if you need any additional information.\n\nThank you for your consideration.\n\nBest regards,\n[Your Name]`,
-        prompt: `Here's your crafted prompt:\n\n"You are an expert [topic] advisor. I need help with [task]. My audience is [who]. Please be [tone] and format your response as [format]. Keep it [length]. Avoid jargon and explain any technical terms."\n\n💡 Why this works:\n• "You are an expert" → gives the AI a clear role\n• Specifying audience → ensures the right language level\n• Format request → gets structured, usable output\n• "Avoid jargon" → keeps it accessible`,
-        summarize: `📋 Key Takeaways:\n\n1. The main point of this content is [X]\n2. The most important action item is [Y]\n3. The key data/evidence shows [Z]\n\n⚡ Bottom Line:\nIn one sentence, this means [simplified conclusion].\n\n🎯 What You Should Do:\n• [Specific action 1]\n• [Specific action 2]`,
-        image: `Here are 3 prompts you can use:\n\n🎨 Prompt 1 (Detailed):\n"A cozy autumn coffee shop interior, warm golden light streaming through rain-spotted windows, watercolor illustration style, soft amber and cream tones, steaming cup on a wooden table"\n\n🎨 Prompt 2 (Dramatic):\n"Dramatic overhead shot of a coffee shop in fall, cinematic lighting, rain outside, warm interior glow, photorealistic, 35mm film grain"\n\n🎨 Prompt 3 (Minimal):\n"Minimalist line drawing of a coffee cup with autumn leaves, clean white background, single continuous line, elegant and simple"\n\n💡 Tip: The more specific you are about lighting, mood, and style, the better your results.`,
-        finder: `Based on your needs, here are my top recommendations:\n\n1. 🤖 Claude (claude.ai) – Best for writing, analysis, and learning. Free tier available. Perfect for beginners.\n\n2. 🎨 Canva AI – Best for creating images, social posts, and presentations. Free tier with paid upgrade ($12.99/mo).\n\n3. 📊 Google Sheets + AI – Built-in AI features for spreadsheets. Free with a Google account.\n\n4. 📝 Notion AI – Best for organizing notes and documents with AI assistance. Free tier available.\n\n5. 🎙️ Otter.ai – Best for meeting notes and transcription. Free tier with 300 min/month.`,
-      };
-      setTimeout(() => { setResult(demos[wf.id] || demos.prompt); setGenerating(false); }, 1500);
+    const prompt = wf.steps.map((s, i) => `${s.q}: ${allAnswers[i]}`).join("\n");
+    try {
+      const r = await sb.callClaude({
+        feature: "tool",
+        system: wf.systemPrompt + "\n\nYou are part of AI Fluent. Keep output practical and ready to use. The user is a non-technical beginner.",
+        messages: [{ role: "user", content: prompt }],
+        context_type: "tool",
+        context_id: wf.id,
+        context_title: wf.name,
+      });
+      setResult(r.text);
+    } catch {
+      // Demo fallback
+      setTimeout(() => {
+        setResult(DEMO_RESULTS[wf.id] || DEMO_RESULTS.prompt);
+        setGenerating(false);
+      }, 1500);
       return;
     }
     setGenerating(false);
@@ -822,11 +914,11 @@ const ToolsScreen = ({ apiKey }) => {
 };
 
 // ─── PROFILE SCREEN ───
-const ProfileScreen = ({ progress, lang, setLang, apiKey, setApiKey }) => {
+const ProfileScreen = ({ progress, lang, setLang, apiKey, setApiKey, uid, profile, onSignOut }) => {
   const [showLang, setShowLang] = useState(false);
   const [showApi, setShowApi] = useState(false);
   const [tempKey, setTempKey] = useState(apiKey);
-  const streak = progress.streak || 0;
+  const streak = profile?.current_streak ?? (progress.streak || 0);
   const done = Object.keys(progress.completed || {}).length;
 
   if (showApi) return (
@@ -869,10 +961,12 @@ const ProfileScreen = ({ progress, lang, setLang, apiKey, setApiKey }) => {
     <Screen>
       <h1 style={{ color: T.text, fontSize: 28, fontFamily: T.fontDisplay, fontWeight: 700, marginBottom: 20 }}>Settings ⚙️</h1>
       <div className="fade-up" style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 28 }}>
-        <div style={{ width: 80, height: 80, borderRadius: "50%", background: `linear-gradient(135deg, ${T.accent}, #6d28d9)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 34, marginBottom: 10 }}>👤</div>
-        <p style={{ color: T.text, fontSize: 18, fontWeight: 600, fontFamily: T.font }}>AI Explorer</p>
+        <div style={{ width: 80, height: 80, borderRadius: "50%", background: `linear-gradient(135deg, ${T.accent}, #6d28d9)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 34, marginBottom: 10 }}>
+          {profile?.avatar_url ? <img src={profile.avatar_url} style={{ width: 80, height: 80, borderRadius: "50%" }} alt="" /> : "👤"}
+        </div>
+        <p style={{ color: T.text, fontSize: 18, fontWeight: 600, fontFamily: T.font }}>{profile?.display_name || "AI Explorer"}</p>
         <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
-          <span style={{ color: T.accent, fontSize: 12, fontFamily: T.font }}>Level {Math.max(1, Math.floor(done / 2) + 1)}</span>
+          <span style={{ color: T.accent, fontSize: 12, fontFamily: T.font }}>Level {Math.max(1, Math.floor(done / 2) + 1)} · {profile?.subscription_tier === "pro" ? "Pro" : "Free"}</span>
           <ClaudeBadge small />
         </div>
       </div>
@@ -903,7 +997,12 @@ const ProfileScreen = ({ progress, lang, setLang, apiKey, setApiKey }) => {
           </button>
         ))}
       </div>
-      <div className="fade-up stagger-3" style={{ marginTop: 28, textAlign: "center" }}>
+      {onSignOut && (
+        <div className="fade-up stagger-3" style={{ marginTop: 20 }}>
+          <Btn variant="ghost" onClick={onSignOut}>Sign Out</Btn>
+        </div>
+      )}
+      <div className="fade-up stagger-4" style={{ marginTop: 20, textAlign: "center" }}>
         <p style={{ color: T.textDim, fontSize: 11, fontFamily: T.font }}>AI Fluent v1.0 · Powered by Claude</p>
       </div>
     </Screen>
@@ -919,6 +1018,58 @@ export default function AIFluent() {
   const [lesson, setLesson] = useState(null);
   const [progress, setProgress] = useState({ streak: 0, completed: {}, lastVisit: null });
 
+  // Supabase auth state
+  const [sbReady, setSbReady] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [sbProgress, setSbProgress] = useState([]);
+
+  // Inject Supabase SDK via CDN
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js";
+    script.onload = () => { window.__supabase = window.supabase; setSbReady(true); };
+    script.onerror = () => setAuthLoading(false); // SDK failed — run in demo mode
+    document.head.appendChild(script);
+  }, []);
+
+  // Once SDK is ready, check for an existing session
+  useEffect(() => {
+    if (!sbReady) return;
+    const init = async () => {
+      const session = await sb.getSession();
+      if (session?.user) {
+        setUser(session.user);
+        const p = await sb.getProfile(session.user.id);
+        setProfile(p);
+        const prog = await sb.getProgress(session.user.id);
+        setSbProgress(prog);
+        if (p?.onboarded) setOnboarded(true);
+      }
+      setAuthLoading(false);
+    };
+    init();
+
+    const { data } = sb.onAuthChange(async (event, session) => {
+      if (event === "SIGNED_IN" && session?.user) {
+        setUser(session.user);
+        const p = await sb.getProfile(session.user.id);
+        setProfile(p);
+        const prog = await sb.getProgress(session.user.id);
+        setSbProgress(prog);
+        if (p?.onboarded) setOnboarded(true);
+        setAuthLoading(false);
+      } else if (event === "SIGNED_OUT") {
+        setUser(null); setProfile(null); setSbProgress([]);
+        setOnboarded(false);
+        setAuthLoading(false);
+      }
+    });
+    return () => data?.subscription?.unsubscribe();
+  }, [sbReady]);
+
+  // Load local storage preferences on mount
   useEffect(() => {
     try {
       const p = localStorage.getItem("ai-fluent-progress");
@@ -956,20 +1107,48 @@ export default function AIFluent() {
     save("ai-fluent-progress", newProgress);
   };
 
+  const handleSignOut = async () => {
+    await sb.signOut();
+    setOnboarded(false);
+    setUser(null);
+    setProfile(null);
+    setSbProgress([]);
+    localStorage.removeItem("ai-fluent-onboarded");
+  };
+
   const handleSetApiKey = (k) => { setApiKey(k); save("ai-fluent-apikey", k); };
   const handleSetLang = (l) => { setLang(l); save("ai-fluent-lang", l); };
 
+  // Waiting for Supabase SDK + session check
+  if (authLoading) return (
+    <>
+      <style>{css}</style>
+      <div style={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: T.bg }}>
+        <div style={{ width: 48, height: 48, borderRadius: "50%", border: `3px solid ${T.border}`, borderTopColor: T.claude, animation: "spin 0.7s linear infinite" }} />
+      </div>
+    </>
+  );
+
+  // Not authenticated — show sign in / sign up
+  if (!user) return (
+    <>
+      <style>{css}</style>
+      <AuthScreen onAuth={(u) => setUser(u)} />
+    </>
+  );
+
+  // Authenticated but not onboarded
   if (!onboarded) return (
     <>
       <style>{css}</style>
-      <Onboarding onDone={handleOnboard} />
+      <Onboarding uid={user.id} onDone={handleOnboard} />
     </>
   );
 
   if (lesson) return (
     <>
       <style>{css}</style>
-      <LessonView pathId={lesson} onBack={() => setLesson(null)} onComplete={handleComplete} apiKey={apiKey} />
+      <LessonView pathId={lesson} uid={user.id} onBack={() => setLesson(null)} onComplete={handleComplete} />
     </>
   );
 
@@ -978,9 +1157,17 @@ export default function AIFluent() {
       <style>{css}</style>
       <div style={{ background: T.bg, minHeight: "100vh" }}>
         {tab === "learn" && <LearnScreen progress={progress} onOpen={setLesson} />}
-        {tab === "news" && <NewsScreen apiKey={apiKey} />}
-        {tab === "tools" && <ToolsScreen apiKey={apiKey} />}
-        {tab === "profile" && <ProfileScreen progress={progress} lang={lang} setLang={handleSetLang} apiKey={apiKey} setApiKey={handleSetApiKey} />}
+        {tab === "news" && <NewsScreen uid={user.id} />}
+        {tab === "tools" && <ToolsScreen uid={user.id} />}
+        {tab === "profile" && (
+          <ProfileScreen
+            progress={progress}
+            lang={lang} setLang={handleSetLang}
+            apiKey={apiKey} setApiKey={handleSetApiKey}
+            uid={user.id} profile={profile}
+            onSignOut={handleSignOut}
+          />
+        )}
         <TabBar tab={tab} setTab={setTab} />
       </div>
     </>
