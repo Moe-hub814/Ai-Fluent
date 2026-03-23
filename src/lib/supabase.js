@@ -103,4 +103,14 @@ export const sb = {
     if (!s) return { data: { subscription: { unsubscribe: () => {} } } };
     return s.auth.onAuthStateChange(callback);
   },
+
+  // Alias used by the v3 redesign
+  onAuth(callback) {
+    const s = getSupabase();
+    if (!s) return { data: { subscription: { unsubscribe: () => {} } } };
+    return s.auth.onAuthStateChange(callback);
+  },
 };
+
+// Named export for v3 redesign (uses `db` instead of `sb`)
+export const db = sb;
