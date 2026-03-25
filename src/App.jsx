@@ -85,6 +85,25 @@ const TOOLS = [
   {id:"summarize",icon:"📋",name:"Summarize Text",color:C.blue,steps:[{q:"Content type?",opts:["Article","Report","Email chain","Contract"]},{q:"What do you need?",opts:["Key takeaways","Action items","Simple explanation","Pros and cons"]},{q:"Paste text:",free:true,ph:"Paste or describe content..."}],sys:"Create a clear concise summary in simple language."},
 ];
 
+// DEMO FALLBACKS (used when Edge Function isn't deployed yet)
+const DEMO = {
+  email: `Subject: [As requested]\n\nHi,\n\nI hope this message finds you well. I wanted to reach out regarding the matter we discussed.\n\nPlease let me know if you have any questions or need further information.\n\nBest regards`,
+  prompt: `Here's a well-structured prompt you can use:\n\n"Act as an expert in [your field]. I need help with [specific task]. Please provide [detail level] response, focusing on [key aspects]. Format the output as [preferred format]."\n\nWhy this works: it gives the AI a role, a clear task, and expected output format — the three keys to great prompts.`,
+  summarize: `Here are the key takeaways:\n\n• Main point 1: The core argument or finding\n• Main point 2: Supporting evidence or context\n• Main point 3: Implications or next steps\n\nAction items: Review the highlighted sections and follow up on any open questions.\n\n(Connect your Anthropic API key to get real AI summaries!)`,
+  tutor: `Great question! Let me explain that simply...\n\nThink of AI like a very well-read assistant who has studied millions of books and articles. It can connect ideas and explain things clearly — but it needs YOU to ask the right questions.\n\nThe more specific you are, the better the answer. Try asking: "Explain X like I'm 12 years old" or "Give me 3 practical examples of Y."\n\n(Connect your Anthropic API key for full Lumi responses!)`,
+  news: `Here's the plain-English version:\n\nThis development matters because it affects how AI tools work in everyday apps. The key takeaway is that AI is becoming more accessible — meaning tools that used to require technical expertise are now available to everyone.\n\nWhat you should know: keep an eye on how this changes the tools you already use.\n\n(Connect your Anthropic API key for Lumi's full explanations!)`,
+};
+
+const callAI = async (opts) => {
+  try {
+    const r = await db.callClaude(opts);
+    if (r?.text) return r.text;
+    throw new Error("No text in response");
+  } catch {
+    return DEMO[opts.feature] || DEMO[opts.context_type] || "Lumi is resting — try again shortly! ✨";
+  }
+};
+
 // CSS
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Quicksand:wght@500;600;700&family=Baloo+2:wght@500;600;700;800&display=swap');
@@ -259,9 +278,8 @@ const LocationView = ({locId,uid,progress,onBack,onComplete}) => {
   useEffect(()=>{ref.current?.scrollTo(0,ref.current.scrollHeight)},[msgs,typing]);
 
   const ask=async(q)=>{setMsgs(m=>[...m,{from:"user",text:q}]);setTyping(true);
-    try{const r=await db.callClaude({feature:"tutor",system:`You are Lumi, a magical glowing guide in "AI Fluent." You're at "${loc.name}" teaching "${lesson?.title}". User is a complete beginner. Use simple language, fun analogies, emojis. Keep under 180 words. Be warm and encouraging!`,messages:[...msgs.map(m=>({role:m.from==="user"?"user":"assistant",content:m.text})),{role:"user",content:q}],session_id:sid,context_type:"tutor",context_id:locId,context_title:lesson?.title});
-      setSid(r.session_id||sid);setTyping(false);setMsgs(m=>[...m,{from:"lumi",text:r.text}]);
-    }catch{setTyping(false);setMsgs(m=>[...m,{from:"lumi",text:"The magical connection flickered! Try again. ✨"}])}};
+    const text=await callAI({feature:"tutor",system:`You are Lumi, a magical glowing guide in "AI Fluent." You're at "${loc.name}" teaching "${lesson?.title}". User is a complete beginner. Use simple language, fun analogies, emojis. Keep under 180 words. Be warm and encouraging!`,messages:[...msgs.map(m=>({role:m.from==="user"?"user":"assistant",content:m.text})),{role:"user",content:q}],context_type:"tutor",context_id:locId,context_title:lesson?.title});
+    setTyping(false);setMsgs(m=>[...m,{from:"lumi",text}]);};
   const send=()=>{if(inp.trim()){ask(inp.trim());setInp("")}};
 
   if(view==="tutor")return(<div style={{height:"100vh",display:"flex",flexDirection:"column",background:`linear-gradient(180deg,${C.bgDark},${C.bgCard})`}}>
@@ -317,9 +335,8 @@ const NewsView = ({uid,onBack}) => {
   const art=NEWS.find(n=>n.id===open);
 
   const ask=async(q)=>{setMsgs(m=>[...m,{from:"user",text:q}]);setTyping(true);
-    try{const r=await db.callClaude({feature:"news",system:`You are Lumi, the Town Crier of AI Land. Explain AI news simply and friendly. Reading: "${art.title}". Summary: ${art.eli5}. Keep under 150 words. Use emojis.`,messages:[...msgs.map(m=>({role:m.from==="user"?"user":"assistant",content:m.text})),{role:"user",content:q}],session_id:sid,context_type:"news",context_id:String(art.id),context_title:art.title});
-      setSid(r.session_id||sid);setTyping(false);setMsgs(m=>[...m,{from:"lumi",text:r.text}]);
-    }catch{setTyping(false);setMsgs(m=>[...m,{from:"lumi",text:"Carrier pigeon got lost! Try again. 🕊️"}])}};
+    const text=await callAI({feature:"news",system:`You are Lumi, the Town Crier of AI Land. Explain AI news simply and friendly. Reading: "${art.title}". Summary: ${art.eli5}. Keep under 150 words. Use emojis.`,messages:[...msgs.map(m=>({role:m.from==="user"?"user":"assistant",content:m.text})),{role:"user",content:q}],context_type:"news",context_id:String(art.id),context_title:art.title});
+    setTyping(false);setMsgs(m=>[...m,{from:"lumi",text}]);};
   const send=()=>{if(inp.trim()){ask(inp.trim());setInp("")}};
 
   if(chat&&art)return(<div style={{height:"100vh",display:"flex",flexDirection:"column",background:C.bgDark}}>
@@ -351,7 +368,7 @@ const ToolsView = ({uid,onBack}) => {
   const [wf,setWf]=useState(null);const [step,setStep]=useState(0);const [ans,setAns]=useState([]);const [ft,setFt]=useState("");
   const [gen,setGen]=useState(false);const [result,setResult]=useState(null);
   const reset=()=>{setWf(null);setStep(0);setAns([]);setFt("");setResult(null)};
-  const doGen=async(all)=>{setGen(true);try{const prompt=wf.steps.map((s,i)=>`${s.q}: ${all[i]}`).join("\n");const r=await db.callClaude({feature:"tool",system:wf.sys+" You are Lumi from AI Fluent's Workshop. Practical and beginner-friendly.",messages:[{role:"user",content:prompt}],context_type:"tool",context_id:wf.id,context_title:wf.name});setResult(r.text)}catch{setResult("Workshop hiccup! Try again. 🔧")}setGen(false)};
+  const doGen=async(all)=>{setGen(true);const prompt=wf.steps.map((s,i)=>`${s.q}: ${all[i]}`).join("\n");const text=await callAI({feature:wf.id,system:wf.sys+" You are Lumi from AI Fluent's Workshop. Practical and beginner-friendly.",messages:[{role:"user",content:prompt}],context_type:"tool",context_id:wf.id,context_title:wf.name});setResult(text);setGen(false)};
   const pick=(v)=>{const na=[...ans,v];setAns(na);if(step<wf.steps.length-1)setTimeout(()=>setStep(step+1),200);else doGen(na)};
 
   if(result)return(<div style={{height:"100vh",overflowY:"auto",background:C.bgDark,padding:"16px 20px 40px"}}>
