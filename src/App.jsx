@@ -422,19 +422,40 @@ export default function AIFluent(){
   const [screen,setScreen]=useState("map");const [activeLoc,setActiveLoc]=useState(null);
 
   useEffect(()=>{
-    const{data}=db.onAuth(async(ev,s)=>{
+    let settled=false;
+    const finish=()=>{if(!settled){settled=true;setLoading(false)}};
+
+    // Primary path: direct session check (fast, works even if onAuth is slow)
+    db.getSession().then(async(session)=>{
       try{
-        if(s?.user){
+        if(session?.user){
+          setUser(session.user);
+          const[prof,prog]=await Promise.all([db.getProfile(session.user.id),db.getProgress(session.user.id)]);
+          setProfile(prof);setProgress(prog);
+        }
+      }catch(e){console.error("Session init:",e)}
+      finish();
+    }).catch(()=>finish());
+
+    // Hard timeout — always clears loading after 5s no matter what
+    const timeout=setTimeout(finish,5000);
+
+    // Auth listener for sign-in / sign-out after initial load
+    const{data}=db.onAuth(async(ev,s)=>{
+      if(ev==="SIGNED_IN"&&s?.user){
+        try{
           setUser(s.user);
           const[prof,prog]=await Promise.all([db.getProfile(s.user.id),db.getProgress(s.user.id)]);
           setProfile(prof);setProgress(prog);
-        }else{
-          setUser(null);setProfile(null);setProgress([]);
-        }
-      }catch(e){console.error("Auth handler:",e)}
-      setLoading(false);
+        }catch(e){console.error("onAuth SIGNED_IN:",e)}
+        finish();
+      }else if(ev==="SIGNED_OUT"){
+        setUser(null);setProfile(null);setProgress([]);
+        finish();
+      }
     });
-    return()=>data?.subscription?.unsubscribe?.();
+
+    return()=>{clearTimeout(timeout);data?.subscription?.unsubscribe?.()};
   },[]);
 
   const refresh=async()=>{if(!user)return;setProfile(await db.getProfile(user.id));setProgress(await db.getProgress(user.id))};
