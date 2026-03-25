@@ -470,10 +470,29 @@ export default function AIFluent(){
   const [screen,setScreen]=useState("map");const [activeLoc,setActiveLoc]=useState(null);
 
   useEffect(()=>{
-    const init=async()=>{try{const s=await db.getSession();if(s?.user){setUser(s.user);setProfile(await db.getProfile(s.user.id));setProgress(await db.getProgress(s.user.id))}}catch(e){console.error(e)}setLoading(false)};
-    init();
-    const{data}=db.onAuth(async(ev,s)=>{if(ev==="SIGNED_IN"&&s?.user){setUser(s.user);setProfile(await db.getProfile(s.user.id));setProgress(await db.getProgress(s.user.id))}else if(ev==="SIGNED_OUT"){setUser(null);setProfile(null);setProgress([])}});
-    return()=>data?.subscription?.unsubscribe?.();
+    let settled=false;
+    const finish=()=>{if(!settled){settled=true;setLoading(false)}};
+
+    // Fast path: direct session check from localStorage (doesn't hang)
+    db.getSession().then(async(session)=>{
+      try{if(session?.user){setUser(session.user);const[p,g]=await Promise.all([db.getProfile(session.user.id),db.getProgress(session.user.id)]);setProfile(p);setProgress(g)}}
+      catch(e){console.error("init:",e)}
+      finish();
+    }).catch(()=>finish());
+
+    // Hard timeout: loading always clears within 5s no matter what
+    const timeout=setTimeout(finish,5000);
+
+    // Auth listener: handles sign-in / sign-out after initial load
+    const{data}=db.onAuth(async(ev,s)=>{
+      if(ev==="SIGNED_IN"&&s?.user){
+        try{setUser(s.user);const[p,g]=await Promise.all([db.getProfile(s.user.id),db.getProgress(s.user.id)]);setProfile(p);setProgress(g)}
+        catch(e){console.error("onAuth:",e)}
+        finish();
+      }else if(ev==="SIGNED_OUT"){setUser(null);setProfile(null);setProgress([]);finish();}
+    });
+
+    return()=>{clearTimeout(timeout);data?.subscription?.unsubscribe?.()};
   },[]);
 
   const refresh=async()=>{if(!user)return;setProfile(await db.getProfile(user.id));setProgress(await db.getProgress(user.id))};
