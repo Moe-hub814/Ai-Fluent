@@ -405,9 +405,18 @@ export default function AIFluent(){
   const [screen,setScreen]=useState("map");const [activeLoc,setActiveLoc]=useState(null);
 
   useEffect(()=>{
-    const init=async()=>{try{const s=await db.getSession();if(s?.user){setUser(s.user);setProfile(await db.getProfile(s.user.id));setProgress(await db.getProgress(s.user.id))}}catch(e){console.error("Init:",e)}setLoading(false)};
-    init();
-    const{data}=db.onAuth(async(ev,s)=>{if(ev==="SIGNED_IN"&&s?.user){setUser(s.user);setProfile(await db.getProfile(s.user.id));setProgress(await db.getProgress(s.user.id))}else if(ev==="SIGNED_OUT"){setUser(null);setProfile(null);setProgress([])}});
+    const{data}=db.onAuth(async(ev,s)=>{
+      try{
+        if(s?.user){
+          setUser(s.user);
+          const[prof,prog]=await Promise.all([db.getProfile(s.user.id),db.getProgress(s.user.id)]);
+          setProfile(prof);setProgress(prog);
+        }else{
+          setUser(null);setProfile(null);setProgress([]);
+        }
+      }catch(e){console.error("Auth handler:",e)}
+      setLoading(false);
+    });
     return()=>data?.subscription?.unsubscribe?.();
   },[]);
 
