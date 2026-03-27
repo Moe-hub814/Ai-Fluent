@@ -55,8 +55,8 @@ serve(async (req) => {
 
     // Select model based on feature
     const model = (feature === "tutor" || feature === "news_chat")
-      ? "claude-haiku-4-5-20251001"
-      : "claude-haiku-4-5-20251001";
+      ? "claude-sonnet-4-5-20250929"
+      : "claude-haiku-4-5-20241022";
 
     // Build request body
     const claudeBody: any = {
