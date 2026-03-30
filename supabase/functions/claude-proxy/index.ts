@@ -5,77 +5,66 @@ const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
-const corsHeaders = {
+const cors = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+function reply(body: any, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...cors, "Content-Type": "application/json" },
+  });
+}
+
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  if (req.method === "OPTIONS") return new Response(null, { headers: cors });
 
   try {
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: "No auth" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    // 1. Auth
+    const authHeader = req.headers.get("authorization") || req.headers.get("Authorization") || "";
+    const token = authHeader.replace("Bearer ", "").trim();
+    
+    console.log("Auth header present:", !!token, "length:", token.length);
 
     const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
-    const token = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    let userId: string | null = null;
 
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (token && token.length > 20) {
+      const { data, error } = await supabase.auth.getUser(token);
+      if (error) console.warn("Auth error:", error.message);
+      if (data?.user) userId = data.user.id;
     }
 
+    console.log("User ID:", userId || "anonymous");
+
+    // 2. Parse body
     const body = await req.json();
-    const { feature, messages, system, session_id, context_type, context_id, context_title, use_search } = body;
+    const { feature, messages, system, use_search } = body;
+    console.log("Feature:", feature, "Messages:", messages?.length || 0);
 
-    // Check usage limits
-    const { data: usageCheck } = await supabase.rpc("check_usage", {
-      p_user_id: user.id,
-      p_feature: feature || "tutor",
-    });
-
-    if (usageCheck && !usageCheck.allowed) {
-      return new Response(JSON.stringify({
-        error: "limit_reached",
-        message: "You've reached your free tier limit. Upgrade to Pro for unlimited access.",
-        remaining: 0,
-      }), {
-        status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // Select model based on feature
-    const model = (feature === "tutor" || feature === "news_chat")
+    // 3. Model selection
+    const model = (feature === "tutor" || feature === "news_fetch" || feature === "news_chat")
       ? "claude-sonnet-4-5-20250929"
       : "claude-haiku-4-5-20241022";
 
-    // Build request body
+    // 4. Build request
     const claudeBody: any = {
       model,
-      max_tokens: feature === "news_fetch" ? 2000 : feature === "tool" ? 1000 : 800,
-      system: system || "You are a helpful AI guide called Lumi.",
+      max_tokens: feature === "news_fetch" ? 2048 : 1024,
+      system: system || "You are Lumi, a helpful AI guide.",
       messages: messages || [],
     };
 
-    // Add web search tool for news fetching
     if (use_search || feature === "news_fetch") {
-      claudeBody.tools = [{
-        type: "web_search_20250305",
-        name: "web_search",
-      }];
+      claudeBody.tools = [{ type: "web_search_20250305", name: "web_search", max_uses: 3 }];
     }
 
-    // Call Claude API
-    const claudeResponse = await fetch("https://api.anthropic.com/v1/messages", {
+    console.log("Calling Claude:", model, "search:", !!(use_search || feature === "news_fetch"));
+
+    // 5. Call Claude API
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -85,58 +74,31 @@ serve(async (req) => {
       body: JSON.stringify(claudeBody),
     });
 
-    const claudeData = await claudeResponse.json();
+    const data = await res.json();
 
-    if (!claudeResponse.ok) {
-      console.error("Claude API error:", claudeData);
-      return new Response(JSON.stringify({ error: "Claude API error", details: claudeData }), {
-        status: claudeResponse.status, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (!res.ok) {
+      console.error("Claude error:", res.status, JSON.stringify(data));
+      return reply({ error: "Claude error", detail: data?.error?.message || "Unknown" }, 502);
     }
 
-    // Extract text from response (handle web search blocks too)
-    const assistantText = claudeData.content
-      ?.filter((c: any) => c.type === "text")
+    // 6. Extract text
+    const text = (data.content || [])
+      .filter((c: any) => c.type === "text")
       .map((c: any) => c.text || "")
-      .join("\n") || "";
+      .join("\n");
 
-    // Store chat history if session tracking
-    if (session_id || context_type) {
-      let sid = session_id;
-      if (!sid && context_type) {
-        const { data: newSession } = await supabase
-          .from("chat_sessions")
-          .insert({ user_id: user.id, context_type, context_id: context_id || null, context_title: context_title || null })
-          .select("id").single();
-        sid = newSession?.id;
-      }
-      if (sid) {
-        const lastMsg = messages?.[messages.length - 1];
-        if (lastMsg) {
-          await supabase.from("chat_messages").insert({ session_id: sid, user_id: user.id, role: "user", content: lastMsg.content });
-        }
-        await supabase.from("chat_messages").insert({
-          session_id: sid, user_id: user.id, role: "assistant", content: assistantText,
-          input_tokens: claudeData.usage?.input_tokens, output_tokens: claudeData.usage?.output_tokens, model,
-        });
-      }
+    console.log("Success! Response length:", text.length, "chars");
 
-      const actType = feature === "tutor" ? "tutor" : feature?.startsWith("news") ? "news" : "tool";
-      await supabase.rpc("record_activity", { p_user_id: user.id, p_type: actType });
-
-      return new Response(JSON.stringify({
-        text: assistantText, session_id: sid, usage: claudeData.usage, remaining: usageCheck?.remaining ?? -1,
-      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    // 7. Record activity (don't block response)
+    if (userId) {
+      try { await supabase.rpc("record_activity", { p_user_id: userId, p_type: feature || "general" }); }
+      catch (e) { console.warn("Activity record failed:", e); }
     }
 
-    return new Response(JSON.stringify({
-      text: assistantText, usage: claudeData.usage, remaining: usageCheck?.remaining ?? -1,
-    }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return reply({ text, usage: data.usage });
 
   } catch (err) {
-    console.error("Edge function error:", err);
-    return new Response(JSON.stringify({ error: "Internal server error", msg: String(err) }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    console.error("CRASH:", String(err), (err as any)?.stack);
+    return reply({ error: "Server error", detail: String(err) }, 500);
   }
 });
