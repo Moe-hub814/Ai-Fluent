@@ -132,6 +132,88 @@ const TOOLS = [
   {id:"study",iconType:"study",name:"Study Helper",desc:"Learn anything faster",color:C.green,steps:[{q:"What are you studying?",opts:["A concept I don't understand","Preparing for a test","Researching a topic","Learning a new skill"]},{q:"How should I help?",opts:["Explain it simply","Create flashcards","Quiz me","Give me a study plan"]},{q:"The topic:",free:true,ph:"e.g. How does blockchain work..."}],sys:"You are a patient, encouraging tutor. Explain concepts at the appropriate level. Use analogies and examples. If creating flashcards, format them clearly."},
 ];
 
+// Sound effects system using Web Audio API
+const SFX = {
+  _ctx: null,
+  _getCtx() { if(!this._ctx) this._ctx = new (window.AudioContext||window.webkitAudioContext)(); return this._ctx; },
+  play(type) {
+    try {
+      const ctx=this._getCtx(); const now=ctx.currentTime;
+      if(type==="correct") {
+        // Bright ascending chime
+        [523.25, 659.25, 783.99].forEach((f,i)=>{const o=ctx.createOscillator();const g=ctx.createGain();o.type="sine";o.frequency.value=f;g.gain.setValueAtTime(0.15,now+i*0.08);g.gain.exponentialRampToValueAtTime(0.001,now+i*0.08+0.3);o.connect(g);g.connect(ctx.destination);o.start(now+i*0.08);o.stop(now+i*0.08+0.3)});
+      } else if(type==="wrong") {
+        // Soft low tone
+        const o=ctx.createOscillator();const g=ctx.createGain();o.type="sine";o.frequency.value=220;g.gain.setValueAtTime(0.1,now);g.gain.exponentialRampToValueAtTime(0.001,now+0.4);o.connect(g);g.connect(ctx.destination);o.start(now);o.stop(now+0.4);
+      } else if(type==="triumph") {
+        // Victory fanfare - ascending major chord
+        [523.25, 659.25, 783.99, 1046.5].forEach((f,i)=>{const o=ctx.createOscillator();const g=ctx.createGain();o.type="triangle";o.frequency.value=f;g.gain.setValueAtTime(0.12,now+i*0.12);g.gain.exponentialRampToValueAtTime(0.001,now+i*0.12+0.5);o.connect(g);g.connect(ctx.destination);o.start(now+i*0.12);o.stop(now+i*0.12+0.5)});
+      } else if(type==="sparkle") {
+        // Magical sparkle for achievements
+        [1200, 1400, 1600, 1800, 2000].forEach((f,i)=>{const o=ctx.createOscillator();const g=ctx.createGain();o.type="sine";o.frequency.value=f;g.gain.setValueAtTime(0.06,now+i*0.06);g.gain.exponentialRampToValueAtTime(0.001,now+i*0.06+0.2);o.connect(g);g.connect(ctx.destination);o.start(now+i*0.06);o.stop(now+i*0.06+0.2)});
+      } else if(type==="click") {
+        // Subtle tap
+        const o=ctx.createOscillator();const g=ctx.createGain();o.type="sine";o.frequency.value=800;g.gain.setValueAtTime(0.05,now);g.gain.exponentialRampToValueAtTime(0.001,now+0.05);o.connect(g);g.connect(ctx.destination);o.start(now);o.stop(now+0.05);
+      } else if(type==="fail") {
+        // Descending tone — not harsh, just "not quite"
+        [400, 350, 300].forEach((f,i)=>{const o=ctx.createOscillator();const g=ctx.createGain();o.type="sine";o.frequency.value=f;g.gain.setValueAtTime(0.08,now+i*0.1);g.gain.exponentialRampToValueAtTime(0.001,now+i*0.1+0.25);o.connect(g);g.connect(ctx.destination);o.start(now+i*0.1);o.stop(now+i*0.1+0.25)});
+      }
+    } catch(e) { /* Audio not available */ }
+  }
+};
+
+// Lumi Reaction component for results screen
+const LumiReaction = ({rating,size=100}) => {
+  const s=size;
+  const config={
+    summit:{eyes:"★ ★",mouth:"▽",color:"#FFD700",msg:"INCREDIBLE! You absolutely crushed it!",anim:"celebrate"},
+    ridge:{eyes:"◠ ◠",mouth:"▽",color:C.green,msg:"Really solid work! You've got this!",anim:"lumiFloat"},
+    treeline:{eyes:"◠ ◠",mouth:"‿",color:"#E8B84B",msg:"Getting there! One more try?",anim:"lumiFloat"},
+    base:{eyes:"• •",mouth:"○",color:C.red,msg:"Let's review together and try again!",anim:"lumiFloat"},
+  };
+  const c=config[rating]||config.base;
+  return(
+    <div style={{textAlign:"center",marginBottom:16}}>
+      <div style={{display:"inline-block",animation:`${c.anim} ${c.anim==="celebrate"?"0.6s ease infinite":"3s ease-in-out infinite"}`}}>
+        <svg width={s} height={s} viewBox="0 0 100 100" fill="none">
+          <defs>
+            <radialGradient id="lrGlow" cx="50%" cy="45%" r="50%"><stop offset="0%" stopColor="#FFF8E8" stopOpacity=".3"/><stop offset="100%" stopColor={c.color} stopOpacity="0"/></radialGradient>
+            <radialGradient id="lrBody" cx="50%" cy="40%" r="45%"><stop offset="0%" stopColor="#FFFDF5"/><stop offset="40%" stopColor="#FFE8C0"/><stop offset="100%" stopColor="#D4A55A"/></radialGradient>
+          </defs>
+          {/* Outer glow */}
+          <circle cx="50" cy="50" r="48" fill="url(#lrGlow)"/>
+          {/* Body */}
+          <circle cx="50" cy="50" r="35" fill="url(#lrBody)" stroke="#D4A55A" strokeWidth="0.8"/>
+          {/* Cheeks - bigger when happy */}
+          {(rating==="summit"||rating==="ridge")&&<><circle cx="32" cy="56" r="6" fill="#FFB366" opacity=".2"/><circle cx="68" cy="56" r="6" fill="#FFB366" opacity=".2"/></>}
+          {/* Eyes */}
+          <text x="50" y="48" textAnchor="middle" fontSize={rating==="summit"?"16":"14"} fill="#5D4E37" fontFamily="sans-serif" fontWeight="700">{c.eyes}</text>
+          {/* Mouth */}
+          {rating==="summit"?<path d="M38 56 Q50 68 62 56" fill="none" stroke="#5D4E37" strokeWidth="2" strokeLinecap="round"/>
+          :rating==="ridge"?<path d="M40 57 Q50 64 60 57" fill="none" stroke="#5D4E37" strokeWidth="1.5" strokeLinecap="round"/>
+          :rating==="treeline"?<path d="M42 58 Q50 62 58 58" fill="none" stroke="#5D4E37" strokeWidth="1.5" strokeLinecap="round"/>
+          :<circle cx="50" cy="60" r="3" fill="none" stroke="#5D4E37" strokeWidth="1.5"/>}
+          {/* Summit sparkles */}
+          {rating==="summit"&&<>
+            <path d="M50 5 L52 12 L58 14 L52 16 L50 23 L48 16 L42 14 L48 12 Z" fill="#FFE8C0" opacity=".9"/>
+            <path d="M20 25 L22 29 L26 30 L22 31 L20 35 L18 31 L14 30 L18 29 Z" fill="#FFE8C0" opacity=".6"/>
+            <path d="M80 25 L82 29 L86 30 L82 31 L80 35 L78 31 L74 30 L78 29 Z" fill="#FFE8C0" opacity=".6"/>
+            <path d="M30 75 L31 78 L34 79 L31 80 L30 83 L29 80 L26 79 L29 78 Z" fill="#FFE8C0" opacity=".5"/>
+            <path d="M70 75 L71 78 L74 79 L71 80 L70 83 L69 80 L66 79 L69 78 Z" fill="#FFE8C0" opacity=".5"/>
+          </>}
+          {/* Ridge - small sparkle */}
+          {rating==="ridge"&&<path d="M50 8 L51 13 L56 14 L51 15 L50 20 L49 15 L44 14 L49 13 Z" fill="#FFE8C0" opacity=".7"/>}
+          {/* Treeline - thinking lines */}
+          {rating==="treeline"&&<><line x1="72" y1="38" x2="78" y2="35" stroke="#D4A55A" strokeWidth="1.5" strokeLinecap="round" opacity=".4"/><line x1="74" y1="43" x2="80" y2="42" stroke="#D4A55A" strokeWidth="1.5" strokeLinecap="round" opacity=".3"/></>}
+          {/* Base - sweat drop */}
+          {rating==="base"&&<path d="M72 35 Q74 30 76 35 Q74 38 72 35" fill="#8AA0B8" opacity=".4"/>}
+        </svg>
+      </div>
+      <p style={{color:c.color,fontSize:15,fontWeight:700,fontFamily:C.font,margin:"8px 0 0"}}>{c.msg}</p>
+    </div>
+  );
+};
+
 // CSS
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Quicksand:wght@500;600;700&display=swap');
@@ -144,7 +226,7 @@ const css = `
   @keyframes twinkle{0%,100%{opacity:.2}50%{opacity:.8}}
   @keyframes pop{0%{transform:scale(.92);opacity:0}100%{transform:scale(1);opacity:1}}
   @keyframes confetti{0%{transform:translateY(0) rotate(0);opacity:1}100%{transform:translateY(-80px) rotate(360deg);opacity:0}}
-  @keyframes celebrate{0%{transform:scale(1)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
+  @keyframes celebrate{0%,100%{transform:scale(1) rotate(0deg)}25%{transform:scale(1.1) rotate(-5deg)}50%{transform:scale(1.15) rotate(0deg)}75%{transform:scale(1.1) rotate(5deg)}}
   .fu{animation:fadeUp .4s ease both}.fi{animation:fadeIn .3s ease both}.pop{animation:pop .3s ease both}
   .s1{animation-delay:.05s}.s2{animation-delay:.1s}.s3{animation-delay:.15s}.s4{animation-delay:.2s}.s5{animation-delay:.25s}
   button{transition:all .15s ease;cursor:pointer}button:active{transform:scale(.97)}
@@ -380,6 +462,7 @@ const LocView = ({locId,uid,progress,onBack,onComplete}) => {
       setFeedback(r.text.replace(/SCORE:\s*\d+\s*\/\s*10\s*/i,"").trim());
       setPracticeScore(ps=>ps+numScore);
       setTotalPossible(tp=>tp+10);
+      SFX.play(numScore>=7?"correct":"click");
     }catch{setFeedback("Great effort! The key is being specific — the more detail you give AI, the better the result.");setPracticeScore(ps=>ps+6);setTotalPossible(tp=>tp+10)}
     setGrading(false);setSubmitted(true);
   };
@@ -399,7 +482,7 @@ const LocView = ({locId,uid,progress,onBack,onComplete}) => {
         return<button key={i} onClick={()=>{if(!submitted)setSelected(i)}} disabled={submitted} className={`pop s${Math.min(i+1,5)}`}
           style={{background:showResult?(isCorrect?"rgba(74,186,120,.12)":isSelected?"rgba(216,88,88,.12)":"rgba(255,255,255,.03)"):(isSelected?"rgba(212,165,90,.1)":"rgba(255,255,255,.03)"),border:`1.5px solid ${showResult?(isCorrect?C.green:isSelected?C.red:C.border):(isSelected?C.gold:C.border)}`,borderRadius:14,padding:"13px 16px",textAlign:"left",width:"100%"}}>
           <span style={{color:showResult?(isCorrect?C.green:isSelected?C.red:C.textMuted):(isSelected?C.goldLight:C.textMuted),fontSize:14,fontWeight:isSelected?700:500,fontFamily:C.font}}>{showResult?(isCorrect?"✓ ":isSelected?"✗ ":""):isSelected?"● ":""}{o}</span></button>})}
-      {!submitted&&selected!==null&&<div style={{marginTop:8}}><Btn onClick={()=>{setSubmitted(true);setTotalPossible(tp=>tp+10);if(selected===currentP.correct)setPracticeScore(ps=>ps+10)}}>Check Answer</Btn></div>}
+      {!submitted&&selected!==null&&<div style={{marginTop:8}}><Btn onClick={()=>{setSubmitted(true);setTotalPossible(tp=>tp+10);if(selected===currentP.correct){setPracticeScore(ps=>ps+10);SFX.play("correct")}else{SFX.play("wrong")}}}>Check Answer</Btn></div>}
       {submitted&&<div className="fu" style={{background:"rgba(212,165,90,.06)",border:`1px solid ${C.borderGold}`,borderRadius:14,padding:14,marginTop:10}}><p style={{color:C.goldLight,fontSize:13,fontWeight:700,fontFamily:C.font,margin:"0 0 4px"}}>💡 Why?</p><p style={{color:C.textMuted,fontSize:13,lineHeight:1.6,fontFamily:C.font,margin:0}}>{currentP.explain}</p></div>}
     </div>}
     {currentP.type==="free_response"&&<div>
@@ -410,7 +493,7 @@ const LocView = ({locId,uid,progress,onBack,onComplete}) => {
     </div>}
     {submitted&&<div style={{marginTop:14}}>
       {practiceIdx<practice.length-1?<Btn v="teal" onClick={()=>{setPracticeIdx(practiceIdx+1);setSelected(null);setSubmitted(false);setFreeAns("");setFeedback("")}}>Next Question →</Btn>
-      :<Btn v="gold" onClick={()=>setShowResults(true)}>See My Results →</Btn>}
+      :<Btn v="gold" onClick={()=>{setShowResults(true);SFX.play("click")}}>See My Results →</Btn>}
     </div>}
   </div>);
 
@@ -419,11 +502,15 @@ const LocView = ({locId,uid,progress,onBack,onComplete}) => {
     const pct=totalPossible>0?Math.round((practiceScore/totalPossible)*100):0;
     const alt=getAltitude(pct);
     const passed=pct>=50;
+    const ratingKey=pct>=90?"summit":pct>=70?"ridge":pct>=50?"treeline":"base";
+    // Play sound on mount
+    useEffect(()=>{if(showResults){passed?SFX.play(pct>=90?"triumph":"sparkle"):SFX.play("fail")}},[showResults]);
     return(<div style={{height:"100vh",overflowY:"auto",background:`linear-gradient(180deg,${C.bgDark},${C.bgCard})`,padding:"20px",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
       {passed&&<Confetti/>}
       <div className="fu" style={{textAlign:"center",maxWidth:340}}>
-        {/* Altitude badge */}
-        <div style={{width:100,height:100,borderRadius:"50%",background:alt.bg,border:`3px solid ${alt.border}`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px",fontSize:48}}>{alt.icon}</div>
+        {/* Lumi Reaction */}
+        <LumiReaction rating={ratingKey} size={120}/>
+
         <p style={{color:alt.color,fontSize:14,fontWeight:700,fontFamily:C.font,textTransform:"uppercase",letterSpacing:2,margin:"0 0 4px"}}>{alt.label} Rating</p>
         <p style={{color:C.text,fontSize:48,fontWeight:800,fontFamily:C.fontDisplay,margin:"0 0 8px"}}>{pct}%</p>
         <p style={{color:C.textMuted,fontSize:14,fontFamily:C.font,lineHeight:1.6,margin:"0 0 24px"}}>{alt.msg}</p>
@@ -440,7 +527,7 @@ const LocView = ({locId,uid,progress,onBack,onComplete}) => {
         </div>
 
         {passed?<div style={{display:"flex",flexDirection:"column",gap:8}}>
-          <Btn v="green" onClick={async()=>{saveScore(locId,lessonIdx,pct);await db.completeLesson(uid,locId,lessonIdx);onComplete();setView("intro");setLessonIdx(null);resetPractice()}}>
+          <Btn v="green" onClick={async()=>{SFX.play("triumph");saveScore(locId,lessonIdx,pct);await db.completeLesson(uid,locId,lessonIdx);onComplete();setView("intro");setLessonIdx(null);resetPractice()}}>
             {pct>=90?"🏔️ Claim Summit Rating!":pct>=70?"⛰️ Claim Ridge Rating!":"🌲 Complete Lesson"}
           </Btn>
           {pct<90&&<Btn v="ghost" onClick={()=>{resetPractice();setView("practice")}}>Retry for a higher rating →</Btn>}
