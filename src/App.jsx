@@ -493,7 +493,7 @@ const LocView = ({locId,uid,progress,onBack,onComplete}) => {
     </div>}
     {submitted&&<div style={{marginTop:14}}>
       {practiceIdx<practice.length-1?<Btn v="teal" onClick={()=>{setPracticeIdx(practiceIdx+1);setSelected(null);setSubmitted(false);setFreeAns("");setFeedback("")}}>Next Question →</Btn>
-      :<Btn v="gold" onClick={()=>{setShowResults(true);SFX.play("click")}}>See My Results →</Btn>}
+      :<Btn v="gold" onClick={()=>{const pct=totalPossible>0?Math.round((practiceScore/(totalPossible+10))*100):0;SFX.play(pct>=70?"triumph":pct>=50?"sparkle":"fail");setShowResults(true)}}>See My Results →</Btn>}
     </div>}
   </div>);
 
@@ -503,8 +503,6 @@ const LocView = ({locId,uid,progress,onBack,onComplete}) => {
     const alt=getAltitude(pct);
     const passed=pct>=50;
     const ratingKey=pct>=90?"summit":pct>=70?"ridge":pct>=50?"treeline":"base";
-    // Play sound on mount
-    useEffect(()=>{if(showResults){passed?SFX.play(pct>=90?"triumph":"sparkle"):SFX.play("fail")}},[showResults]);
     return(<div style={{height:"100vh",overflowY:"auto",background:`linear-gradient(180deg,${C.bgDark},${C.bgCard})`,padding:"20px",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
       {passed&&<Confetti/>}
       <div className="fu" style={{textAlign:"center",maxWidth:340}}>
