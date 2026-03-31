@@ -1,10 +1,9 @@
-// ─── SUPABASE CLIENT v2 ───
+// ─── SUPABASE CLIENT v3 ───
 import { createClient } from "@supabase/supabase-js";
 
 const SUPABASE_URL = "https://jedeqqkrmgsemnnmufjo.supabase.co";
 const SUPABASE_KEY = "sb_publishable_Bcpg3b7ytODIYoPa54AF1A_MmG5DT8q";
 
-// Create client with explicit session persistence
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: {
     autoRefreshToken: true,
@@ -12,12 +11,6 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
     detectSessionInUrl: true,
   },
 });
-
-// Helper to get current access token
-async function getToken() {
-  const { data } = await supabase.auth.getSession();
-  return data?.session?.access_token || null;
-}
 
 export const db = {
   async signUp(email, pass) {
@@ -49,19 +42,15 @@ export const db = {
       { user_id: uid, path_id: pathId, lesson_index: lessonIndex, status: "completed", completed_at: new Date().toISOString() },
       { onConflict: "user_id,path_id,lesson_index" }
     );
-    try { await supabase.rpc("record_activity", { p_user_id: uid, p_type: "lesson" }); } catch (e) { console.warn("record_activity:", e); }
+    try { await supabase.rpc("record_activity", { p_user_id: uid, p_type: "lesson" }); } catch (e) { console.warn(e); }
   },
   async callClaude(options) {
-    // Manually get the token and pass it — this ensures auth header is always sent
-    const token = await getToken();
-    
-    // Use fetch directly instead of supabase.functions.invoke for reliability
+    // Direct fetch - no auth needed, edge function handles Claude directly
     const res = await fetch(`${SUPABASE_URL}/functions/v1/claude-proxy`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "apikey": SUPABASE_KEY,
-        "Authorization": `Bearer ${token}`,
       },
       body: JSON.stringify(options),
     });
