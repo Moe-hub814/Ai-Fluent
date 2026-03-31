@@ -296,7 +296,7 @@ const LocView = ({locId,uid,progress,onBack,onComplete}) => {
   const goToLesson=(idx)=>{setLessonIdx(idx);setView("lesson");setMsgs([]);setSid(null);resetPractice()};
 
   // PRACTICE MODE
-  if(view==="practice"&&practice.length>0)return(<div style={{height:"100vh",overflowY:"auto",background:`linear-gradient(180deg,${C.bgDark},${C.bgCard})`,padding:"14px 20px 100px"}}>
+  if(view==="practice"&&practice.length>0&&!showResults)return(<div style={{height:"100vh",overflowY:"auto",background:`linear-gradient(180deg,${C.bgDark},${C.bgCard})`,padding:"14px 20px 100px"}}>
     <button onClick={()=>setView("lesson")} style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700,marginBottom:14}}>← Back to lesson</button>
     {showConfetti&&<Confetti/>}
     <div style={{display:"flex",gap:4,marginBottom:16}}>{practice.map((_,i)=><div key={i} style={{flex:1,height:5,borderRadius:3,background:i<practiceIdx?C.green:i===practiceIdx?C.gold:"rgba(255,255,255,.06)",transition:"all .3s"}}/>)}</div>
