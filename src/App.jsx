@@ -415,9 +415,9 @@ const WorldMap = ({profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfi
 // Altitude Rating helper
 const getAltitude=(pct)=>{
   if(pct>=90)return{label:"Summit",icon:"🏔️",color:"#FFD700",bg:"rgba(255,215,0,.12)",border:"rgba(255,215,0,.25)",msg:"Outstanding! You've mastered this lesson."};
-  if(pct>=70)return{label:"Ridge",icon:"⛰️",color:C.green,bg:"rgba(74,186,120,.1)",border:"rgba(74,186,120,.2)",msg:"Solid understanding. Great work!"};
-  if(pct>=50)return{label:"Treeline",icon:"🌲",color:"#E8B84B",bg:"rgba(232,184,75,.1)",border:"rgba(232,184,75,.2)",msg:"Getting there! Consider retrying for a better rating."};
-  return{label:"Base",icon:"🏕️",color:C.red,bg:"rgba(216,88,88,.1)",border:"rgba(216,88,88,.2)",msg:"You need more practice. Review the lesson and try again."};
+  if(pct>=70)return{label:"Ridge",icon:"⛰️",color:"#4ABA78",bg:"rgba(74,186,120,.1)",border:"rgba(74,186,120,.2)",msg:"Solid understanding. Great work!"};
+  if(pct>=50)return{label:"Treeline",icon:"◈",color:"#E8B84B",bg:"rgba(232,184,75,.08)",border:"rgba(232,184,75,.18)",msg:"Getting there! Consider retrying for a better rating."};
+  return{label:"Base Camp",icon:"△",color:"#C87858",bg:"rgba(200,120,88,.08)",border:"rgba(200,120,88,.18)",msg:"You need more practice. Review the lesson and try again."};
 };
 
 const LocView = ({locId,uid,progress,onBack,onComplete}) => {
@@ -525,14 +525,14 @@ const LocView = ({locId,uid,progress,onBack,onComplete}) => {
         </div>
 
         {passed?<div style={{display:"flex",flexDirection:"column",gap:8}}>
-          <Btn v="green" onClick={async()=>{SFX.play("triumph");saveScore(locId,lessonIdx,pct);await db.completeLesson(uid,locId,lessonIdx);onComplete();setView("intro");setLessonIdx(null);resetPractice()}}>
-            {pct>=90?"🏔️ Claim Summit Rating!":pct>=70?"⛰️ Claim Ridge Rating!":"🌲 Complete Lesson"}
+          <Btn v="green" onClick={async()=>{SFX.play("triumph");saveScore(locId,lessonIdx,pct);try{await db.completeLesson(uid,locId,lessonIdx)}catch(e){console.warn(e)}onComplete();resetPractice();setLessonIdx(null);setView("intro")}}>
+            {pct>=90?"🏔️ Claim Summit Rating!":pct>=70?"⛰️ Claim Ridge Rating!":"✦ Complete Lesson"}
           </Btn>
-          {pct<90&&<Btn v="ghost" onClick={()=>{resetPractice();setView("practice")}}>Retry for a higher rating →</Btn>}
+          {pct<90&&<Btn v="ghost" onClick={()=>{setShowResults(false);resetPractice();setView("practice")}}>Retry for a higher rating →</Btn>}
         </div>
         :<div style={{display:"flex",flexDirection:"column",gap:8}}>
-          <Btn v="gold" onClick={()=>{resetPractice();setView("practice")}}>🏕️ Try Again</Btn>
-          <Btn v="ghost" onClick={()=>{setView("lesson");resetPractice()}}>← Review the lesson first</Btn>
+          <Btn v="gold" onClick={()=>{setShowResults(false);resetPractice();setView("practice")}}>Try Again</Btn>
+          <Btn v="ghost" onClick={()=>{setShowResults(false);resetPractice();setView("lesson")}}>← Review the lesson first</Btn>
         </div>}
       </div>
     </div>);
@@ -768,17 +768,30 @@ export default function AIFluent(){
   const [screen,setScreen]=useState("map");const [activeLoc,setActiveLoc]=useState(null);
 
   useEffect(()=>{
-    const init=async()=>{try{const s=await db.getSession();if(s?.user){setUser(s.user);setProfile(await db.getProfile(s.user.id));setProgress(await db.getProgress(s.user.id))}}catch(e){console.error(e)}setLoading(false)};
+    // Failsafe: if loading takes more than 5 seconds, force it to stop
+    const timeout=setTimeout(()=>{setLoading(false);console.warn("Loading timeout — forced to sign-in screen")},5000);
+    const init=async()=>{
+      try{
+        const s=await db.getSession();
+        if(s?.user){
+          setUser(s.user);
+          try{setProfile(await db.getProfile(s.user.id))}catch(e){console.warn("Profile load failed:",e);setProfile({})}
+          try{setProgress(await db.getProgress(s.user.id))}catch(e){console.warn("Progress load failed:",e);setProgress([])}
+        }
+      }catch(e){console.error("Init error:",e)}
+      clearTimeout(timeout);
+      setLoading(false);
+    };
     init();
-    const{data}=db.onAuth(async(ev,s)=>{if(ev==="SIGNED_IN"&&s?.user){setUser(s.user);setProfile(await db.getProfile(s.user.id));setProgress(await db.getProgress(s.user.id))}else if(ev==="SIGNED_OUT"){setUser(null);setProfile(null);setProgress([])}});
-    return()=>data?.subscription?.unsubscribe?.();
+    const{data}=db.onAuth(async(ev,s)=>{if(ev==="SIGNED_IN"&&s?.user){setUser(s.user);try{setProfile(await db.getProfile(s.user.id))}catch(e){setProfile({})}try{setProgress(await db.getProgress(s.user.id))}catch(e){setProgress([])}}else if(ev==="SIGNED_OUT"){setUser(null);setProfile(null);setProgress([])}});
+    return()=>{clearTimeout(timeout);data?.subscription?.unsubscribe?.()};
   },[]);
 
   const refresh=async()=>{if(!user)return;setProfile(await db.getProfile(user.id));setProgress(await db.getProgress(user.id))};
   const out=async()=>{await db.signOut();setUser(null);setProfile(null);setProgress([])};
   const goMap=()=>{setScreen("map");setActiveLoc(null)};
 
-  if(loading)return<><style>{css}</style><div style={{height:"100vh",background:`linear-gradient(180deg,${C.skyTop},${C.skyMid})`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",position:"relative"}}><Stars/><Lumi size={56} mood="happy" level={1} animate/><p style={{color:C.textMuted,fontSize:14,fontFamily:"'Nunito',sans-serif",marginTop:14}}>Loading AI Fluent...</p></div></>;
+  if(loading)return<><style>{css}</style><div onClick={()=>setLoading(false)} style={{height:"100vh",background:`linear-gradient(180deg,${C.skyTop},${C.skyMid})`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",position:"relative",cursor:"pointer"}}><Stars/><Lumi size={56} mood="happy" level={1} animate/><p style={{color:C.textMuted,fontSize:14,fontFamily:"'Nunito',sans-serif",marginTop:14}}>Loading AI Fluent...</p><p style={{color:C.textDim,fontSize:11,fontFamily:"'Nunito',sans-serif",marginTop:20}}>Tap anywhere if stuck</p></div></>;
   if(!user)return<><style>{css}</style><AuthScreen/></>;
   if(profile&&!profile.onboarded)return<><style>{css}</style><Onboarding uid={user.id} onDone={refresh}/></>;
   if(screen==="location"&&activeLoc)return<><style>{css}</style><LocView locId={activeLoc} uid={user.id} progress={progress} onBack={goMap} onComplete={refresh}/></>;
