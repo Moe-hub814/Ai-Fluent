@@ -374,28 +374,6 @@ const LocView = ({locId,uid,progress,onBack,onComplete}) => {
     </div>
   </div>);
 };
-    <h1 className="fu s1" style={{color:C.text,fontSize:24,fontFamily:C.fontDisplay,fontWeight:700,margin:"0 0 22px",lineHeight:1.3}}>{lesson.title}</h1>
-    {lesson.sections.map((sec,i)=>(<div key={i} className={`fu s${Math.min(i+2,5)}`} style={{marginBottom:26}}><h3 style={{color:C.text,fontSize:16,fontWeight:700,fontFamily:C.font,margin:"0 0 8px"}}>{sec.h}</h3><p style={{color:C.textMuted,fontSize:14,lineHeight:1.8,fontFamily:C.font,whiteSpace:"pre-wrap"}}>{sec.body}</p></div>))}
-    <button onClick={()=>setView("tutor")} className="fu" style={{width:"100%",background:"rgba(212,165,90,.06)",border:`1px solid ${C.borderGold}`,borderRadius:16,padding:16,textAlign:"left",marginBottom:10}}>
-      <div style={{display:"flex",alignItems:"center",gap:10}}><Lumi size={32} mood="happy" level={level} animate/><div><p style={{color:C.goldLight,fontSize:14,fontWeight:700,fontFamily:C.font,margin:0}}>Questions? Ask Lumi</p><p style={{color:C.textDim,fontSize:12,fontFamily:C.font,margin:"2px 0 0"}}>Your guide is here to help</p></div></div>
-    </button>
-    {practice.length>0?<Btn v="teal" onClick={()=>{setView("practice");setPracticeIdx(0);setSelected(null);setSubmitted(false);setFreeAns("");setFeedback("")}}>Start Practice →</Btn>
-    :<Btn onClick={async()=>{await db.completeLesson(uid,locId,0);onComplete();onBack()}}>Complete & continue →</Btn>}
-  </div>);
-
-  // INTRO
-  return(<div style={{height:"100vh",background:`linear-gradient(180deg,${C.skyTop},${C.skyMid} 60%,${C.bgDark})`,display:"flex",flexDirection:"column",position:"relative"}}>
-    <Stars/><button onClick={onBack} style={{position:"absolute",top:14,left:14,background:"rgba(255,255,255,.05)",border:`1px solid ${C.border}`,borderRadius:10,padding:"7px 14px",color:C.gold,fontSize:13,fontFamily:C.font,fontWeight:700,zIndex:10}}>← Map</button>
-    <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"40px 28px",position:"relative",zIndex:5}}>
-      <div className="fu" style={{fontSize:48,marginBottom:6}}>{loc.icon}</div>
-      <h1 className="fu s1" style={{color:C.text,fontSize:28,fontFamily:C.fontDisplay,fontWeight:700,textAlign:"center"}}>{loc.name}</h1>
-      <p className="fu s2" style={{color:C.textMuted,fontSize:14,fontFamily:C.font,textAlign:"center",marginBottom:2}}>{loc.sub}</p>
-      <p className="fu s3" style={{color:C.textDim,fontSize:13,fontFamily:C.font,textAlign:"center",lineHeight:1.6,maxWidth:280,marginBottom:20}}>{loc.desc}</p>
-      {practice.length>0&&<p className="fu s3" style={{color:C.teal,fontSize:12,fontFamily:C.font,textAlign:"center",marginBottom:4}}>Includes {practice.length} practice exercises</p>}
-      <div className="fu s4" style={{display:"flex",alignItems:"center",gap:8,marginBottom:22}}><Lumi size={32} mood="happy" level={level} animate/><p style={{color:C.textDim,fontSize:13,fontFamily:C.font,fontStyle:"italic"}}>Ready when you are</p></div>
-      <div className="fu s5" style={{width:"100%",maxWidth:280}}>{lesson?<Btn onClick={()=>setView("lesson")}>Start learning →</Btn>:<p style={{color:C.textDim,fontSize:14,fontFamily:C.font,textAlign:"center"}}>Complete all stops to reach the summit</p>}</div>
-    </div></div>);
-};
 
 // LIVE NEWS - fetches real AI news via Claude web search
 const NewsView = ({uid,onBack}) => {
