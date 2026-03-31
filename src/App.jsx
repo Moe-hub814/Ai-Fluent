@@ -238,6 +238,14 @@ const WorldMap = ({profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfi
 };
 
 // LOCATION VIEW + LESSON SELECTOR + TUTOR + PRACTICE MODE
+// Altitude Rating helper
+const getAltitude=(pct)=>{
+  if(pct>=90)return{label:"Summit",icon:"🏔️",color:"#FFD700",bg:"rgba(255,215,0,.12)",border:"rgba(255,215,0,.25)",msg:"Outstanding! You've mastered this lesson."};
+  if(pct>=70)return{label:"Ridge",icon:"⛰️",color:C.green,bg:"rgba(74,186,120,.1)",border:"rgba(74,186,120,.2)",msg:"Solid understanding. Great work!"};
+  if(pct>=50)return{label:"Treeline",icon:"🌲",color:"#E8B84B",bg:"rgba(232,184,75,.1)",border:"rgba(232,184,75,.2)",msg:"Getting there! Consider retrying for a better rating."};
+  return{label:"Base",icon:"🏕️",color:C.red,bg:"rgba(216,88,88,.1)",border:"rgba(216,88,88,.2)",msg:"You need more practice. Review the lesson and try again."};
+};
+
 const LocView = ({locId,uid,progress,onBack,onComplete}) => {
   const loc=LOCS.find(l=>l.id===locId)||LOCS[0];
   const lessons=LESSONS[locId]||[];
@@ -249,6 +257,13 @@ const LocView = ({locId,uid,progress,onBack,onComplete}) => {
   const [practiceIdx,setPracticeIdx]=useState(0);const [selected,setSelected]=useState(null);const [submitted,setSubmitted]=useState(false);
   const [freeAns,setFreeAns]=useState("");const [feedback,setFeedback]=useState("");const [grading,setGrading]=useState(false);
   const [showConfetti,setShowConfetti]=useState(false);const [practiceScore,setPracticeScore]=useState(0);
+  const [totalPossible,setTotalPossible]=useState(0);
+  const [showResults,setShowResults]=useState(false);
+  // Store scores per lesson: { "basics-0": 85, "writing-1": 70 }
+  const [lessonScores,setLessonScores]=useState(()=>{try{return JSON.parse(localStorage.getItem("ai_fluent_scores")||"{}")}catch{return{}}});
+  const saveScore=(pathId,li,pct)=>{const k=`${pathId}-${li}`;const ns={...lessonScores,[k]:Math.max(pct,lessonScores[k]||0)};setLessonScores(ns);localStorage.setItem("ai_fluent_scores",JSON.stringify(ns))};
+  const getScore=(pathId,li)=>lessonScores[`${pathId}-${li}`]||null;
+
   useEffect(()=>{ref.current?.scrollTo(0,ref.current.scrollHeight)},[msgs,typing]);
 
   // Which lessons in this path has the user completed?
@@ -267,13 +282,17 @@ const LocView = ({locId,uid,progress,onBack,onComplete}) => {
 
   const gradeFreeResponse=async()=>{
     setGrading(true);
-    try{const r=await db.callClaude({feature:"tutor",system:`You are Lumi, grading a practice exercise. The question was: "${currentP.q}". The hint was: "${currentP.hint||""}". Grade their response: 1) Was it specific enough? 2) Did they follow the lesson's framework? Give a score out of 10, brief encouraging feedback, and one specific suggestion to improve. Keep under 120 words. Be warm and encouraging.`,messages:[{role:"user",content:freeAns}]});
-      setFeedback(r.text);setPracticeScore(ps=>ps+1);
-    }catch{setFeedback("Great effort! The key is being specific — the more detail you give AI, the better the result.")}
+    try{const r=await db.callClaude({feature:"tutor",system:`You are Lumi, grading a practice exercise. The question was: "${currentP.q}". The hint was: "${currentP.hint||""}". IMPORTANT: Start your response with exactly "SCORE: X/10" on the first line (where X is 1-10). Then grade their response: 1) Was it specific enough? 2) Did they follow the lesson's framework? Give brief encouraging feedback and one specific suggestion to improve. Keep under 120 words. Be warm and encouraging.`,messages:[{role:"user",content:freeAns}]});
+      const scoreMatch=r.text.match(/SCORE:\s*(\d+)\s*\/\s*10/i);
+      const numScore=scoreMatch?parseInt(scoreMatch[1]):6;
+      setFeedback(r.text.replace(/SCORE:\s*\d+\s*\/\s*10\s*/i,"").trim());
+      setPracticeScore(ps=>ps+numScore);
+      setTotalPossible(tp=>tp+10);
+    }catch{setFeedback("Great effort! The key is being specific — the more detail you give AI, the better the result.");setPracticeScore(ps=>ps+6);setTotalPossible(tp=>tp+10)}
     setGrading(false);setSubmitted(true);
   };
 
-  const resetPractice=()=>{setPracticeIdx(0);setSelected(null);setSubmitted(false);setFreeAns("");setFeedback("");setPracticeScore(0);setShowConfetti(false)};
+  const resetPractice=()=>{setPracticeIdx(0);setSelected(null);setSubmitted(false);setFreeAns("");setFeedback("");setPracticeScore(0);setTotalPossible(0);setShowConfetti(false);setShowResults(false)};
   const goToLesson=(idx)=>{setLessonIdx(idx);setView("lesson");setMsgs([]);setSid(null);resetPractice()};
 
   // PRACTICE MODE
@@ -288,7 +307,7 @@ const LocView = ({locId,uid,progress,onBack,onComplete}) => {
         return<button key={i} onClick={()=>{if(!submitted)setSelected(i)}} disabled={submitted} className={`pop s${Math.min(i+1,5)}`}
           style={{background:showResult?(isCorrect?"rgba(74,186,120,.12)":isSelected?"rgba(216,88,88,.12)":"rgba(255,255,255,.03)"):(isSelected?"rgba(212,165,90,.1)":"rgba(255,255,255,.03)"),border:`1.5px solid ${showResult?(isCorrect?C.green:isSelected?C.red:C.border):(isSelected?C.gold:C.border)}`,borderRadius:14,padding:"13px 16px",textAlign:"left",width:"100%"}}>
           <span style={{color:showResult?(isCorrect?C.green:isSelected?C.red:C.textMuted):(isSelected?C.goldLight:C.textMuted),fontSize:14,fontWeight:isSelected?700:500,fontFamily:C.font}}>{showResult?(isCorrect?"✓ ":isSelected?"✗ ":""):isSelected?"● ":""}{o}</span></button>})}
-      {!submitted&&selected!==null&&<div style={{marginTop:8}}><Btn onClick={()=>{setSubmitted(true);if(selected===currentP.correct)setPracticeScore(ps=>ps+1)}}>Check Answer</Btn></div>}
+      {!submitted&&selected!==null&&<div style={{marginTop:8}}><Btn onClick={()=>{setSubmitted(true);setTotalPossible(tp=>tp+10);if(selected===currentP.correct)setPracticeScore(ps=>ps+10)}}>Check Answer</Btn></div>}
       {submitted&&<div className="fu" style={{background:"rgba(212,165,90,.06)",border:`1px solid ${C.borderGold}`,borderRadius:14,padding:14,marginTop:10}}><p style={{color:C.goldLight,fontSize:13,fontWeight:700,fontFamily:C.font,margin:"0 0 4px"}}>💡 Why?</p><p style={{color:C.textMuted,fontSize:13,lineHeight:1.6,fontFamily:C.font,margin:0}}>{currentP.explain}</p></div>}
     </div>}
     {currentP.type==="free_response"&&<div>
@@ -299,9 +318,48 @@ const LocView = ({locId,uid,progress,onBack,onComplete}) => {
     </div>}
     {submitted&&<div style={{marginTop:14}}>
       {practiceIdx<practice.length-1?<Btn v="teal" onClick={()=>{setPracticeIdx(practiceIdx+1);setSelected(null);setSubmitted(false);setFreeAns("");setFeedback("")}}>Next Question →</Btn>
-      :<Btn v="green" onClick={async()=>{setShowConfetti(true);await db.completeLesson(uid,locId,lessonIdx);setTimeout(()=>{onComplete();setView("intro");setLessonIdx(null)},1500)}}>🎉 Lesson Complete!</Btn>}
+      :<Btn v="gold" onClick={()=>setShowResults(true)}>See My Results →</Btn>}
     </div>}
   </div>);
+
+  // RESULTS SCREEN
+  if(view==="practice"&&showResults){
+    const pct=totalPossible>0?Math.round((practiceScore/totalPossible)*100):0;
+    const alt=getAltitude(pct);
+    const passed=pct>=50;
+    return(<div style={{height:"100vh",overflowY:"auto",background:`linear-gradient(180deg,${C.bgDark},${C.bgCard})`,padding:"20px",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
+      {passed&&<Confetti/>}
+      <div className="fu" style={{textAlign:"center",maxWidth:340}}>
+        {/* Altitude badge */}
+        <div style={{width:100,height:100,borderRadius:"50%",background:alt.bg,border:`3px solid ${alt.border}`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px",fontSize:48}}>{alt.icon}</div>
+        <p style={{color:alt.color,fontSize:14,fontWeight:700,fontFamily:C.font,textTransform:"uppercase",letterSpacing:2,margin:"0 0 4px"}}>{alt.label} Rating</p>
+        <p style={{color:C.text,fontSize:48,fontWeight:800,fontFamily:C.fontDisplay,margin:"0 0 8px"}}>{pct}%</p>
+        <p style={{color:C.textMuted,fontSize:14,fontFamily:C.font,lineHeight:1.6,margin:"0 0 24px"}}>{alt.msg}</p>
+
+        {/* Score breakdown */}
+        <div style={{background:"rgba(255,255,255,.03)",borderRadius:14,padding:16,marginBottom:20,border:`1px solid ${C.border}`}}>
+          <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}>
+            <span style={{color:C.textDim,fontSize:13,fontFamily:C.font}}>Points earned</span>
+            <span style={{color:C.text,fontSize:13,fontWeight:700,fontFamily:C.font}}>{practiceScore}/{totalPossible}</span>
+          </div>
+          <div style={{height:8,background:"rgba(255,255,255,.06)",borderRadius:4,overflow:"hidden"}}>
+            <div style={{width:`${pct}%`,height:"100%",background:`linear-gradient(90deg,${alt.color},${alt.color}88)`,borderRadius:4,transition:"width .8s ease"}}/>
+          </div>
+        </div>
+
+        {passed?<div style={{display:"flex",flexDirection:"column",gap:8}}>
+          <Btn v="green" onClick={async()=>{saveScore(locId,lessonIdx,pct);await db.completeLesson(uid,locId,lessonIdx);onComplete();setView("intro");setLessonIdx(null);resetPractice()}}>
+            {pct>=90?"🏔️ Claim Summit Rating!":pct>=70?"⛰️ Claim Ridge Rating!":"🌲 Complete Lesson"}
+          </Btn>
+          {pct<90&&<Btn v="ghost" onClick={()=>{resetPractice();setView("practice")}}>Retry for a higher rating →</Btn>}
+        </div>
+        :<div style={{display:"flex",flexDirection:"column",gap:8}}>
+          <Btn v="gold" onClick={()=>{resetPractice();setView("practice")}}>🏕️ Try Again</Btn>
+          <Btn v="ghost" onClick={()=>{setView("lesson");resetPractice()}}>← Review the lesson first</Btn>
+        </div>}
+      </div>
+    </div>);
+  }
 
   // TUTOR
   if(view==="tutor")return(<div style={{height:"100vh",display:"flex",flexDirection:"column",background:C.bgDark}}>
@@ -355,18 +413,23 @@ const LocView = ({locId,uid,progress,onBack,onComplete}) => {
       <div style={{display:"flex",flexDirection:"column",gap:10}}>
         {lessons.map((l,i)=>{
           const done=isLessonDone(i);const unlocked=isLessonUnlocked(i);
+          const score=getScore(locId,i);const alt=score?getAltitude(score):null;
           return(<button key={i} className={`fu s${Math.min(i+1,5)}`} onClick={()=>unlocked&&goToLesson(i)} disabled={!unlocked}
-            style={{background:done?"rgba(74,186,120,.06)":unlocked?C.bgCard:"rgba(255,255,255,.02)",border:`1px solid ${done?"rgba(74,186,120,.15)":unlocked?C.border:"rgba(255,255,255,.04)"}`,borderRadius:14,padding:"14px 16px",textAlign:"left",width:"100%",opacity:unlocked?1:.4}}>
+            style={{background:done?"rgba(74,186,120,.06)":unlocked?C.bgCard:"rgba(255,255,255,.02)",border:`1px solid ${done?(alt?alt.border:"rgba(74,186,120,.15)"):unlocked?C.border:"rgba(255,255,255,.04)"}`,borderRadius:14,padding:"14px 16px",textAlign:"left",width:"100%",opacity:unlocked?1:.4}}>
             <div style={{display:"flex",alignItems:"center",gap:12}}>
-              <div style={{width:36,height:36,borderRadius:10,background:done?"rgba(74,186,120,.15)":unlocked?"rgba(212,165,90,.1)":"rgba(255,255,255,.04)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                <span style={{color:done?C.green:unlocked?C.gold:C.textDim,fontSize:14,fontWeight:700,fontFamily:C.font}}>{done?"✓":unlocked?(i+1):"🔒"}</span>
+              <div style={{width:36,height:36,borderRadius:10,background:done?(alt?alt.bg:"rgba(74,186,120,.15)"):unlocked?"rgba(212,165,90,.1)":"rgba(255,255,255,.04)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                <span style={{fontSize:done&&alt?18:14}}>{done&&alt?alt.icon:done?"✓":unlocked?(i+1):"🔒"}</span>
               </div>
               <div style={{flex:1}}>
                 <p style={{color:unlocked?C.text:C.textDim,fontSize:14,fontWeight:700,fontFamily:C.font,margin:0}}>{l.title}</p>
-                <p style={{color:C.textDim,fontSize:11,fontFamily:C.font,margin:"2px 0 0"}}>{l.sections.length} sections{l.practice?.length>0?` · ${l.practice.length} practice`:""}
-                {done?" · ✅ Completed":""}</p>
+                <div style={{display:"flex",alignItems:"center",gap:6,marginTop:2}}>
+                  <span style={{color:C.textDim,fontSize:11,fontFamily:C.font}}>{l.sections.length} sections{l.practice?.length>0?` · ${l.practice.length} practice`:""}</span>
+                  {done&&alt&&<span style={{color:alt.color,fontSize:10,fontWeight:700,fontFamily:C.font,background:alt.bg,padding:"1px 8px",borderRadius:8,border:`1px solid ${alt.border}`}}>{alt.icon} {alt.label} · {score}%</span>}
+                  {done&&!alt&&<span style={{color:C.green,fontSize:10,fontFamily:C.font}}>✅ Done</span>}
+                </div>
               </div>
               {unlocked&&!done&&<span style={{color:C.gold,fontSize:16}}>→</span>}
+              {done&&score&&score<90&&<span style={{color:C.gold,fontSize:11,fontFamily:C.font}}>↑</span>}
             </div>
           </button>);
         })}
