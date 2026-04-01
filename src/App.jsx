@@ -246,6 +246,139 @@ const ErrorMsg = ({msg,onRetry}) => (
   </div>
 );
 
+// STREAK SYSTEM — tracks daily activity, streak freeze, calendar
+const Streak = {
+  _key: "ai_fluent_streak",
+  _get() { try { return JSON.parse(localStorage.getItem(this._key) || "{}") } catch { return {} } },
+  _set(data) { localStorage.setItem(this._key, JSON.stringify(data)) },
+
+  check() {
+    const d = this._get();
+    const today = new Date().toISOString().slice(0, 10);
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+
+    if (d.lastActive === today) return d; // Already active today
+
+    if (d.lastActive === yesterday) {
+      // Streak continues
+      return { ...d, current: (d.current || 0), todayDone: false };
+    } else if (d.lastActive && d.lastActive !== today) {
+      // Streak broken — check for freeze
+      if (d.freezes > 0) {
+        const nd = { ...d, freezes: d.freezes - 1, freezeUsedOn: d.lastActive, todayDone: false };
+        this._set(nd);
+        return nd;
+      }
+      // Streak lost
+      return { ...d, current: 0, todayDone: false };
+    }
+    return { current: 0, best: d.best || 0, freezes: d.freezes || 1, history: d.history || [], todayDone: false };
+  },
+
+  recordActivity() {
+    const d = this._get();
+    const today = new Date().toISOString().slice(0, 10);
+    if (d.lastActive === today) return d; // Already recorded today
+
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    let current = d.lastActive === yesterday ? (d.current || 0) + 1 : d.lastActive === today ? (d.current || 1) : 1;
+    // If freeze was used, continue streak
+    if (d.freezeUsedOn && d.lastActive !== yesterday && d.lastActive !== today) current = (d.current || 0) + 1;
+
+    const best = Math.max(current, d.best || 0);
+    const history = [...(d.history || []), today].slice(-60); // Keep last 60 days
+    const nd = { ...d, current, best, lastActive: today, history, todayDone: true, freezeUsedOn: null };
+    this._set(nd);
+    return nd;
+  },
+
+  getCalendar() {
+    const d = this._get();
+    const days = [];
+    const today = new Date();
+    for (let i = 27; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(today.getDate() - i);
+      const key = date.toISOString().slice(0, 10);
+      days.push({ date: key, active: (d.history || []).includes(key), isToday: i === 0, day: date.getDate(), dow: ["S","M","T","W","T","F","S"][date.getDay()] });
+    }
+    return days;
+  },
+
+  getData() { return this._get() },
+  addFreeze() { const d = this._get(); d.freezes = Math.min((d.freezes || 0) + 1, 3); this._set(d); return d },
+};
+
+// PROGRESS CELEBRATIONS — milestone screens
+const MilestoneCheck = ({progress, onDismiss}) => {
+  const milestones = [
+    { at: 1, title: "First Lesson!", msg: "You've taken your first step up the mountain. The journey of a thousand miles begins with a single step.", icon: "👣", color: C.green },
+    { at: 3, title: "Getting Warmed Up!", msg: "3 lessons done! You're building real momentum. Most people never get this far.", icon: "🔥", color: C.gold },
+    { at: 5, title: "Trailblazer!", msg: "5 lessons complete! You officially know more about AI than most people. Keep climbing!", icon: "🥾", color: C.teal },
+    { at: 10, title: "Mountaineer!", msg: "Double digits! 10 lessons shows serious commitment. You're becoming AI fluent.", icon: "⛰️", color: C.blue },
+    { at: 15, title: "Almost There!", msg: "15 lessons! You can see the summit from here. The air is getting thin but you're strong.", icon: "🌟", color: C.purple },
+    { at: 20, title: "AI Master!", msg: "20 lessons! You've reached near-mastery. You understand AI better than 99% of people.", icon: "🏔️", color: "#FFD700" },
+  ];
+
+  const [show, setShow] = useState(() => {
+    const seen = JSON.parse(localStorage.getItem("ai_fluent_milestones") || "[]");
+    const hit = milestones.find(m => progress.length >= m.at && !seen.includes(m.at));
+    return hit || null;
+  });
+
+  if (!show) return null;
+
+  const dismiss = () => {
+    const seen = JSON.parse(localStorage.getItem("ai_fluent_milestones") || "[]");
+    localStorage.setItem("ai_fluent_milestones", JSON.stringify([...seen, show.at]));
+    setShow(null);
+    if(onDismiss) onDismiss();
+  };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(6,13,26,.92)", display: "flex", alignItems: "center", justifyContent: "center", padding: 30 }} onClick={dismiss}>
+      <Confetti />
+      <div className="fu" style={{ textAlign: "center", maxWidth: 320 }} onClick={e => e.stopPropagation()}>
+        <div style={{ fontSize: 64, marginBottom: 12, animation: "celebrate 0.6s ease infinite" }}>{show.icon}</div>
+        <h2 style={{ color: show.color, fontSize: 28, fontFamily: C.fontDisplay, fontWeight: 800, margin: "0 0 8px" }}>{show.title}</h2>
+        <p style={{ color: C.textMuted, fontSize: 15, fontFamily: C.font, lineHeight: 1.7, margin: "0 0 8px" }}>{show.msg}</p>
+        <p style={{ color: C.textDim, fontSize: 12, fontFamily: C.font, margin: "0 0 24px" }}>{progress.length} lessons completed</p>
+        <Btn v="gold" onClick={dismiss}>Keep Climbing →</Btn>
+      </div>
+    </div>
+  );
+};
+
+// STREAK CALENDAR widget for profile
+const StreakCalendar = () => {
+  const cal = Streak.getCalendar();
+  const data = Streak.getData();
+  return (
+    <div style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 16, padding: 16 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+        <p style={{ color: C.text, fontSize: 14, fontWeight: 700, fontFamily: C.font, margin: 0 }}>Activity Calendar</p>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <span style={{ fontSize: 14 }}>🔥</span>
+          <span style={{ color: C.gold, fontSize: 14, fontWeight: 800, fontFamily: C.font }}>{data.current || 0} day streak</span>
+        </div>
+      </div>
+      {data.best > 0 && <p style={{ color: C.textDim, fontSize: 11, fontFamily: C.font, margin: "0 0 10px" }}>Best streak: {data.best} days · Freezes: {data.freezes || 0} remaining</p>}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4 }}>
+        {["S","M","T","W","T","F","S"].map((d, i) => <div key={i} style={{ textAlign: "center", color: C.textDim, fontSize: 9, fontFamily: C.font, fontWeight: 600, marginBottom: 2 }}>{d}</div>)}
+        {cal.map((d, i) => (
+          <div key={i} style={{
+            width: "100%", aspectRatio: "1", borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center",
+            background: d.active ? "rgba(74,186,120,.2)" : d.isToday ? "rgba(212,165,90,.1)" : "rgba(255,255,255,.02)",
+            border: d.isToday ? `1.5px solid ${C.gold}` : d.active ? "1px solid rgba(74,186,120,.3)" : "1px solid rgba(255,255,255,.03)",
+          }}>
+            <span style={{ color: d.active ? C.green : d.isToday ? C.gold : C.textDim, fontSize: 10, fontWeight: d.isToday ? 800 : 500, fontFamily: C.font }}>{d.day}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 // CSS
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Quicksand:wght@500;600;700&display=swap');
@@ -322,7 +455,7 @@ const WorldMap = ({profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfi
   const status=(loc)=>{if(loc.id==="master")return done.length>=6?"current":"locked";const idx=LOCS.findIndex(l=>l.id===loc.id);if(done.includes(loc.id))return"done";if(idx===0)return"current";const prev=LOCS[idx-1];if(prev&&done.includes(prev.id))return"current";return"locked"};
   const pct=Math.round((done.length/6)*100);
   const greet=()=>{const h=new Date().getHours();return h<12?"Good morning":h<17?"Good afternoon":"Good evening"};
-  const streak=profile?.current_streak||0;
+  const streak=Streak.getData().current||profile?.current_streak||0;
   const name=profile?.display_name?.split(" ")[0]||"Climber";
 
   // Node positions on the mountain (x%, y% of viewport)
@@ -455,7 +588,7 @@ const getAltitude=(pct)=>{
   return{label:"Base Camp",icon:"△",color:"#C87858",bg:"rgba(200,120,88,.08)",border:"rgba(200,120,88,.18)",msg:"You need more practice. Review the lesson and try again."};
 };
 
-const LocView = ({locId,uid,progress,onBack,onComplete}) => {
+const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
   const loc=LOCS.find(l=>l.id===locId)||LOCS[0];
   const lessons=LESSONS[locId]||[];
   const [lessonIdx,setLessonIdx]=useState(null);
@@ -463,6 +596,12 @@ const LocView = ({locId,uid,progress,onBack,onComplete}) => {
   const [view,setView]=useState("intro");const [msgs,setMsgs]=useState([]);const [typing,setTyping]=useState(false);
   const [inp,setInp]=useState("");const [sid,setSid]=useState(null);const ref=useRef(null);
   const level=Math.max(1,Math.floor(progress.length/2)+1);
+  // Lumi personality context
+  const userName=profile?.display_name?.split(" ")[0]||"friend";
+  const userRole=profile?.role||"learner";
+  const completedCount=progress.length;
+  const streakDays=Streak.getData().current||0;
+  const lumiPersonality=`You are Lumi, a warm and knowledgeable AI guide in "AI Fluent" at "${loc.name}" teaching "${lesson?.title}". The learner's name is ${userName} and they are a ${userRole}. They have completed ${completedCount} lessons and have a ${streakDays}-day streak. Reference their name occasionally (not every message). If they've done many lessons, acknowledge their progress. Be clear, use simple language, everyday analogies. Encouraging but never condescending. Under 180 words.`;
   const [practiceIdx,setPracticeIdx]=useState(0);const [selected,setSelected]=useState(null);const [submitted,setSubmitted]=useState(false);
   const [freeAns,setFreeAns]=useState("");const [feedback,setFeedback]=useState("");const [grading,setGrading]=useState(false);
   const [showConfetti,setShowConfetti]=useState(false);const [practiceScore,setPracticeScore]=useState(0);
@@ -481,7 +620,7 @@ const LocView = ({locId,uid,progress,onBack,onComplete}) => {
   const isLessonUnlocked=(idx)=>idx===0||completedInPath.includes(idx-1);
 
   const ask=async(q)=>{setMsgs(m=>[...m,{from:"user",text:q}]);setTyping(true);
-    try{const r=await db.callClaude({feature:"tutor",system:`You are Lumi, a knowledgeable warm AI guide in "AI Fluent" at "${loc.name}" teaching "${lesson?.title}". Clear, simple language. Encouraging, not condescending. Everyday analogies. Under 180 words.`,messages:[...msgs.map(m=>({role:m.from==="user"?"user":"assistant",content:m.text})),{role:"user",content:q}],session_id:sid,context_type:"tutor",context_id:locId,context_title:lesson?.title});
+    try{const r=await db.callClaude({feature:"tutor",system:lumiPersonality,messages:[...msgs.map(m=>({role:m.from==="user"?"user":"assistant",content:m.text})),{role:"user",content:q}],session_id:sid,context_type:"tutor",context_id:locId,context_title:lesson?.title});
       setSid(r.session_id||sid);setTyping(false);setMsgs(m=>[...m,{from:"lumi",text:r.text}]);
     }catch(e){setTyping(false);setMsgs(m=>[...m,{from:"lumi",text:"Hmm, I lost my connection for a moment. Could you try asking that again? 🌟"}])}};
   const send=()=>{if(inp.trim()){ask(inp.trim());setInp("")}};
@@ -585,7 +724,7 @@ const LocView = ({locId,uid,progress,onBack,onComplete}) => {
       <div style={{flex:1,textAlign:"center",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><Lumi size={22} level={level}/><span style={{color:C.text,fontSize:13,fontWeight:700,fontFamily:C.font}}>Lumi — Guide</span></div>
     </div>
     <div ref={ref} style={{flex:1,overflowY:"auto",padding:16}}>
-      <Bub from="lumi" text={`Welcome to ${loc.name}. Ask me anything about "${lesson?.title}" — nothing is too basic.`}/>
+      <Bub from="lumi" text={`Hey ${userName}! Welcome to ${loc.name}. I'm here to help with "${lesson?.title}" — ask me anything, nothing is too basic!`}/>
       {msgs.map((m,i)=><Bub key={i} from={m.from} text={m.text}/>)}{typing&&<Bub from="lumi" typing/>}
       {msgs.length===0&&lesson&&<div className="fu s2" style={{marginTop:14}}><p style={{color:C.textDim,fontSize:12,fontFamily:C.font,fontWeight:600,margin:"0 0 10px"}}>People often ask...</p>{lesson.questions.map((q,i)=><button key={i} onClick={()=>ask(q)} style={{display:"block",width:"100%",background:"rgba(255,255,255,.03)",border:`1px solid ${C.border}`,borderRadius:12,padding:"10px 14px",marginBottom:7,textAlign:"left"}}><span style={{color:C.textMuted,fontSize:13,fontFamily:C.font}}>{q}</span></button>)}</div>}
     </div>
@@ -802,6 +941,7 @@ const ProfileView = ({profile,progress,onBack,onSignOut}) => {
   const summitCount=Object.values(scores).filter(s=>s>=90).length;
   const ridgeCount=Object.values(scores).filter(s=>s>=70&&s<90).length;
   const totalScored=Object.keys(scores).length;
+  const streakData=Streak.getData();
 
   return(<div style={{height:"100vh",overflowY:"auto",background:`linear-gradient(180deg,${C.skyTop},${C.bgDark})`,padding:"14px 20px 40px",position:"relative"}}><Stars/>
     <button onClick={onBack} style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700,marginBottom:18,position:"relative",zIndex:1}}>← Map</button>
@@ -816,7 +956,7 @@ const ProfileView = ({profile,progress,onBack,onSignOut}) => {
     {/* Stats grid */}
     <div className="fu s1" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16,position:"relative",zIndex:1}}>
       {[
-        {v:profile?.current_streak||0,l:"Day Streak",icon:"🔥",color:C.gold,bg:"rgba(212,165,90,.06)"},
+        {v:streakData.current||0,l:"Day Streak",icon:"🔥",color:C.gold,bg:"rgba(212,165,90,.06)"},
         {v:progress.length,l:"Lessons Done",icon:"📖",color:C.teal,bg:"rgba(58,168,160,.06)"},
         {v:profile?.total_tutor_sessions||0,l:"Lumi Chats",icon:"💬",color:C.blue,bg:"rgba(74,144,217,.06)"},
         {v:ACHIEVEMENTS.filter(a=>a.condition(progress,profile)).length,l:"Achievements",icon:"🏆",color:C.green,bg:"rgba(74,186,120,.06)"},
@@ -828,6 +968,9 @@ const ProfileView = ({profile,progress,onBack,onSignOut}) => {
         </div>
       ))}
     </div>
+
+    {/* Streak Calendar */}
+    <div className="fu s2" style={{marginBottom:16,position:"relative",zIndex:1}}><StreakCalendar/></div>
 
     {/* Altitude ratings earned */}
     {totalScored>0&&<div className="fu s2" style={{background:C.bgCard,border:`1px solid ${C.border}`,borderRadius:16,padding:16,marginBottom:16,position:"relative",zIndex:1}}>
@@ -1009,22 +1152,33 @@ export default function AIFluent(){
     return()=>{clearTimeout(timeout);data?.subscription?.unsubscribe?.()};
   },[]);
 
-  const refresh=async()=>{if(!user)return;setProfile(await db.getProfile(user.id));setProgress(await db.getProgress(user.id))};
+  const refresh=async()=>{
+    if(!user)return;
+    setProfile(await db.getProfile(user.id));
+    setProgress(await db.getProgress(user.id));
+    // Record streak activity when user completes something
+    Streak.recordActivity();
+  };
   const out=async()=>{await db.signOut();setUser(null);setProfile(null);setProgress([])};
   const goMap=()=>{setScreen("map");setActiveLoc(null)};
+
+  // Record streak on initial load if user is active
+  useEffect(()=>{if(user) Streak.check()},[user]);
 
   if(loading)return<><style>{css}</style><div onClick={()=>setLoading(false)} style={{height:"100vh",background:`linear-gradient(180deg,${C.skyTop},${C.skyMid})`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",position:"relative",cursor:"pointer"}}><Stars/><Lumi size={56} mood="happy" level={1} animate/><p style={{color:C.textMuted,fontSize:14,fontFamily:"'Nunito',sans-serif",marginTop:14}}>Loading AI Fluent...</p><p style={{color:C.textDim,fontSize:11,fontFamily:"'Nunito',sans-serif",marginTop:20}}>Tap anywhere if stuck</p></div></>;
   if(!user)return<><style>{css}</style><AuthScreen/></>;
   if(profile&&!profile.onboarded)return<><style>{css}</style><Onboarding uid={user.id} onDone={refresh}/></>;
   if(showTutorial&&user)return<><style>{css}</style><Tutorial onComplete={()=>{localStorage.setItem("ai_fluent_tutorial_seen","1");setShowTutorial(false)}}/></>;
-  if(screen==="location"&&activeLoc)return<><style>{css}</style><LocView locId={activeLoc} uid={user.id} progress={progress} onBack={goMap} onComplete={refresh}/></>;
+  if(screen==="location"&&activeLoc)return<><style>{css}</style><LocView locId={activeLoc} uid={user.id} progress={progress} profile={profile} onBack={goMap} onComplete={refresh}/></>;
   if(screen==="news")return<><style>{css}</style><NewsView uid={user.id} onBack={goMap}/></>;
   if(screen==="tools")return<><style>{css}</style><ToolsView uid={user.id} onBack={goMap}/></>;
   if(screen==="challenge")return<><style>{css}</style><ChallengeView uid={user.id} onBack={goMap}/></>;
   if(screen==="achievements")return<><style>{css}</style><AchievementsView profile={profile} progress={progress} onBack={goMap}/></>;
   if(screen==="profile")return<><style>{css}</style><ProfileView profile={profile} progress={progress} onBack={goMap} onSignOut={out}/></>;
 
-  return<><style>{css}</style><WorldMap profile={profile} progress={progress}
+  return<><style>{css}</style>
+    <MilestoneCheck progress={progress}/>
+    <WorldMap profile={profile} progress={progress}
     onOpenLoc={(id)=>{setActiveLoc(id);setScreen("location")}}
     onOpenNews={()=>setScreen("news")}
     onOpenTools={()=>setScreen("tools")}
