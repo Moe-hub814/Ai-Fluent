@@ -767,10 +767,126 @@ const ProfileView = ({profile,progress,onBack,onSignOut}) => {
   </div>);
 };
 
+// TUTORIAL — animated walkthrough for first-time users
+const Tutorial = ({onComplete}) => {
+  const [step,setStep]=useState(0);
+  const slides=[
+    {
+      title:"Welcome to AI Land",
+      desc:"You're about to climb the mountain of AI fluency. Each stop on the trail teaches you a new skill — from the basics at Base Camp to mastery at The Summit.",
+      visual:(
+        <div style={{position:"relative",width:200,height:200,margin:"0 auto"}}>
+          <svg viewBox="0 0 200 200" width="200" height="200">
+            <path d="M30 180 L100 40 L170 180 Z" fill="#1E3348" stroke="#2A4560" strokeWidth="1"/>
+            <path d="M85 65 L100 40 L115 65 Z" fill="#E8F0F8" opacity=".3"/>
+            <circle cx="50" cy="165" r="8" fill="#4ABA78"/><text x="50" y="168" textAnchor="middle" fontSize="8" fill="#fff" fontWeight="700">1</text>
+            <circle cx="75" cy="130" r="8" fill="#3AA8A0"/><text x="75" y="133" textAnchor="middle" fontSize="8" fill="#fff" fontWeight="700">2</text>
+            <circle cx="110" cy="110" r="8" fill="#D4A55A"/><text x="110" y="113" textAnchor="middle" fontSize="8" fill="#fff" fontWeight="700">3</text>
+            <circle cx="130" cy="80" r="8" fill="#4A90D9"/><text x="130" y="83" textAnchor="middle" fontSize="8" fill="#fff" fontWeight="700">4</text>
+            <circle cx="100" cy="52" r="10" fill="#FFD700" stroke="#FFE8A8" strokeWidth="1.5"/><text x="100" y="56" textAnchor="middle" fontSize="8" fill="#5D4E37" fontWeight="700">★</text>
+            <path d="M50 165 L75 130 L110 110 L130 80 L100 52" fill="none" stroke="#D4A55A" strokeWidth="1.5" strokeDasharray="4 3" opacity=".5"/>
+          </svg>
+        </div>
+      ),
+    },
+    {
+      title:"Meet Lumi, Your Guide",
+      desc:"Lumi is your AI companion on this journey. Tap 'Ask Lumi' in any lesson to get personalized explanations, ask questions, and get instant answers — like having a private tutor.",
+      visual:(
+        <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:8}}>
+          <Lumi size={100} mood="excited" level={3} animate/>
+          <div style={{display:"flex",gap:16,marginTop:8}}>
+            <div style={{textAlign:"center"}}><Lumi size={40} mood="happy" level={1}/><p style={{color:C.textDim,fontSize:9,fontFamily:C.font,margin:"4px 0 0"}}>Beginner</p></div>
+            <div style={{textAlign:"center"}}><Lumi size={40} mood="happy" level={3}/><p style={{color:C.textDim,fontSize:9,fontFamily:C.font,margin:"4px 0 0"}}>Level 3</p></div>
+            <div style={{textAlign:"center"}}><Lumi size={40} mood="excited" level={5}/><p style={{color:C.textDim,fontSize:9,fontFamily:C.font,margin:"4px 0 0"}}>Level 5</p></div>
+          </div>
+          <p style={{color:C.textDim,fontSize:11,fontFamily:C.font,marginTop:4}}>Lumi evolves as you level up!</p>
+        </div>
+      ),
+    },
+    {
+      title:"Learn, Practice, Prove It",
+      desc:"Each lesson has three phases: read the content, ask Lumi questions, then prove your understanding in practice mode. Score 70% or higher to earn your Altitude Rating and unlock the next lesson.",
+      visual:(
+        <div style={{display:"flex",flexDirection:"column",gap:10,maxWidth:240,margin:"0 auto"}}>
+          <div style={{display:"flex",alignItems:"center",gap:10,background:"rgba(74,186,120,.08)",borderRadius:12,padding:"10px 14px",border:"1px solid rgba(74,186,120,.15)"}}>
+            <span style={{fontSize:20}}>📖</span><div><p style={{color:C.text,fontSize:13,fontWeight:700,fontFamily:C.font,margin:0}}>Read</p><p style={{color:C.textDim,fontSize:10,fontFamily:C.font,margin:0}}>Learn the concepts</p></div>
+          </div>
+          <div style={{display:"flex",alignItems:"center",gap:10,background:"rgba(212,165,90,.08)",borderRadius:12,padding:"10px 14px",border:"1px solid rgba(212,165,90,.15)"}}>
+            <span style={{fontSize:20}}>💬</span><div><p style={{color:C.text,fontSize:13,fontWeight:700,fontFamily:C.font,margin:0}}>Ask Lumi</p><p style={{color:C.textDim,fontSize:10,fontFamily:C.font,margin:0}}>Get instant help</p></div>
+          </div>
+          <div style={{display:"flex",alignItems:"center",gap:10,background:"rgba(58,168,160,.08)",borderRadius:12,padding:"10px 14px",border:"1px solid rgba(58,168,160,.15)"}}>
+            <span style={{fontSize:20}}>✍️</span><div><p style={{color:C.text,fontSize:13,fontWeight:700,fontFamily:C.font,margin:0}}>Practice</p><p style={{color:C.textDim,fontSize:10,fontFamily:C.font,margin:0}}>Prove your skills</p></div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      title:"Earn Your Altitude",
+      desc:"Your practice score earns an Altitude Rating. Push for Summit to show true mastery — or retry anytime to improve your rating.",
+      visual:(
+        <div style={{display:"flex",flexDirection:"column",gap:8,maxWidth:220,margin:"0 auto"}}>
+          {[{icon:"🏔️",label:"Summit",pct:"90%+",color:"#FFD700",bg:"rgba(255,215,0,.1)"},{icon:"⛰️",label:"Ridge",pct:"70-89%",color:"#4ABA78",bg:"rgba(74,186,120,.08)"},{icon:"◈",label:"Treeline",pct:"50-69%",color:"#E8B84B",bg:"rgba(232,184,75,.06)"},{icon:"△",label:"Base Camp",pct:"<50%",color:"#C87858",bg:"rgba(200,120,88,.06)"}].map((r,i)=>(
+            <div key={i} style={{display:"flex",alignItems:"center",gap:10,background:r.bg,borderRadius:10,padding:"8px 12px"}}>
+              <span style={{fontSize:18,width:28,textAlign:"center"}}>{r.icon}</span>
+              <div style={{flex:1}}><span style={{color:r.color,fontSize:13,fontWeight:700,fontFamily:C.font}}>{r.label}</span></div>
+              <span style={{color:C.textDim,fontSize:11,fontFamily:C.font}}>{r.pct}</span>
+            </div>
+          ))}
+        </div>
+      ),
+    },
+    {
+      title:"Stay Sharp Every Day",
+      desc:"Complete Daily Challenges to keep your streak alive, read today's AI News simplified by Lumi, and use 6 AI Tools to practice real-world skills. You've got everything you need.",
+      visual:(
+        <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap",maxWidth:280,margin:"0 auto"}}>
+          {[{icon:<Icon type="challenge" size={28} color="#F0A878"/>,label:"Daily Challenge",bg:"rgba(232,128,96,.08)"},{icon:<Icon type="news" size={28} color="#E8C878"/>,label:"AI News",bg:"rgba(212,165,90,.06)"},{icon:<Icon type="tools" size={28} color="#68D8C8"/>,label:"6 AI Tools",bg:"rgba(58,168,160,.06)"}].map((f,i)=>(
+            <div key={i} style={{background:f.bg,borderRadius:14,padding:"14px 18px",textAlign:"center",width:80}}>
+              <div style={{marginBottom:6}}>{f.icon}</div>
+              <p style={{color:C.textMuted,fontSize:10,fontFamily:C.font,margin:0}}>{f.label}</p>
+            </div>
+          ))}
+        </div>
+      ),
+    },
+  ];
+  const s=slides[step];
+  const isLast=step===slides.length-1;
+  return(
+    <div style={{height:"100vh",background:`linear-gradient(180deg,${C.skyTop},${C.skyMid} 60%,${C.bgDark})`,display:"flex",flexDirection:"column",position:"relative",overflow:"hidden"}}>
+      <Stars/>
+      {/* Progress dots */}
+      <div style={{display:"flex",gap:6,justifyContent:"center",padding:"20px 0 0",position:"relative",zIndex:10}}>
+        {slides.map((_,i)=><div key={i} style={{width:i===step?24:8,height:8,borderRadius:4,background:i<=step?C.gold:"rgba(255,255,255,.1)",transition:"all .4s"}}/>)}
+      </div>
+      {/* Skip */}
+      {!isLast&&<button onClick={onComplete} style={{position:"absolute",top:20,right:20,background:"none",border:"none",color:C.textDim,fontSize:13,fontFamily:C.font,zIndex:10}}>Skip</button>}
+      {/* Content */}
+      <div className="fu" key={step} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"20px 30px",position:"relative",zIndex:5}}>
+        <div style={{marginBottom:24}}>{s.visual}</div>
+        <h2 style={{color:C.text,fontSize:24,fontFamily:C.fontDisplay,fontWeight:700,textAlign:"center",margin:"0 0 10px"}}>{s.title}</h2>
+        <p style={{color:C.textMuted,fontSize:14,fontFamily:C.font,textAlign:"center",lineHeight:1.7,maxWidth:320,margin:0}}>{s.desc}</p>
+      </div>
+      {/* Navigation */}
+      <div style={{padding:"0 24px 30px",position:"relative",zIndex:10,paddingBottom:"max(30px,env(safe-area-inset-bottom))"}}>
+        <Btn v={isLast?"gold":"teal"} onClick={()=>{
+          try{SFX.play("click")}catch(e){}
+          if(isLast){onComplete()}else{setStep(step+1)}
+        }}>
+          {isLast?"Start My Journey →":"Next"}
+        </Btn>
+        {step>0&&!isLast&&<button onClick={()=>setStep(step-1)} style={{display:"block",width:"100%",background:"none",border:"none",color:C.textDim,fontSize:13,fontFamily:C.font,marginTop:12,textAlign:"center"}}>← Back</button>}
+      </div>
+    </div>
+  );
+};
+
 // MAIN APP
 export default function AIFluent(){
   const [loading,setLoading]=useState(true);const [user,setUser]=useState(null);const [profile,setProfile]=useState(null);const [progress,setProgress]=useState([]);
   const [screen,setScreen]=useState("map");const [activeLoc,setActiveLoc]=useState(null);
+  const [showTutorial,setShowTutorial]=useState(()=>!localStorage.getItem("ai_fluent_tutorial_seen"));
 
   useEffect(()=>{
     // Failsafe: if loading takes more than 5 seconds, force it to stop
@@ -799,6 +915,7 @@ export default function AIFluent(){
   if(loading)return<><style>{css}</style><div onClick={()=>setLoading(false)} style={{height:"100vh",background:`linear-gradient(180deg,${C.skyTop},${C.skyMid})`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",position:"relative",cursor:"pointer"}}><Stars/><Lumi size={56} mood="happy" level={1} animate/><p style={{color:C.textMuted,fontSize:14,fontFamily:"'Nunito',sans-serif",marginTop:14}}>Loading AI Fluent...</p><p style={{color:C.textDim,fontSize:11,fontFamily:"'Nunito',sans-serif",marginTop:20}}>Tap anywhere if stuck</p></div></>;
   if(!user)return<><style>{css}</style><AuthScreen/></>;
   if(profile&&!profile.onboarded)return<><style>{css}</style><Onboarding uid={user.id} onDone={refresh}/></>;
+  if(showTutorial&&user)return<><style>{css}</style><Tutorial onComplete={()=>{localStorage.setItem("ai_fluent_tutorial_seen","1");setShowTutorial(false)}}/></>;
   if(screen==="location"&&activeLoc)return<><style>{css}</style><LocView locId={activeLoc} uid={user.id} progress={progress} onBack={goMap} onComplete={refresh}/></>;
   if(screen==="news")return<><style>{css}</style><NewsView uid={user.id} onBack={goMap}/></>;
   if(screen==="tools")return<><style>{css}</style><ToolsView uid={user.id} onBack={goMap}/></>;
