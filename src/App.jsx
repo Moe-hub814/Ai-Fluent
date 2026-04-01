@@ -493,7 +493,7 @@ const LocView = ({locId,uid,progress,onBack,onComplete}) => {
     </div>}
     {submitted&&<div style={{marginTop:14}}>
       {practiceIdx<practice.length-1?<Btn v="teal" onClick={()=>{setPracticeIdx(practiceIdx+1);setSelected(null);setSubmitted(false);setFreeAns("");setFeedback("")}}>Next Question →</Btn>
-      :<Btn v="gold" onClick={()=>{const pct=totalPossible>0?Math.round((practiceScore/(totalPossible+10))*100):0;SFX.play(pct>=70?"triumph":pct>=50?"sparkle":"fail");setShowResults(true)}}>See My Results →</Btn>}
+      :<Btn v="gold" onClick={()=>{const p=totalPossible>0?Math.round((practiceScore/totalPossible)*100):0;try{SFX.play(p>=70?"triumph":p>=50?"sparkle":"fail")}catch(e){}setShowResults(true)}}>See My Results →</Btn>}
     </div>}
   </div>);
 
@@ -506,14 +506,10 @@ const LocView = ({locId,uid,progress,onBack,onComplete}) => {
     return(<div style={{height:"100vh",overflowY:"auto",background:`linear-gradient(180deg,${C.bgDark},${C.bgCard})`,padding:"20px",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
       {passed&&<Confetti/>}
       <div className="fu" style={{textAlign:"center",maxWidth:340}}>
-        {/* Lumi Reaction */}
         <LumiReaction rating={ratingKey} size={120}/>
-
         <p style={{color:alt.color,fontSize:14,fontWeight:700,fontFamily:C.font,textTransform:"uppercase",letterSpacing:2,margin:"0 0 4px"}}>{alt.label} Rating</p>
         <p style={{color:C.text,fontSize:48,fontWeight:800,fontFamily:C.fontDisplay,margin:"0 0 8px"}}>{pct}%</p>
         <p style={{color:C.textMuted,fontSize:14,fontFamily:C.font,lineHeight:1.6,margin:"0 0 24px"}}>{alt.msg}</p>
-
-        {/* Score breakdown */}
         <div style={{background:"rgba(255,255,255,.03)",borderRadius:14,padding:16,marginBottom:20,border:`1px solid ${C.border}`}}>
           <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}>
             <span style={{color:C.textDim,fontSize:13,fontFamily:C.font}}>Points earned</span>
@@ -523,7 +519,6 @@ const LocView = ({locId,uid,progress,onBack,onComplete}) => {
             <div style={{width:`${pct}%`,height:"100%",background:`linear-gradient(90deg,${alt.color},${alt.color}88)`,borderRadius:4,transition:"width .8s ease"}}/>
           </div>
         </div>
-
         {passed?<div style={{display:"flex",flexDirection:"column",gap:8}}>
           <Btn v="green" onClick={async()=>{SFX.play("triumph");saveScore(locId,lessonIdx,pct);try{await db.completeLesson(uid,locId,lessonIdx)}catch(e){console.warn(e)}onComplete();resetPractice();setLessonIdx(null);setView("intro")}}>
             {pct>=90?"🏔️ Claim Summit Rating!":pct>=70?"⛰️ Claim Ridge Rating!":"✦ Complete Lesson"}
