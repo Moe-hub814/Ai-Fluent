@@ -416,7 +416,7 @@ const WorldMap = ({profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfi
 const getAltitude=(pct)=>{
   if(pct>=90)return{label:"Summit",icon:"🏔️",color:"#FFD700",bg:"rgba(255,215,0,.12)",border:"rgba(255,215,0,.25)",msg:"Outstanding! You've mastered this lesson."};
   if(pct>=70)return{label:"Ridge",icon:"⛰️",color:"#4ABA78",bg:"rgba(74,186,120,.1)",border:"rgba(74,186,120,.2)",msg:"Solid understanding. Great work!"};
-  if(pct>=50)return{label:"Treeline",icon:"◈",color:"#E8B84B",bg:"rgba(232,184,75,.08)",border:"rgba(232,184,75,.18)",msg:"Getting there! Consider retrying for a better rating."};
+  if(pct>=50)return{label:"Treeline",icon:"◈",color:"#E8B84B",bg:"rgba(232,184,75,.08)",border:"rgba(232,184,75,.18)",msg:"Almost there! You need 70% to pass. Review and try again."};
   return{label:"Base Camp",icon:"△",color:"#C87858",bg:"rgba(200,120,88,.08)",border:"rgba(200,120,88,.18)",msg:"You need more practice. Review the lesson and try again."};
 };
 
@@ -501,7 +501,7 @@ const LocView = ({locId,uid,progress,onBack,onComplete}) => {
   if(view==="practice"&&showResults){
     const pct=totalPossible>0?Math.round((practiceScore/totalPossible)*100):0;
     const alt=getAltitude(pct);
-    const passed=pct>=50;
+    const passed=pct>=70;
     const ratingKey=pct>=90?"summit":pct>=70?"ridge":pct>=50?"treeline":"base";
     return(<div style={{height:"100vh",overflowY:"auto",background:`linear-gradient(180deg,${C.bgDark},${C.bgCard})`,padding:"20px",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
       {passed&&<Confetti/>}
@@ -520,14 +520,24 @@ const LocView = ({locId,uid,progress,onBack,onComplete}) => {
           </div>
         </div>
         {passed?<div style={{display:"flex",flexDirection:"column",gap:8}}>
-          <Btn v="green" onClick={async()=>{SFX.play("triumph");saveScore(locId,lessonIdx,pct);try{await db.completeLesson(uid,locId,lessonIdx)}catch(e){console.warn(e)}onComplete();resetPractice();setLessonIdx(null);setView("intro")}}>
-            {pct>=90?"🏔️ Claim Summit Rating!":pct>=70?"⛰️ Claim Ridge Rating!":"✦ Complete Lesson"}
+          <Btn v="green" onClick={async()=>{
+            try{SFX.play("triumph")}catch(e){}
+            saveScore(locId,lessonIdx,pct);
+            try{await db.completeLesson(uid,locId,lessonIdx)}catch(e){console.warn(e)}
+            onComplete();
+            // Navigate directly — don't call resetPractice which conflicts
+            setShowResults(false);
+            setLessonIdx(null);
+            setView("intro");
+          }}>
+            {pct>=90?"🏔️ Claim Summit Rating!":"⛰️ Claim Ridge Rating!"}
           </Btn>
-          {pct<90&&<Btn v="ghost" onClick={()=>{setShowResults(false);resetPractice();setView("practice")}}>Retry for a higher rating →</Btn>}
+          {pct<90&&<Btn v="ghost" onClick={()=>{setShowResults(false);setPracticeIdx(0);setSelected(null);setSubmitted(false);setFreeAns("");setFeedback("");setPracticeScore(0);setTotalPossible(0);setView("practice")}}>Retry for a higher rating →</Btn>}
         </div>
         :<div style={{display:"flex",flexDirection:"column",gap:8}}>
-          <Btn v="gold" onClick={()=>{setShowResults(false);resetPractice();setView("practice")}}>Try Again</Btn>
-          <Btn v="ghost" onClick={()=>{setShowResults(false);resetPractice();setView("lesson")}}>← Review the lesson first</Btn>
+          <p style={{color:C.textMuted,fontSize:13,fontFamily:C.font,margin:"0 0 8px"}}>You need 70% or higher to pass this lesson</p>
+          <Btn v="gold" onClick={()=>{setShowResults(false);setPracticeIdx(0);setSelected(null);setSubmitted(false);setFreeAns("");setFeedback("");setPracticeScore(0);setTotalPossible(0);setView("practice")}}>Try Again</Btn>
+          <Btn v="ghost" onClick={()=>{setShowResults(false);setView("lesson")}}>← Review the lesson first</Btn>
         </div>}
       </div>
     </div>);
