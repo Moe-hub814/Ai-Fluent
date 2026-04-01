@@ -214,6 +214,38 @@ const LumiReaction = ({rating,size=100}) => {
   );
 };
 
+// Markdown-lite renderer for AI responses
+const Md = ({text=""}) => {
+  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`|\n)/g).filter(Boolean);
+  return <>{parts.map((p,i) => {
+    if(p==="\n") return <br key={i}/>;
+    if(p.startsWith("**")&&p.endsWith("**")) return <strong key={i} style={{color:C.goldLight,fontWeight:700}}>{p.slice(2,-2)}</strong>;
+    if(p.startsWith("*")&&p.endsWith("*")) return <em key={i} style={{color:C.textMuted}}>{p.slice(1,-1)}</em>;
+    if(p.startsWith("`")&&p.endsWith("`")) return <code key={i} style={{background:"rgba(212,165,90,.1)",padding:"1px 6px",borderRadius:4,fontSize:13,fontFamily:"monospace",color:C.goldLight}}>{p.slice(1,-1)}</code>;
+    return <span key={i}>{p}</span>;
+  })}</>;
+};
+
+// Page transition wrapper
+const PageWrap = ({children,k}) => <div key={k} style={{animation:"fadeUp .35s ease both"}}>{children}</div>;
+
+// Skeleton loading placeholder
+const Skeleton = ({lines=3,style:sx={}}) => (
+  <div style={{padding:16,...sx}}>
+    {Array.from({length:lines},(_,i)=><div key={i} style={{height:14,background:"rgba(255,255,255,.04)",borderRadius:8,marginBottom:10,width:`${85-i*15}%`,animation:"pulse 1.5s ease-in-out infinite"}}/>)}
+  </div>
+);
+
+// Error message component
+const ErrorMsg = ({msg,onRetry}) => (
+  <div className="fu" style={{background:"rgba(200,120,88,.08)",border:"1px solid rgba(200,120,88,.15)",borderRadius:14,padding:16,textAlign:"center",margin:"12px 0"}}>
+    <Lumi size={36} mood="thinking"/>
+    <p style={{color:"#E8A878",fontSize:14,fontWeight:600,fontFamily:C.font,margin:"8px 0 4px"}}>Oops, something went wrong</p>
+    <p style={{color:C.textDim,fontSize:12,fontFamily:C.font,margin:"0 0 10px"}}>{msg||"Check your connection and try again."}</p>
+    {onRetry&&<Btn v="ghost" onClick={onRetry} style={{width:"auto",padding:"8px 20px",fontSize:13}}>Try Again</Btn>}
+  </div>
+);
+
 // CSS
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Quicksand:wght@500;600;700&display=swap');
@@ -227,9 +259,12 @@ const css = `
   @keyframes pop{0%{transform:scale(.92);opacity:0}100%{transform:scale(1);opacity:1}}
   @keyframes confetti{0%{transform:translateY(0) rotate(0);opacity:1}100%{transform:translateY(-80px) rotate(360deg);opacity:0}}
   @keyframes celebrate{0%,100%{transform:scale(1) rotate(0deg)}25%{transform:scale(1.1) rotate(-5deg)}50%{transform:scale(1.15) rotate(0deg)}75%{transform:scale(1.1) rotate(5deg)}}
+  @keyframes pulse{0%,100%{opacity:.04}50%{opacity:.08}}
+  @keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
   .fu{animation:fadeUp .4s ease both}.fi{animation:fadeIn .3s ease both}.pop{animation:pop .3s ease both}
   .s1{animation-delay:.05s}.s2{animation-delay:.1s}.s3{animation-delay:.15s}.s4{animation-delay:.2s}.s5{animation-delay:.25s}
   button{transition:all .15s ease;cursor:pointer}button:active{transform:scale(.97)}
+  @media(max-width:420px){html{font-size:14px}}
 `;
 
 const Btn = ({children,onClick,v="gold",disabled,style:sx={}}) => {
@@ -237,7 +272,7 @@ const Btn = ({children,onClick,v="gold",disabled,style:sx={}}) => {
   return <button disabled={disabled} onClick={onClick} style={{padding:"13px 24px",borderRadius:14,fontSize:15,fontWeight:700,fontFamily:C.font,opacity:disabled?.5:1,width:"100%",...st[v],...sx}}>{children}</button>;
 };
 const Dots = () => {const[f,sF]=useState(0);useEffect(()=>{const i=setInterval(()=>sF(n=>(n+1)%4),400);return()=>clearInterval(i)},[]);return<div style={{display:"flex",gap:5,padding:"10px 0"}}>{[0,1,2].map(i=><div key={i} style={{width:6,height:6,borderRadius:"50%",background:C.gold,opacity:f>i?.8:.2,transition:"opacity .3s"}}/>)}</div>};
-const Bub = ({from,text,typing}) => <div className="fu" style={{display:"flex",justifyContent:from==="user"?"flex-end":"flex-start",gap:8,marginBottom:12}}>{from==="lumi"&&!typing&&<div style={{marginTop:4}}><Lumi size={26}/></div>}<div style={{maxWidth:"82%",padding:"11px 15px",borderRadius:from==="user"?"16px 16px 4px 16px":"16px 16px 16px 4px",background:from==="user"?"rgba(58,168,160,.12)":"rgba(212,165,90,.08)",border:`1px solid ${from==="user"?"rgba(58,168,160,.2)":C.borderGold}`}}>{typing?<Dots/>:<p style={{color:C.text,fontSize:14,lineHeight:1.6,fontFamily:C.font,whiteSpace:"pre-wrap",margin:0}}>{text}</p>}</div></div>;
+const Bub = ({from,text,typing}) => <div className="fu" style={{display:"flex",justifyContent:from==="user"?"flex-end":"flex-start",gap:8,marginBottom:12}}>{from==="lumi"&&!typing&&<div style={{marginTop:4,flexShrink:0}}><Lumi size={26}/></div>}<div style={{maxWidth:"82%",padding:"11px 15px",borderRadius:from==="user"?"16px 16px 4px 16px":"16px 16px 16px 4px",background:from==="user"?"rgba(58,168,160,.12)":"rgba(212,165,90,.08)",border:`1px solid ${from==="user"?"rgba(58,168,160,.2)":C.borderGold}`}}>{typing?<Dots/>:<p style={{color:C.text,fontSize:14,lineHeight:1.7,fontFamily:C.font,margin:0}}>{from==="lumi"?<Md text={text}/>:text}</p>}</div></div>;
 const Stars = () => <div style={{position:"absolute",inset:0,overflow:"hidden",pointerEvents:"none"}}>{Array.from({length:50},(_,i)=><div key={i} style={{position:"absolute",left:`${Math.random()*100}%`,top:`${Math.random()*50}%`,width:Math.random()>.8?2.5:1.5,height:Math.random()>.8?2.5:1.5,background:"#fff",borderRadius:"50%",opacity:.1+Math.random()*.3,animation:`twinkle ${3+Math.random()*4}s ease-in-out infinite`,animationDelay:`${Math.random()*4}s`}}/>)}</div>;
 
 // Confetti component
@@ -448,7 +483,7 @@ const LocView = ({locId,uid,progress,onBack,onComplete}) => {
   const ask=async(q)=>{setMsgs(m=>[...m,{from:"user",text:q}]);setTyping(true);
     try{const r=await db.callClaude({feature:"tutor",system:`You are Lumi, a knowledgeable warm AI guide in "AI Fluent" at "${loc.name}" teaching "${lesson?.title}". Clear, simple language. Encouraging, not condescending. Everyday analogies. Under 180 words.`,messages:[...msgs.map(m=>({role:m.from==="user"?"user":"assistant",content:m.text})),{role:"user",content:q}],session_id:sid,context_type:"tutor",context_id:locId,context_title:lesson?.title});
       setSid(r.session_id||sid);setTyping(false);setMsgs(m=>[...m,{from:"lumi",text:r.text}]);
-    }catch{setTyping(false);setMsgs(m=>[...m,{from:"lumi",text:"Connection dropped — try again."}])}};
+    }catch(e){setTyping(false);setMsgs(m=>[...m,{from:"lumi",text:"Hmm, I lost my connection for a moment. Could you try asking that again? 🌟"}])}};
   const send=()=>{if(inp.trim()){ask(inp.trim());setInp("")}};
 
   const practice=lesson?.practice||[];
@@ -489,7 +524,7 @@ const LocView = ({locId,uid,progress,onBack,onComplete}) => {
       {currentP.hint&&!submitted&&<div className="fu" style={{background:"rgba(212,165,90,.04)",border:`1px solid ${C.borderGold}`,borderRadius:12,padding:10,marginBottom:12}}><p style={{color:C.gold,fontSize:12,fontFamily:C.font,margin:0}}>💡 Hint: {currentP.hint}</p></div>}
       <textarea value={freeAns} onChange={e=>setFreeAns(e.target.value)} placeholder="Type your answer..." disabled={submitted} style={{width:"100%",minHeight:120,background:"rgba(255,255,255,.03)",borderRadius:14,border:`1px solid ${C.border}`,padding:14,color:C.text,fontSize:14,fontFamily:C.font,outline:"none",resize:"vertical",marginBottom:10}}/>
       {!submitted&&<Btn onClick={gradeFreeResponse} disabled={!freeAns.trim()||grading}>{grading?"Lumi is reviewing...":"Submit for Review"}</Btn>}
-      {submitted&&feedback&&<div className="fu" style={{background:"rgba(212,165,90,.06)",border:`1px solid ${C.borderGold}`,borderRadius:14,padding:14,marginTop:10}}><div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}><Lumi size={22}/><span style={{color:C.goldLight,fontSize:13,fontWeight:700,fontFamily:C.font}}>Lumi's feedback</span></div><p style={{color:C.textMuted,fontSize:13,lineHeight:1.65,fontFamily:C.font,margin:0,whiteSpace:"pre-wrap"}}>{feedback}</p></div>}
+      {submitted&&feedback&&<div className="fu" style={{background:"rgba(212,165,90,.06)",border:`1px solid ${C.borderGold}`,borderRadius:14,padding:14,marginTop:10}}><div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}><Lumi size={22}/><span style={{color:C.goldLight,fontSize:13,fontWeight:700,fontFamily:C.font}}>Lumi's feedback</span></div><p style={{color:C.textMuted,fontSize:13,lineHeight:1.65,fontFamily:C.font,margin:0}}><Md text={feedback}/></p></div>}
     </div>}
     {submitted&&<div style={{marginTop:14}}>
       {practiceIdx<practice.length-1?<Btn v="teal" onClick={()=>{setPracticeIdx(practiceIdx+1);setSelected(null);setSubmitted(false);setFreeAns("");setFeedback("")}}>Next Question →</Btn>
@@ -676,7 +711,10 @@ const NewsView = ({uid,onBack}) => {
     <button onClick={onBack} style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700,marginBottom:16}}>← Map</button>
     <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:4}}><h1 style={{color:C.text,fontSize:24,fontFamily:C.fontDisplay,fontWeight:700}}>AI News</h1><div style={{display:"flex",alignItems:"center",gap:4}}><div style={{width:6,height:6,borderRadius:"50%",background:C.green,animation:"twinkle 2s infinite"}}/><span style={{color:C.green,fontSize:11,fontFamily:C.font,fontWeight:600}}>Live</span></div></div>
     <p style={{color:C.textDim,fontSize:13,fontFamily:C.font,marginBottom:18}}>Today's AI stories, simplified by Lumi</p>
-    {loading?<div style={{display:"flex",flexDirection:"column",alignItems:"center",padding:"40px 0"}}><Lumi size={48} mood="thinking" animate/><p style={{color:C.textMuted,fontSize:13,fontFamily:C.font,marginTop:12}}>Lumi is fetching today's news...</p></div>
+    {loading?<div style={{display:"flex",flexDirection:"column",gap:10}}>
+      {[1,2,3,4].map(i=><div key={i} className={`fu s${i}`} style={{background:C.bgCard,border:`1px solid ${C.border}`,borderRadius:14,padding:16}}><Skeleton lines={2}/></div>)}
+      <p style={{color:C.textDim,fontSize:12,fontFamily:C.font,textAlign:"center",marginTop:8}}>Lumi is searching for today's AI news...</p>
+    </div>
     :<div style={{display:"flex",flexDirection:"column",gap:10}}>{articles.map((n,i)=>(<button key={i} className={`fu s${Math.min(i+1,5)}`} onClick={()=>setOpen(i)} style={{background:C.bgCard,border:`1px solid ${C.border}`,borderRadius:14,padding:14,textAlign:"left",width:"100%"}}>
       <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}><span style={{fontSize:10,color:C.gold,fontWeight:700,fontFamily:C.font,textTransform:"uppercase",letterSpacing:.8}}>{n.category}</span><span style={{color:C.textDim,fontSize:10,fontFamily:C.font}}>{n.timeAgo}</span>{n.source&&<span style={{color:C.textDim,fontSize:10,fontFamily:C.font}}>· {n.source}</span>}</div>
       <p style={{color:C.text,fontSize:14,fontWeight:600,fontFamily:C.font,margin:0,lineHeight:1.4}}>{n.title}</p>
@@ -759,11 +797,74 @@ const ToolsView = ({uid,onBack}) => {
 // PROFILE
 const ProfileView = ({profile,progress,onBack,onSignOut}) => {
   const level=Math.max(1,Math.floor(progress.length/2)+1);
-  return(<div style={{height:"100vh",overflowY:"auto",background:`linear-gradient(180deg,${C.skyTop},${C.bgDark})`,padding:"14px 20px 40px",position:"relative"}}><Stars/><button onClick={onBack} style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700,marginBottom:18,position:"relative",zIndex:1}}>← Map</button>
-    <div className="fu" style={{display:"flex",flexDirection:"column",alignItems:"center",marginBottom:24,position:"relative",zIndex:1}}><Lumi size={72} mood="excited" level={level} animate/><p style={{color:C.text,fontSize:20,fontFamily:C.fontDisplay,fontWeight:700,marginTop:8}}>{profile?.display_name||"Explorer"}</p><p style={{color:C.textDim,fontSize:12,fontFamily:C.font}}>Altitude {level} · {profile?.subscription_tier==="pro"?"Pro":"Free"}</p></div>
-    <div className="fu s1" style={{background:"rgba(212,165,90,.05)",border:`1px solid ${C.borderGold}`,borderRadius:16,padding:16,marginBottom:18,position:"relative",zIndex:1}}><div style={{display:"flex",justifyContent:"space-around"}}>{[{v:profile?.current_streak||0,l:"Streak",e:"🔥"},{v:progress.length,l:"Lessons",e:"⭐"},{v:profile?.total_tutor_sessions||0,l:"Chats",e:"💬"},{v:ACHIEVEMENTS.filter(a=>a.condition(progress,profile)).length,l:"Badges",e:"🏆"}].map((s,i)=><div key={i} style={{textAlign:"center"}}><span style={{fontSize:18}}>{s.e}</span><p style={{color:C.text,fontSize:18,fontWeight:800,fontFamily:C.font,margin:"2px 0 0"}}>{s.v}</p><p style={{color:C.textDim,fontSize:10,fontFamily:C.font}}>{s.l}</p></div>)}</div></div>
-    <div className="fu s2" style={{position:"relative",zIndex:1}}><Btn v="ghost" onClick={onSignOut}>Sign Out</Btn></div>
-    <p className="fu s3" style={{textAlign:"center",color:C.textDim,fontSize:11,fontFamily:C.font,marginTop:20,position:"relative",zIndex:1}}>AI Fluent v3 · Powered by Claude</p>
+  const donePaths=[...new Set(progress.map(p=>p.path_id))];
+  const scores=(() => {try{return JSON.parse(localStorage.getItem("ai_fluent_scores")||"{}")}catch{return{}}})();
+  const summitCount=Object.values(scores).filter(s=>s>=90).length;
+  const ridgeCount=Object.values(scores).filter(s=>s>=70&&s<90).length;
+  const totalScored=Object.keys(scores).length;
+
+  return(<div style={{height:"100vh",overflowY:"auto",background:`linear-gradient(180deg,${C.skyTop},${C.bgDark})`,padding:"14px 20px 40px",position:"relative"}}><Stars/>
+    <button onClick={onBack} style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700,marginBottom:18,position:"relative",zIndex:1}}>← Map</button>
+
+    {/* Profile header */}
+    <div className="fu" style={{display:"flex",flexDirection:"column",alignItems:"center",marginBottom:20,position:"relative",zIndex:1}}>
+      <Lumi size={80} mood="excited" level={level} animate/>
+      <p style={{color:C.text,fontSize:22,fontFamily:C.fontDisplay,fontWeight:700,marginTop:8}}>{profile?.display_name||"Explorer"}</p>
+      <p style={{color:C.textDim,fontSize:12,fontFamily:C.font}}>Altitude {level} · {profile?.role||"Learner"}</p>
+    </div>
+
+    {/* Stats grid */}
+    <div className="fu s1" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16,position:"relative",zIndex:1}}>
+      {[
+        {v:profile?.current_streak||0,l:"Day Streak",icon:"🔥",color:C.gold,bg:"rgba(212,165,90,.06)"},
+        {v:progress.length,l:"Lessons Done",icon:"📖",color:C.teal,bg:"rgba(58,168,160,.06)"},
+        {v:profile?.total_tutor_sessions||0,l:"Lumi Chats",icon:"💬",color:C.blue,bg:"rgba(74,144,217,.06)"},
+        {v:ACHIEVEMENTS.filter(a=>a.condition(progress,profile)).length,l:"Achievements",icon:"🏆",color:C.green,bg:"rgba(74,186,120,.06)"},
+      ].map((s,i)=>(
+        <div key={i} className={`fu s${i+1}`} style={{background:s.bg,border:`1px solid ${s.color}20`,borderRadius:14,padding:"14px 12px",textAlign:"center"}}>
+          <span style={{fontSize:20}}>{s.icon}</span>
+          <p style={{color:C.text,fontSize:22,fontWeight:800,fontFamily:C.font,margin:"4px 0 0"}}>{s.v}</p>
+          <p style={{color:C.textDim,fontSize:10,fontFamily:C.font}}>{s.l}</p>
+        </div>
+      ))}
+    </div>
+
+    {/* Altitude ratings earned */}
+    {totalScored>0&&<div className="fu s2" style={{background:C.bgCard,border:`1px solid ${C.border}`,borderRadius:16,padding:16,marginBottom:16,position:"relative",zIndex:1}}>
+      <p style={{color:C.text,fontSize:14,fontWeight:700,fontFamily:C.font,margin:"0 0 12px"}}>Altitude Ratings Earned</p>
+      <div style={{display:"flex",gap:12,justifyContent:"center"}}>
+        <div style={{textAlign:"center"}}><span style={{fontSize:24}}>🏔️</span><p style={{color:"#FFD700",fontSize:18,fontWeight:800,fontFamily:C.font,margin:"2px 0 0"}}>{summitCount}</p><p style={{color:C.textDim,fontSize:9,fontFamily:C.font}}>Summit</p></div>
+        <div style={{textAlign:"center"}}><span style={{fontSize:24}}>⛰️</span><p style={{color:C.green,fontSize:18,fontWeight:800,fontFamily:C.font,margin:"2px 0 0"}}>{ridgeCount}</p><p style={{color:C.textDim,fontSize:9,fontFamily:C.font}}>Ridge</p></div>
+        <div style={{textAlign:"center"}}><span style={{fontSize:24}}>📊</span><p style={{color:C.teal,fontSize:18,fontWeight:800,fontFamily:C.font,margin:"2px 0 0"}}>{totalScored}</p><p style={{color:C.textDim,fontSize:9,fontFamily:C.font}}>Graded</p></div>
+      </div>
+    </div>}
+
+    {/* Learning paths progress */}
+    <div className="fu s3" style={{background:C.bgCard,border:`1px solid ${C.border}`,borderRadius:16,padding:16,marginBottom:16,position:"relative",zIndex:1}}>
+      <p style={{color:C.text,fontSize:14,fontWeight:700,fontFamily:C.font,margin:"0 0 12px"}}>Learning Paths</p>
+      <div style={{display:"flex",flexDirection:"column",gap:8}}>
+        {LOCS.filter(l=>l.id!=="master").map(loc=>{
+          const lessons=LESSONS[loc.id]||[];
+          const completed=progress.filter(p=>p.path_id===loc.id).length;
+          const pct=lessons.length>0?Math.round(completed/lessons.length*100):0;
+          return(<div key={loc.id} style={{display:"flex",alignItems:"center",gap:10}}>
+            <span style={{fontSize:16,width:24,textAlign:"center"}}>{loc.icon}</span>
+            <div style={{flex:1}}>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
+                <span style={{color:C.textMuted,fontSize:11,fontFamily:C.font}}>{loc.name}</span>
+                <span style={{color:pct===100?C.green:C.textDim,fontSize:10,fontFamily:C.font,fontWeight:600}}>{completed}/{lessons.length}</span>
+              </div>
+              <div style={{height:4,background:"rgba(255,255,255,.06)",borderRadius:2,overflow:"hidden"}}>
+                <div style={{width:`${pct}%`,height:"100%",background:pct===100?C.green:C.gold,borderRadius:2,transition:"width .5s"}}/>
+              </div>
+            </div>
+          </div>);
+        })}
+      </div>
+    </div>
+
+    <div className="fu s4" style={{position:"relative",zIndex:1}}><Btn v="ghost" onClick={onSignOut}>Sign Out</Btn></div>
+    <p className="fu s5" style={{textAlign:"center",color:C.textDim,fontSize:11,fontFamily:C.font,marginTop:16,position:"relative",zIndex:1}}>AI Fluent v5 · Powered by Claude</p>
   </div>);
 };
 
