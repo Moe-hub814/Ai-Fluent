@@ -405,6 +405,128 @@ const StreakCalendar = () => {
   );
 };
 
+// SHARE CARD — generates a canvas-based progress image for social media
+const ShareCard = ({type="progress",data={},onClose}) => {
+  const canvasRef=useRef(null);
+  const [ready,setReady]=useState(false);
+  const [shared,setShared]=useState(false);
+
+  useEffect(()=>{
+    const canvas=canvasRef.current;if(!canvas)return;
+    const ctx=canvas.getContext("2d");
+    const w=1080,h=1080; // Square for Instagram
+    canvas.width=w;canvas.height=h;
+
+    // Background gradient
+    const bg=ctx.createLinearGradient(0,0,0,h);
+    bg.addColorStop(0,"#0B1A2E");bg.addColorStop(0.4,"#132D4A");bg.addColorStop(0.7,"#1E5040");bg.addColorStop(1,"#1E4A35");
+    ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
+
+    // Mountain silhouette
+    ctx.fillStyle="rgba(15,30,48,.6)";
+    ctx.beginPath();ctx.moveTo(0,h);ctx.lineTo(200,350);ctx.lineTo(350,500);ctx.lineTo(540,200);ctx.lineTo(700,450);ctx.lineTo(880,150);ctx.lineTo(w,400);ctx.lineTo(w,h);ctx.fill();
+
+    // Snow caps
+    ctx.fillStyle="rgba(200,220,240,.12)";
+    ctx.beginPath();ctx.moveTo(500,240);ctx.lineTo(540,200);ctx.lineTo(580,240);ctx.fill();
+    ctx.beginPath();ctx.moveTo(840,190);ctx.lineTo(880,150);ctx.lineTo(920,190);ctx.fill();
+
+    // Stars
+    for(let i=0;i<80;i++){
+      ctx.fillStyle=`rgba(255,255,255,${.1+Math.random()*.3})`;
+      ctx.beginPath();ctx.arc(Math.random()*w,Math.random()*h*.5,Math.random()*1.5+.5,0,Math.PI*2);ctx.fill();
+    }
+
+    // Lumi circle (golden orb)
+    const cx=w/2,lumiY=type==="altitude"?240:200;
+    const lumiGrad=ctx.createRadialGradient(cx,lumiY,10,cx,lumiY,70);
+    lumiGrad.addColorStop(0,"#FFFDF5");lumiGrad.addColorStop(0.4,"#FFE8C0");lumiGrad.addColorStop(1,"#D4A55A");
+    ctx.fillStyle=lumiGrad;ctx.beginPath();ctx.arc(cx,lumiY,55,0,Math.PI*2);ctx.fill();
+    // Lumi glow
+    ctx.fillStyle="rgba(255,248,232,.15)";ctx.beginPath();ctx.arc(cx,lumiY,80,0,Math.PI*2);ctx.fill();
+    // Lumi eyes
+    ctx.fillStyle="#5D4E37";ctx.beginPath();ctx.arc(cx-15,lumiY-5,5,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(cx+15,lumiY-5,5,0,Math.PI*2);ctx.fill();
+    // Lumi smile
+    ctx.strokeStyle="#5D4E37";ctx.lineWidth=3;ctx.beginPath();ctx.arc(cx,lumiY+5,15,0.1*Math.PI,0.9*Math.PI);ctx.stroke();
+
+    // Content based on type
+    ctx.textAlign="center";
+
+    if(type==="altitude"){
+      // Altitude rating card
+      const alt=data.altitude||"Ridge";const pct=data.pct||75;const lesson=data.lesson||"";
+      const altColors={Summit:"#FFD700",Ridge:"#4ABA78",Treeline:"#E8B84B","Base Camp":"#C87858"};
+      const altIcons={Summit:"🏔️",Ridge:"⛰️",Treeline:"◈","Base Camp":"△"};
+
+      ctx.font="bold 28px 'Nunito',sans-serif";ctx.fillStyle="rgba(212,165,90,.6)";ctx.fillText("I EARNED",cx,340);
+      ctx.font="bold 72px 'Quicksand',sans-serif";ctx.fillStyle=altColors[alt]||"#D4A55A";ctx.fillText(`${alt.toUpperCase()} RATING`,cx,420);
+      ctx.font="bold 120px 'Quicksand',sans-serif";ctx.fillStyle="#E8EEF4";ctx.fillText(`${pct}%`,cx,560);
+      if(lesson){ctx.font="500 24px 'Nunito',sans-serif";ctx.fillStyle="rgba(138,160,184,.7)";ctx.fillText(lesson,cx,610)}
+    } else {
+      // Progress card
+      const lessons=data.lessons||0;const paths=data.paths||0;const streakVal=data.streak||0;const lvl=data.level||1;
+
+      ctx.font="bold 28px 'Nunito',sans-serif";ctx.fillStyle="rgba(212,165,90,.6)";ctx.fillText("MY AI FLUENT JOURNEY",cx,320);
+      ctx.font="bold 96px 'Quicksand',sans-serif";ctx.fillStyle="#E8EEF4";ctx.fillText(`Level ${lvl}`,cx,440);
+
+      // Stats row
+      const stats=[{v:lessons,l:"Lessons"},{v:paths,l:"Paths"},{v:streakVal,l:"Day Streak"}];
+      const sw=240;const startX=cx-((stats.length-1)*sw)/2;
+      stats.forEach((s,i)=>{
+        const sx=startX+i*sw;
+        ctx.font="bold 56px 'Quicksand',sans-serif";ctx.fillStyle="#D4A55A";ctx.fillText(String(s.v),sx,550);
+        ctx.font="500 22px 'Nunito',sans-serif";ctx.fillStyle="rgba(138,160,184,.6)";ctx.fillText(s.l,sx,585);
+      });
+    }
+
+    // Divider line
+    ctx.strokeStyle="rgba(212,165,90,.2)";ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(w*.2,h-250);ctx.lineTo(w*.8,h-250);ctx.stroke();
+
+    // Branding
+    ctx.font="bold 40px 'Quicksand',sans-serif";ctx.fillStyle="#D4A55A";ctx.fillText("AI Fluent",cx,h-170);
+    ctx.font="500 22px 'Nunito',sans-serif";ctx.fillStyle="rgba(138,160,184,.5)";ctx.fillText("Your climb to AI fluency",cx,h-130);
+
+    // CTA
+    ctx.font="bold 20px 'Nunito',sans-serif";ctx.fillStyle="rgba(212,165,90,.4)";ctx.fillText("Try it free → aifluent.app",cx,h-70);
+
+    setReady(true);
+  },[type,data]);
+
+  const download=()=>{
+    const canvas=canvasRef.current;if(!canvas)return;
+    const link=document.createElement("a");
+    link.download=`ai-fluent-${type}-${Date.now()}.png`;
+    link.href=canvas.toDataURL("image/png");
+    link.click();
+  };
+
+  const share=async()=>{
+    const canvas=canvasRef.current;if(!canvas)return;
+    try{
+      const blob=await new Promise(r=>canvas.toBlob(r,"image/png"));
+      if(navigator.share&&navigator.canShare?.({files:[new File([blob],"ai-fluent.png",{type:"image/png"})]})){
+        await navigator.share({title:"My AI Fluent Progress",text:type==="altitude"?`I earned ${data.altitude} Rating (${data.pct}%) on AI Fluent!`:`I'm Level ${data.level} on AI Fluent with ${data.lessons} lessons completed!`,files:[new File([blob],"ai-fluent.png",{type:"image/png"})]});
+        setShared(true);
+      } else { download() }
+    } catch(e){ download() }
+  };
+
+  return(
+    <div style={{position:"fixed",inset:0,zIndex:200,background:"rgba(6,13,26,.92)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:20}}>
+      <button onClick={onClose} style={{position:"absolute",top:16,right:16,background:"none",border:"none",color:C.textMuted,fontSize:24,zIndex:10}}>✕</button>
+      <canvas ref={canvasRef} style={{width:"100%",maxWidth:340,borderRadius:16,boxShadow:"0 8px 40px rgba(0,0,0,.4)"}}/>
+      <div style={{display:"flex",gap:10,marginTop:20,width:"100%",maxWidth:340}}>
+        <Btn v="gold" onClick={share}>{shared?"Shared!":"Share →"}</Btn>
+        <Btn v="ghost" onClick={download} style={{width:"auto",padding:"13px 20px"}}>💾</Btn>
+      </div>
+      <p style={{color:C.textDim,fontSize:11,fontFamily:C.font,marginTop:12}}>
+        {navigator.share?"Tap Share to post directly":"Image will download to your device"}
+      </p>
+    </div>
+  );
+};
+
 // CSS
 const getCss = () => `
   @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Quicksand:wght@500;600;700&display=swap');
@@ -685,6 +807,7 @@ const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
   const [showConfetti,setShowConfetti]=useState(false);const [practiceScore,setPracticeScore]=useState(0);
   const [totalPossible,setTotalPossible]=useState(0);
   const [showResults,setShowResults]=useState(false);
+  const [showShare,setShowShare]=useState(false);
   // Store scores per lesson: { "basics-0": 85, "writing-1": 70 }
   const [lessonScores,setLessonScores]=useState(()=>{try{return JSON.parse(localStorage.getItem("ai_fluent_scores")||"{}")}catch{return{}}});
   const saveScore=(pathId,li,pct)=>{const k=`${pathId}-${li}`;const ns={...lessonScores,[k]:Math.max(pct,lessonScores[k]||0)};setLessonScores(ns);localStorage.setItem("ai_fluent_scores",JSON.stringify(ns))};
@@ -785,6 +908,8 @@ const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
             {pct>=90?"🏔️ Claim Summit Rating!":"⛰️ Claim Ridge Rating!"}
           </Btn>
           {pct<90&&<Btn v="ghost" onClick={()=>{setShowResults(false);setPracticeIdx(0);setSelected(null);setSubmitted(false);setFreeAns("");setFeedback("");setPracticeScore(0);setTotalPossible(0);setView("practice")}}>Retry for a higher rating →</Btn>}
+          <Btn v="ghost" onClick={()=>setShowShare(true)}>📤 Share My Rating</Btn>
+          {showShare&&<ShareCard type="altitude" data={{altitude:alt.label,pct,lesson:lesson?.title||""}} onClose={()=>setShowShare(false)}/>}
         </div>
         :<div style={{display:"flex",flexDirection:"column",gap:8}}>
           <p style={{color:C.textMuted,fontSize:13,fontFamily:C.font,margin:"0 0 8px"}}>You need 70% or higher to pass this lesson</p>
@@ -1020,6 +1145,7 @@ const ProfileView = ({profile,progress,onBack,onSignOut,onToggleTheme}) => {
   const ridgeCount=Object.values(scores).filter(s=>s>=70&&s<90).length;
   const totalScored=Object.keys(scores).length;
   const streakData=Streak.getData();
+  const [showShare,setShowShare]=useState(false);
 
   return(<div style={{height:"100vh",overflowY:"auto",background:`linear-gradient(180deg,${C.skyTop},${C.bgDark})`,padding:"14px 20px 40px",position:"relative"}}><Stars/>
     <button onClick={onBack} style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700,marginBottom:18,position:"relative",zIndex:1}}>← Map</button>
@@ -1084,7 +1210,13 @@ const ProfileView = ({profile,progress,onBack,onSignOut,onToggleTheme}) => {
       </div>
     </div>
 
-    <div className="fu s4" style={{display:"flex",gap:8,position:"relative",zIndex:1}}>
+    {/* Share progress */}
+    <div className="fu s4" style={{marginBottom:8,position:"relative",zIndex:1}}>
+      <Btn v="gold" onClick={()=>setShowShare(true)}>📤 Share My Progress</Btn>
+    </div>
+    {showShare&&<ShareCard type="progress" data={{lessons:progress.length,paths:donePaths.length,streak:streakData.current||0,level}} onClose={()=>setShowShare(false)}/>}
+
+    <div className="fu s5" style={{display:"flex",gap:8,position:"relative",zIndex:1}}>
       <button onClick={onToggleTheme} style={{flex:1,background:C.mode==="dark"?"rgba(255,255,255,.05)":"rgba(0,0,0,.04)",border:`1px solid ${C.border}`,borderRadius:14,padding:"13px 24px",fontSize:15,fontWeight:700,fontFamily:C.font,color:C.text,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
         {C.mode==="dark"?"☀️ Light Mode":"🌙 Dark Mode"}
       </button>
