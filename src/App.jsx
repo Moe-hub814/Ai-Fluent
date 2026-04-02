@@ -4,21 +4,47 @@ import { db } from "./lib/supabase";
 // AI FLUENT — SUMMIT EDITION v2
 // Live news, practice mode, daily challenges, achievements
 
-const C = {
-  skyTop:"#0B1A2E",skyMid:"#132D4A",skyBot:"#1A4060",
-  mountain:"#1E3348",mountainLight:"#2A4560",snow:"#E8F0F8",
-  trail:"#D4A55A",trailGlow:"#FFE0A0",trailDark:"#8A7040",
-  bgDark:"#0A1420",bgCard:"#0F1E30",bgCardLight:"#142838",
-  border:"rgba(255,255,255,0.07)",borderGold:"rgba(212,165,90,0.3)",
-  text:"#E8EEF4",textMuted:"#8AA0B8",textDim:"#506878",
-  gold:"#D4A55A",goldLight:"#FFE8C0",goldDark:"#A07830",
-  green:"#4ABA78",greenDark:"#2A8A50",greenLight:"#D0F0E0",
-  teal:"#3AA8A0",tealLight:"#C0F0F0",
-  blue:"#4A90D9",blueLight:"#C0D8F0",
-  purple:"#7A6BBF",purpleLight:"#C0B0E8",
-  red:"#D85858",coral:"#E88060",
-  font:"'Nunito',sans-serif",fontDisplay:"'Quicksand',sans-serif",
+// THEME SYSTEM
+const THEMES = {
+  dark: {
+    skyTop:"#0B1A2E",skyMid:"#132D4A",skyBot:"#1A4060",
+    mountain:"#1E3348",mountainLight:"#2A4560",snow:"#E8F0F8",
+    trail:"#D4A55A",trailGlow:"#FFE0A0",trailDark:"#8A7040",
+    bgDark:"#0A1420",bgCard:"#0F1E30",bgCardLight:"#142838",
+    border:"rgba(255,255,255,0.07)",borderGold:"rgba(212,165,90,0.3)",
+    text:"#E8EEF4",textMuted:"#8AA0B8",textDim:"#506878",
+    gold:"#D4A55A",goldLight:"#FFE8C0",goldDark:"#A07830",
+    green:"#4ABA78",greenDark:"#2A8A50",greenLight:"#D0F0E0",
+    teal:"#3AA8A0",tealLight:"#C0F0F0",
+    blue:"#4A90D9",blueLight:"#C0D8F0",
+    purple:"#7A6BBF",purpleLight:"#C0B0E8",
+    red:"#D85858",coral:"#E88060",
+    font:"'Nunito',sans-serif",fontDisplay:"'Quicksand',sans-serif",
+    mode:"dark",
+  },
+  light: {
+    skyTop:"#E8F0F8",skyMid:"#D0E0F0",skyBot:"#B8D0E8",
+    mountain:"#C0D0E0",mountainLight:"#D0DCE8",snow:"#FFFFFF",
+    trail:"#B8903A",trailGlow:"#D4A55A",trailDark:"#8A7040",
+    bgDark:"#F0F4F8",bgCard:"#FFFFFF",bgCardLight:"#F8FAFC",
+    border:"rgba(0,0,0,0.08)",borderGold:"rgba(180,130,50,0.25)",
+    text:"#1A2A3A",textMuted:"#4A6070",textDim:"#8098A8",
+    gold:"#B8903A",goldLight:"#8A6A2A",goldDark:"#6A5020",
+    green:"#2A8A50",greenDark:"#1A6A38",greenLight:"#D0F0E0",
+    teal:"#2A8880",tealLight:"#C0F0F0",
+    blue:"#3070B8",blueLight:"#C0D8F0",
+    purple:"#5A4B9F",purpleLight:"#C0B0E8",
+    red:"#C04040",coral:"#D06848",
+    font:"'Nunito',sans-serif",fontDisplay:"'Quicksand',sans-serif",
+    mode:"light",
+  }
 };
+
+// Theme state — persisted in localStorage
+let _theme = localStorage.getItem("ai_fluent_theme") || "dark";
+let C = {...THEMES[_theme]};
+const setTheme = (t) => { _theme = t; C = {...THEMES[t]}; localStorage.setItem("ai_fluent_theme", t) };
+const getTheme = () => _theme;
 
 const Lumi = ({size=40,level=1,mood="happy",animate=false}) => {
   const s=size;const glow=Math.min(0.2+level*0.05,0.5);const ir=Math.min(16+level,22);
@@ -380,11 +406,11 @@ const StreakCalendar = () => {
 };
 
 // CSS
-const css = `
+const getCss = () => `
   @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Quicksand:wght@500;600;700&display=swap');
-  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}body{background:#0A1420;overflow:hidden}
-  ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#2A4060;border-radius:2px}
-  input::placeholder,textarea::placeholder{color:#506878}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}body{background:${C.bgDark};overflow:hidden;transition:background .3s}
+  ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:${C.mode==="dark"?"#2A4060":"#C0D0E0"};border-radius:2px}
+  input::placeholder,textarea::placeholder{color:${C.textDim}}
   @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
   @keyframes fadeIn{from{opacity:0}to{opacity:1}}@keyframes spin{to{transform:rotate(360deg)}}
   @keyframes lumiFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
@@ -400,8 +426,15 @@ const css = `
   @media(max-width:420px){html{font-size:14px}}
 `;
 
+// Theme toggle button
+const ThemeToggle = ({onToggle}) => (
+  <button onClick={onToggle} style={{width:34,height:34,borderRadius:12,background:C.mode==="dark"?"rgba(255,255,255,.06)":"rgba(0,0,0,.04)",border:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:15}}>
+    {C.mode==="dark"?"☀️":"🌙"}
+  </button>
+);
+
 const Btn = ({children,onClick,v="gold",disabled,style:sx={}}) => {
-  const st={gold:{background:`linear-gradient(135deg,${C.gold},${C.goldDark})`,color:"#fff",border:"none",boxShadow:"0 4px 14px rgba(212,165,90,.3)"},ghost:{background:"rgba(255,255,255,.05)",color:C.text,border:`1px solid ${C.border}`},teal:{background:`linear-gradient(135deg,${C.teal},#2A8888)`,color:"#fff",border:"none",boxShadow:"0 4px 14px rgba(58,168,160,.25)"},green:{background:`linear-gradient(135deg,${C.green},${C.greenDark})`,color:"#fff",border:"none",boxShadow:"0 4px 14px rgba(74,186,120,.25)"},red:{background:`linear-gradient(135deg,${C.red},#A83838)`,color:"#fff",border:"none"}};
+  const st={gold:{background:`linear-gradient(135deg,${C.gold},${C.goldDark})`,color:"#fff",border:"none",boxShadow:"0 4px 14px rgba(212,165,90,.3)"},ghost:{background:C.mode==="dark"?"rgba(255,255,255,.05)":"rgba(0,0,0,.04)",color:C.text,border:`1px solid ${C.border}`},teal:{background:`linear-gradient(135deg,${C.teal},#2A8888)`,color:"#fff",border:"none",boxShadow:"0 4px 14px rgba(58,168,160,.25)"},green:{background:`linear-gradient(135deg,${C.green},${C.greenDark})`,color:"#fff",border:"none",boxShadow:"0 4px 14px rgba(74,186,120,.25)"},red:{background:`linear-gradient(135deg,${C.red},#A83838)`,color:"#fff",border:"none"}};
   return <button disabled={disabled} onClick={onClick} style={{padding:"13px 24px",borderRadius:14,fontSize:15,fontWeight:700,fontFamily:C.font,opacity:disabled?.5:1,width:"100%",...st[v],...sx}}>{children}</button>;
 };
 const Dots = () => {const[f,sF]=useState(0);useEffect(()=>{const i=setInterval(()=>sF(n=>(n+1)%4),400);return()=>clearInterval(i)},[]);return<div style={{display:"flex",gap:5,padding:"10px 0"}}>{[0,1,2].map(i=><div key={i} style={{width:6,height:6,borderRadius:"50%",background:C.gold,opacity:f>i?.8:.2,transition:"opacity .3s"}}/>)}</div>};
@@ -450,7 +483,7 @@ const Onboarding = ({uid,onDone}) => {
 };
 
 // WORLD MAP — Premium mountain climbing experience
-const WorldMap = ({profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfile,onOpenChallenge,onOpenAchievements}) => {
+const WorldMap = ({profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfile,onOpenChallenge,onOpenAchievements,onToggleTheme}) => {
   const level=Math.max(1,Math.floor(progress.length/2)+1);const done=[...new Set(progress.map(p=>p.path_id))];
   const status=(loc)=>{if(loc.id==="master")return done.length>=6?"current":"locked";const idx=LOCS.findIndex(l=>l.id===loc.id);if(done.includes(loc.id))return"done";if(idx===0)return"current";const prev=LOCS[idx-1];if(prev&&done.includes(prev.id))return"current";return"locked"};
   const pct=Math.round((done.length/6)*100);
@@ -465,11 +498,11 @@ const WorldMap = ({profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfi
     {loc:LOCS[6],nx:50,ny:16},
   ];
 
-  return(<div style={{height:"100vh",position:"relative",overflow:"hidden",background:"linear-gradient(180deg, #060D1A 0%, #0B1A2E 15%, #132D4A 35%, #1A4060 50%, #1E5040 70%, #2A6A48 85%, #1E4A35 100%)"}}>
-    {/* Stars - only in top half */}
-    <div style={{position:"absolute",top:0,left:0,right:0,height:"50%",overflow:"hidden",pointerEvents:"none"}}>
+  return(<div style={{height:"100vh",position:"relative",overflow:"hidden",background:C.mode==="dark"?"linear-gradient(180deg, #060D1A 0%, #0B1A2E 15%, #132D4A 35%, #1A4060 50%, #1E5040 70%, #2A6A48 85%, #1E4A35 100%)":"linear-gradient(180deg, #E8F0F8 0%, #D0E0F0 15%, #B8D0E8 35%, #A0C0D8 50%, #88B8A0 70%, #78A888 85%, #90C0A0 100%)"}}>
+    {/* Stars - only in dark mode */}
+    {C.mode==="dark"&&<div style={{position:"absolute",top:0,left:0,right:0,height:"50%",overflow:"hidden",pointerEvents:"none"}}>
       {Array.from({length:60},(_,i)=><div key={i} style={{position:"absolute",left:`${Math.random()*100}%`,top:`${Math.random()*100}%`,width:Math.random()>.85?2.5:1.5,height:Math.random()>.85?2.5:1.5,background:"#fff",borderRadius:"50%",opacity:.08+Math.random()*.25,animation:`twinkle ${3+Math.random()*5}s ease-in-out infinite`,animationDelay:`${Math.random()*4}s`}}/>)}
-    </div>
+    </div>}
 
     {/* Moon */}
     <div style={{position:"absolute",top:"8%",right:"12%",width:40,height:40,borderRadius:"50%",background:"radial-gradient(circle at 35% 35%, #F0E8D8 0%, #D8D0C0 50%, #B8B0A0 100%)",opacity:.2,zIndex:1}}/>
@@ -498,7 +531,7 @@ const WorldMap = ({profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfi
     </svg>
 
     {/* Top bar */}
-    <div style={{position:"absolute",top:0,left:0,right:0,padding:"14px 16px",display:"flex",justifyContent:"space-between",alignItems:"center",zIndex:20,background:"linear-gradient(180deg, rgba(6,13,26,.95) 0%, rgba(6,13,26,.7) 60%, transparent 100%)"}}>
+    <div style={{position:"absolute",top:0,left:0,right:0,padding:"14px 16px",display:"flex",justifyContent:"space-between",alignItems:"center",zIndex:20,background:C.mode==="dark"?"linear-gradient(180deg, rgba(6,13,26,.95) 0%, rgba(6,13,26,.7) 60%, transparent 100%)":"linear-gradient(180deg, rgba(232,240,248,.95) 0%, rgba(232,240,248,.7) 60%, transparent 100%)"}}>
       <div style={{display:"flex",alignItems:"center",gap:10}}>
         <Lumi size={32} mood={streak>=7?"excited":"happy"} level={level}/>
         <div>
@@ -509,7 +542,8 @@ const WorldMap = ({profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfi
       <div style={{display:"flex",gap:8,alignItems:"center"}}>
         <div style={{display:"flex",alignItems:"center",gap:4,background:"rgba(212,165,90,.1)",padding:"6px 12px",borderRadius:20,border:"1px solid rgba(212,165,90,.2)"}}><span style={{fontSize:14}}>🔥</span><span style={{color:"#F0C860",fontSize:14,fontWeight:800,fontFamily:C.font}}>{streak}</span></div>
         <button onClick={onOpenAchievements} style={{display:"flex",alignItems:"center",gap:4,background:"rgba(58,168,160,.1)",padding:"6px 12px",borderRadius:20,border:"1px solid rgba(58,168,160,.2)",fontSize:14}}>🏆<span style={{color:"#60D8C8",fontSize:14,fontWeight:800,fontFamily:C.font}}>{ACHIEVEMENTS.filter(a=>a.condition(progress,profile)).length}</span></button>
-        <button onClick={onOpenProfile} style={{width:34,height:34,borderRadius:12,background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.08)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15}}>👤</button>
+        <ThemeToggle onToggle={onToggleTheme}/>
+        <button onClick={onOpenProfile} style={{width:34,height:34,borderRadius:12,background:C.mode==="dark"?"rgba(255,255,255,.06)":"rgba(0,0,0,.04)",border:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:15}}>👤</button>
       </div>
     </div>
 
@@ -934,7 +968,7 @@ const ToolsView = ({uid,onBack}) => {
 };
 
 // PROFILE
-const ProfileView = ({profile,progress,onBack,onSignOut}) => {
+const ProfileView = ({profile,progress,onBack,onSignOut,onToggleTheme}) => {
   const level=Math.max(1,Math.floor(progress.length/2)+1);
   const donePaths=[...new Set(progress.map(p=>p.path_id))];
   const scores=(() => {try{return JSON.parse(localStorage.getItem("ai_fluent_scores")||"{}")}catch{return{}}})();
@@ -1006,7 +1040,12 @@ const ProfileView = ({profile,progress,onBack,onSignOut}) => {
       </div>
     </div>
 
-    <div className="fu s4" style={{position:"relative",zIndex:1}}><Btn v="ghost" onClick={onSignOut}>Sign Out</Btn></div>
+    <div className="fu s4" style={{display:"flex",gap:8,position:"relative",zIndex:1}}>
+      <button onClick={onToggleTheme} style={{flex:1,background:C.mode==="dark"?"rgba(255,255,255,.05)":"rgba(0,0,0,.04)",border:`1px solid ${C.border}`,borderRadius:14,padding:"13px 24px",fontSize:15,fontWeight:700,fontFamily:C.font,color:C.text,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+        {C.mode==="dark"?"☀️ Light Mode":"🌙 Dark Mode"}
+      </button>
+      <button onClick={onSignOut} style={{flex:1,background:C.mode==="dark"?"rgba(255,255,255,.05)":"rgba(0,0,0,.04)",border:`1px solid ${C.border}`,borderRadius:14,padding:"13px 24px",fontSize:15,fontWeight:700,fontFamily:C.font,color:C.textMuted}}>Sign Out</button>
+    </div>
     <p className="fu s5" style={{textAlign:"center",color:C.textDim,fontSize:11,fontFamily:C.font,marginTop:16,position:"relative",zIndex:1}}>AI Fluent v5 · Powered by Claude</p>
   </div>);
 };
@@ -1131,6 +1170,8 @@ export default function AIFluent(){
   const [loading,setLoading]=useState(true);const [user,setUser]=useState(null);const [profile,setProfile]=useState(null);const [progress,setProgress]=useState([]);
   const [screen,setScreen]=useState("map");const [activeLoc,setActiveLoc]=useState(null);
   const [showTutorial,setShowTutorial]=useState(()=>!localStorage.getItem("ai_fluent_tutorial_seen"));
+  const [theme,setThemeState]=useState(()=>getTheme());
+  const toggleTheme=()=>{const nt=theme==="dark"?"light":"dark";setTheme(nt);setThemeState(nt);C={...THEMES[nt]}};
 
   useEffect(()=>{
     // Failsafe: if loading takes more than 5 seconds, force it to stop
@@ -1165,20 +1206,20 @@ export default function AIFluent(){
   // Record streak on initial load if user is active
   useEffect(()=>{if(user) Streak.check()},[user]);
 
-  if(loading)return<><style>{css}</style><div onClick={()=>setLoading(false)} style={{height:"100vh",background:`linear-gradient(180deg,${C.skyTop},${C.skyMid})`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",position:"relative",cursor:"pointer"}}><Stars/><Lumi size={56} mood="happy" level={1} animate/><p style={{color:C.textMuted,fontSize:14,fontFamily:"'Nunito',sans-serif",marginTop:14}}>Loading AI Fluent...</p><p style={{color:C.textDim,fontSize:11,fontFamily:"'Nunito',sans-serif",marginTop:20}}>Tap anywhere if stuck</p></div></>;
-  if(!user)return<><style>{css}</style><AuthScreen/></>;
-  if(profile&&!profile.onboarded)return<><style>{css}</style><Onboarding uid={user.id} onDone={refresh}/></>;
-  if(showTutorial&&user)return<><style>{css}</style><Tutorial onComplete={()=>{localStorage.setItem("ai_fluent_tutorial_seen","1");setShowTutorial(false)}}/></>;
-  if(screen==="location"&&activeLoc)return<><style>{css}</style><LocView locId={activeLoc} uid={user.id} progress={progress} profile={profile} onBack={goMap} onComplete={refresh}/></>;
-  if(screen==="news")return<><style>{css}</style><NewsView uid={user.id} onBack={goMap}/></>;
-  if(screen==="tools")return<><style>{css}</style><ToolsView uid={user.id} onBack={goMap}/></>;
-  if(screen==="challenge")return<><style>{css}</style><ChallengeView uid={user.id} onBack={goMap}/></>;
-  if(screen==="achievements")return<><style>{css}</style><AchievementsView profile={profile} progress={progress} onBack={goMap}/></>;
-  if(screen==="profile")return<><style>{css}</style><ProfileView profile={profile} progress={progress} onBack={goMap} onSignOut={out}/></>;
+  if(loading)return<><style>{getCss()}</style><div onClick={()=>setLoading(false)} style={{height:"100vh",background:`linear-gradient(180deg,${C.skyTop},${C.skyMid})`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",position:"relative",cursor:"pointer"}}><Stars/><Lumi size={56} mood="happy" level={1} animate/><p style={{color:C.textMuted,fontSize:14,fontFamily:"'Nunito',sans-serif",marginTop:14}}>Loading AI Fluent...</p><p style={{color:C.textDim,fontSize:11,fontFamily:"'Nunito',sans-serif",marginTop:20}}>Tap anywhere if stuck</p></div></>;
+  if(!user)return<><style>{getCss()}</style><AuthScreen/></>;
+  if(profile&&!profile.onboarded)return<><style>{getCss()}</style><Onboarding uid={user.id} onDone={refresh}/></>;
+  if(showTutorial&&user)return<><style>{getCss()}</style><Tutorial onComplete={()=>{localStorage.setItem("ai_fluent_tutorial_seen","1");setShowTutorial(false)}}/></>;
+  if(screen==="location"&&activeLoc)return<><style>{getCss()}</style><LocView locId={activeLoc} uid={user.id} progress={progress} profile={profile} onBack={goMap} onComplete={refresh}/></>;
+  if(screen==="news")return<><style>{getCss()}</style><NewsView uid={user.id} onBack={goMap}/></>;
+  if(screen==="tools")return<><style>{getCss()}</style><ToolsView uid={user.id} onBack={goMap}/></>;
+  if(screen==="challenge")return<><style>{getCss()}</style><ChallengeView uid={user.id} onBack={goMap}/></>;
+  if(screen==="achievements")return<><style>{getCss()}</style><AchievementsView profile={profile} progress={progress} onBack={goMap}/></>;
+  if(screen==="profile")return<><style>{getCss()}</style><ProfileView profile={profile} progress={progress} onBack={goMap} onSignOut={out} onToggleTheme={toggleTheme}/></>;
 
-  return<><style>{css}</style>
+  return<><style>{getCss()}</style>
     <MilestoneCheck progress={progress}/>
-    <WorldMap profile={profile} progress={progress}
+    <WorldMap profile={profile} progress={progress} onToggleTheme={toggleTheme}
     onOpenLoc={(id)=>{setActiveLoc(id);setScreen("location")}}
     onOpenNews={()=>setScreen("news")}
     onOpenTools={()=>setScreen("tools")}
