@@ -490,77 +490,109 @@ const WorldMap = ({profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfi
   const greet=()=>{const h=new Date().getHours();return h<12?"Good morning":h<17?"Good afternoon":"Good evening"};
   const streak=Streak.getData().current||profile?.current_streak||0;
   const name=profile?.display_name?.split(" ")[0]||"Climber";
+  const dk=C.mode==="dark";
 
-  // Node positions on the mountain (x%, y% of viewport)
   const nodes=[
     {loc:LOCS[0],nx:22,ny:86},{loc:LOCS[1],nx:42,ny:72},{loc:LOCS[2],nx:68,ny:78},
     {loc:LOCS[3],nx:78,ny:58},{loc:LOCS[4],nx:55,ny:42},{loc:LOCS[5],nx:32,ny:50},
     {loc:LOCS[6],nx:50,ny:16},
   ];
 
-  return(<div style={{height:"100vh",position:"relative",overflow:"hidden",background:C.mode==="dark"?"linear-gradient(180deg, #060D1A 0%, #0B1A2E 15%, #132D4A 35%, #1A4060 50%, #1E5040 70%, #2A6A48 85%, #1E4A35 100%)":"linear-gradient(180deg, #E8F0F8 0%, #D0E0F0 15%, #B8D0E8 35%, #A0C0D8 50%, #88B8A0 70%, #78A888 85%, #90C0A0 100%)"}}>
-    {/* Stars - only in dark mode */}
-    {C.mode==="dark"&&<div style={{position:"absolute",top:0,left:0,right:0,height:"50%",overflow:"hidden",pointerEvents:"none"}}>
-      {Array.from({length:60},(_,i)=><div key={i} style={{position:"absolute",left:`${Math.random()*100}%`,top:`${Math.random()*100}%`,width:Math.random()>.85?2.5:1.5,height:Math.random()>.85?2.5:1.5,background:"#fff",borderRadius:"50%",opacity:.08+Math.random()*.25,animation:`twinkle ${3+Math.random()*5}s ease-in-out infinite`,animationDelay:`${Math.random()*4}s`}}/>)}
+  // Trail colors that work on both themes
+  const trailDone=dk?"rgba(74,186,120,.5)":"rgba(42,138,80,.6)";
+  const trailPending=dk?"rgba(212,165,90,.2)":"rgba(160,120,50,.25)";
+  const trailKnot=dk?"rgba(212,165,90,.25)":"rgba(160,120,50,.3)";
+
+  return(<div style={{height:"100vh",position:"relative",overflow:"hidden",background:dk
+    ?"linear-gradient(180deg, #060D1A 0%, #0B1A2E 12%, #102840 30%, #1A4060 48%, #1A4838 65%, #1E5040 78%, #2A6A48 90%, #1E4A35 100%)"
+    :"linear-gradient(180deg, #D8E8F8 0%, #C0D8F0 12%, #A8C8E0 30%, #90B8D0 48%, #88B8A0 65%, #6AA878 78%, #5A9868 90%, #4A8858 100%)"}}>
+
+    {/* Stars / Clouds depending on theme */}
+    {dk?<div style={{position:"absolute",top:0,left:0,right:0,height:"45%",overflow:"hidden",pointerEvents:"none"}}>
+      {Array.from({length:50},(_,i)=><div key={i} style={{position:"absolute",left:`${Math.random()*100}%`,top:`${Math.random()*100}%`,width:Math.random()>.85?2:1.5,height:Math.random()>.85?2:1.5,background:"#fff",borderRadius:"50%",opacity:.1+Math.random()*.3,animation:`twinkle ${3+Math.random()*5}s ease-in-out infinite`,animationDelay:`${Math.random()*4}s`}}/>)}
+    </div>
+    :<div style={{position:"absolute",top:0,left:0,right:0,height:"40%",overflow:"hidden",pointerEvents:"none"}}>
+      {[{x:15,y:8,w:80,h:20},{x:65,y:5,w:100,h:24},{x:40,y:15,w:60,h:16},{x:85,y:12,w:70,h:18}].map((c,i)=>
+        <div key={i} style={{position:"absolute",left:`${c.x}%`,top:`${c.y}%`,width:c.w,height:c.h,borderRadius:c.h,background:"rgba(255,255,255,.5)",filter:"blur(8px)",animation:`lumiFloat ${6+i*2}s ease-in-out infinite`,animationDelay:`${i*1.5}s`}}/>
+      )}
     </div>}
 
-    {/* Moon */}
-    <div style={{position:"absolute",top:"8%",right:"12%",width:40,height:40,borderRadius:"50%",background:"radial-gradient(circle at 35% 35%, #F0E8D8 0%, #D8D0C0 50%, #B8B0A0 100%)",opacity:.2,zIndex:1}}/>
+    {/* Sun (light) or Moon (dark) */}
+    <div style={{position:"absolute",top:dk?"8%":"6%",right:dk?"12%":"10%",width:dk?36:50,height:dk?36:50,borderRadius:"50%",
+      background:dk?"radial-gradient(circle at 35% 35%, #F0E8D8, #B8B0A0)":"radial-gradient(circle at 45% 40%, #FFF8E0, #FFE090, #FFD060)",
+      opacity:dk?.15:1,zIndex:1,
+      boxShadow:dk?"none":"0 0 40px rgba(255,210,80,.3), 0 0 80px rgba(255,210,80,.15)"}}/>
 
-    {/* Mountain layers - parallax depth */}
-    <svg viewBox="0 0 400 300" preserveAspectRatio="none" style={{position:"absolute",top:"25%",left:0,width:"100%",height:"45%",zIndex:1}}>
-      {/* Far mountains */}
-      <path d="M-20 300 L60 100 L100 160 L160 40 L220 130 L280 20 L340 110 L420 300 Z" fill="#0F2030" opacity=".6"/>
-      {/* Snow caps on far mountains */}
-      <path d="M145 65 L160 40 L175 65 Z" fill="#C0D0E0" opacity=".12"/>
-      <path d="M265 48 L280 20 L295 48 Z" fill="#C0D0E0" opacity=".15"/>
-      {/* Mid mountains */}
-      <path d="M-20 300 L40 150 L90 200 L150 80 L200 170 L260 60 L310 160 L380 120 L420 300 Z" fill="#142838" opacity=".5"/>
-      {/* Snow on mid */}
-      <path d="M140 105 L150 80 L160 105 Z" fill="#D0DCE8" opacity=".1"/>
-      <path d="M250 85 L260 60 L270 85 Z" fill="#D0DCE8" opacity=".12"/>
+    {/* Mountain range - theme aware */}
+    <svg viewBox="0 0 400 300" preserveAspectRatio="none" style={{position:"absolute",top:"22%",left:0,width:"100%",height:"48%",zIndex:1}}>
+      {/* Far range */}
+      <path d="M-20 300 L50 110 L90 160 L150 50 L210 140 L270 30 L330 120 L420 300 Z" fill={dk?"#0F1E30":"#6A7888"} opacity={dk?".7":".3"}/>
+      <path d="M135 75 L150 50 L165 75 Z" fill={dk?"#C0D0E0":"#E8F0F8"} opacity={dk?".15":".4"}/>
+      <path d="M255 55 L270 30 L285 55 Z" fill={dk?"#C0D0E0":"#E8F0F8"} opacity={dk?".18":".5"}/>
+      {/* Near range */}
+      <path d="M-20 300 L30 160 L80 210 L140 90 L190 180 L250 70 L300 170 L370 130 L420 300 Z" fill={dk?"#142838":"#5A6878"} opacity={dk?".6":".25"}/>
+      <path d="M130 115 L140 90 L150 115 Z" fill={dk?"#D0DCE8":"#F0F4F8"} opacity={dk?".12":".5"}/>
+      <path d="M240 95 L250 70 L260 95 Z" fill={dk?"#D0DCE8":"#F0F4F8"} opacity={dk?".14":".55"}/>
     </svg>
 
-    {/* Atmospheric fog bands */}
-    <div style={{position:"absolute",top:"38%",left:0,right:0,height:80,background:"linear-gradient(180deg, transparent 0%, rgba(180,210,230,.04) 40%, rgba(180,210,230,.06) 50%, rgba(180,210,230,.04) 60%, transparent 100%)",zIndex:2}}/>
-    <div style={{position:"absolute",top:"55%",left:0,right:0,height:50,background:"linear-gradient(180deg, transparent, rgba(150,200,180,.03), transparent)",zIndex:2}}/>
+    {/* Fog bands */}
+    <div style={{position:"absolute",top:"40%",left:0,right:0,height:60,background:`linear-gradient(180deg, transparent, ${dk?"rgba(180,210,230,.04)":"rgba(255,255,255,.15)"}, transparent)`,zIndex:2}}/>
 
-    {/* Tree silhouettes at bottom */}
-    <svg viewBox="0 0 400 80" preserveAspectRatio="none" style={{position:"absolute",bottom:"8%",left:0,width:"100%",height:"12%",zIndex:2,opacity:.15}}>
-      <path d="M0 80 L10 30 L20 80 M30 80 L42 20 L54 80 M70 80 L78 35 L86 80 M100 80 L115 15 L130 80 M150 80 L158 40 L166 80 M190 80 L200 25 L210 80 M230 80 L240 35 L250 80 M270 80 L285 10 L300 80 M320 80 L328 40 L336 80 M350 80 L365 20 L380 80 M390 80 L398 45 L406 80" fill="#1A3A28" stroke="none"/>
+    {/* Tree silhouettes */}
+    <svg viewBox="0 0 400 80" preserveAspectRatio="none" style={{position:"absolute",bottom:"8%",left:0,width:"100%",height:"12%",zIndex:2,opacity:dk?.15:.2}}>
+      <path d="M0 80 L10 30 L20 80 M30 80 L42 20 L54 80 M70 80 L78 35 L86 80 M100 80 L115 15 L130 80 M150 80 L158 40 L166 80 M190 80 L200 25 L210 80 M230 80 L240 35 L250 80 M270 80 L285 10 L300 80 M320 80 L328 40 L336 80 M350 80 L365 20 L380 80 M390 80 L398 45 L406 80" fill={dk?"#1A3A28":"#3A6848"} stroke="none"/>
     </svg>
+
+    {/* Floating particles — fireflies (dark) or pollen (light) */}
+    <div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:3}}>
+      {Array.from({length:8},(_,i)=><div key={i} style={{
+        position:"absolute",left:`${15+Math.random()*70}%`,top:`${30+Math.random()*50}%`,
+        width:dk?3:2,height:dk?3:2,borderRadius:"50%",
+        background:dk?"#FFE8A0":"rgba(255,255,255,.8)",
+        opacity:dk?.15:.4,
+        animation:`lumiFloat ${4+Math.random()*4}s ease-in-out infinite`,
+        animationDelay:`${Math.random()*5}s`,
+      }}/>)}
+    </div>
 
     {/* Top bar */}
-    <div style={{position:"absolute",top:0,left:0,right:0,padding:"14px 16px",display:"flex",justifyContent:"space-between",alignItems:"center",zIndex:20,background:C.mode==="dark"?"linear-gradient(180deg, rgba(6,13,26,.95) 0%, rgba(6,13,26,.7) 60%, transparent 100%)":"linear-gradient(180deg, rgba(232,240,248,.95) 0%, rgba(232,240,248,.7) 60%, transparent 100%)"}}>
+    <div style={{position:"absolute",top:0,left:0,right:0,padding:"14px 16px",display:"flex",justifyContent:"space-between",alignItems:"center",zIndex:20,
+      background:dk?"linear-gradient(180deg, rgba(6,13,26,.95) 0%, rgba(6,13,26,.6) 70%, transparent 100%)":"linear-gradient(180deg, rgba(216,232,248,.95) 0%, rgba(216,232,248,.6) 70%, transparent 100%)"}}>
       <div style={{display:"flex",alignItems:"center",gap:10}}>
         <Lumi size={32} mood={streak>=7?"excited":"happy"} level={level}/>
         <div>
-          <p style={{color:"#F0E8D8",fontSize:14,fontFamily:C.fontDisplay,fontWeight:700,margin:0}}>{greet()}, {name}</p>
-          <p style={{color:"#7A9AB0",fontSize:11,fontFamily:C.font,margin:0}}>Altitude {level} · {pct}% to summit</p>
+          <p style={{color:C.text,fontSize:14,fontFamily:C.fontDisplay,fontWeight:700,margin:0}}>{greet()}, {name}</p>
+          <p style={{color:C.textMuted,fontSize:11,fontFamily:C.font,margin:0}}>Altitude {level} · {pct}% to summit</p>
         </div>
       </div>
-      <div style={{display:"flex",gap:8,alignItems:"center"}}>
-        <div style={{display:"flex",alignItems:"center",gap:4,background:"rgba(212,165,90,.1)",padding:"6px 12px",borderRadius:20,border:"1px solid rgba(212,165,90,.2)"}}><span style={{fontSize:14}}>🔥</span><span style={{color:"#F0C860",fontSize:14,fontWeight:800,fontFamily:C.font}}>{streak}</span></div>
-        <button onClick={onOpenAchievements} style={{display:"flex",alignItems:"center",gap:4,background:"rgba(58,168,160,.1)",padding:"6px 12px",borderRadius:20,border:"1px solid rgba(58,168,160,.2)",fontSize:14}}>🏆<span style={{color:"#60D8C8",fontSize:14,fontWeight:800,fontFamily:C.font}}>{ACHIEVEMENTS.filter(a=>a.condition(progress,profile)).length}</span></button>
+      <div style={{display:"flex",gap:6,alignItems:"center"}}>
+        <div style={{display:"flex",alignItems:"center",gap:4,background:dk?"rgba(212,165,90,.1)":"rgba(180,130,40,.1)",padding:"6px 10px",borderRadius:20,border:`1px solid ${dk?"rgba(212,165,90,.2)":"rgba(180,130,40,.2)"}`}}><span style={{fontSize:13}}>🔥</span><span style={{color:C.gold,fontSize:13,fontWeight:800,fontFamily:C.font}}>{streak}</span></div>
+        <button onClick={onOpenAchievements} style={{display:"flex",alignItems:"center",gap:3,background:dk?"rgba(58,168,160,.1)":"rgba(42,128,120,.08)",padding:"6px 10px",borderRadius:20,border:`1px solid ${dk?"rgba(58,168,160,.2)":"rgba(42,128,120,.15)"}`,fontSize:13}}>🏆<span style={{color:C.teal,fontSize:13,fontWeight:800,fontFamily:C.font}}>{ACHIEVEMENTS.filter(a=>a.condition(progress,profile)).length}</span></button>
         <ThemeToggle onToggle={onToggleTheme}/>
-        <button onClick={onOpenProfile} style={{width:34,height:34,borderRadius:12,background:C.mode==="dark"?"rgba(255,255,255,.06)":"rgba(0,0,0,.04)",border:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:15}}>👤</button>
+        <button onClick={onOpenProfile} style={{width:32,height:32,borderRadius:10,background:dk?"rgba(255,255,255,.06)":"rgba(0,0,0,.05)",border:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14}}>👤</button>
       </div>
     </div>
 
-    {/* CLIMBING TRAIL — rope connecting all nodes */}
+    {/* CLIMBING TRAIL */}
     <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={{position:"absolute",inset:0,width:"100%",height:"100%",zIndex:4,pointerEvents:"none"}}>
+      {/* Trail shadow for depth */}
       {nodes.slice(0,-1).map((n,i)=>{
-        const next=nodes[i+1];const st=status(n.loc);const nst=status(next.loc);
-        const completed=st==="done";
+        const next=nodes[i+1];const completed=status(n.loc)==="done";
+        return<line key={`s${i}`} x1={n.nx+.2} y1={n.ny+.2} x2={next.nx+.2} y2={next.ny+.2}
+          stroke={dk?"rgba(0,0,0,.2)":"rgba(0,0,0,.08)"} strokeWidth=".5" strokeLinecap="round"/>;
+      })}
+      {/* Main trail lines */}
+      {nodes.slice(0,-1).map((n,i)=>{
+        const next=nodes[i+1];const completed=status(n.loc)==="done";
         return<line key={i} x1={n.nx} y1={n.ny} x2={next.nx} y2={next.ny}
-          stroke={completed?"rgba(74,186,120,.4)":"rgba(212,165,90,.15)"}
-          strokeWidth={completed?".4":".3"} strokeDasharray={completed?"none":"1.5 1"}
+          stroke={completed?trailDone:trailPending}
+          strokeWidth={completed?".5":".35"} strokeDasharray={completed?"none":"2 1.5"}
           strokeLinecap="round"/>;
       })}
-      {/* Rope knots at each node */}
+      {/* Rope knots */}
       {nodes.slice(0,-1).map((n,i)=>{
         const next=nodes[i+1];const mx=(n.nx+next.nx)/2;const my=(n.ny+next.ny)/2;
-        return<circle key={`k${i}`} cx={mx} cy={my} r=".4" fill="rgba(212,165,90,.2)"/>;
+        return<circle key={`k${i}`} cx={mx} cy={my} r=".5" fill={trailKnot}/>;
       })}
     </svg>
 
@@ -571,42 +603,54 @@ const WorldMap = ({profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfi
         style={{position:"absolute",left:`${nx}%`,top:`${ny}%`,transform:"translate(-50%,-50%)",zIndex:10,cursor:lk?"default":"pointer",textAlign:"center"}}>
 
         {/* Pulse ring for current */}
-        {cur&&<div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",width:72,height:72,borderRadius:"50%",border:"2px solid rgba(212,165,90,.2)",animation:"pulse 2.5s ease-in-out infinite"}}/>}
+        {cur&&<div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",width:74,height:74,borderRadius:"50%",border:`2px solid ${dk?"rgba(212,165,90,.25)":"rgba(180,130,40,.3)"}`,animation:"pulse 2.5s ease-in-out infinite"}}/>}
 
-        {/* Node circle */}
+        {/* Node */}
         <div style={{
           width:d?52:cur?56:44,height:d?52:cur?56:44,borderRadius:"50%",
-          background:d?"radial-gradient(circle at 40% 35%, #60E898, #3AAA68)":cur?"radial-gradient(circle at 40% 35%, #FFE8C0, #D4A55A)":"radial-gradient(circle at 40% 35%, rgba(60,80,100,.6), rgba(30,50,70,.8))",
-          border:d?"3px solid rgba(74,186,120,.5)":cur?"3px solid rgba(212,165,90,.5)":"2px solid rgba(255,255,255,.06)",
-          boxShadow:d?"0 0 20px rgba(74,186,120,.2)":cur?"0 0 24px rgba(212,165,90,.25)":"none",
+          background:d?`radial-gradient(circle at 40% 35%, ${dk?"#60E898":"#4ABA78"}, ${dk?"#3AAA68":"#2A8A50"})`
+            :cur?`radial-gradient(circle at 40% 35%, ${dk?"#FFE8C0":"#FFD880"}, ${dk?"#D4A55A":"#B8903A"})`
+            :`radial-gradient(circle at 40% 35%, ${dk?"rgba(60,80,100,.6)":"rgba(180,195,210,.8)"}, ${dk?"rgba(30,50,70,.8)":"rgba(140,160,180,.9)"})`,
+          border:d?`3px solid ${dk?"rgba(74,186,120,.5)":"rgba(42,138,80,.5)"}`
+            :cur?`3px solid ${dk?"rgba(212,165,90,.5)":"rgba(180,130,40,.5)"}`
+            :`2px solid ${dk?"rgba(255,255,255,.06)":"rgba(0,0,0,.08)"}`,
+          boxShadow:d?`0 4px 20px ${dk?"rgba(74,186,120,.25)":"rgba(42,138,80,.2)"}`
+            :cur?`0 4px 24px ${dk?"rgba(212,165,90,.3)":"rgba(180,130,40,.25)"}`:"none",
           display:"flex",alignItems:"center",justifyContent:"center",
           margin:"0 auto",opacity:lk?.3:1,transition:"all .3s ease",
           animation:cur?"lumiFloat 3s ease-in-out infinite":"none",
         }}>
-          <span style={{fontSize:d?20:cur?22:18,filter:lk?"grayscale(1)":"none"}}>{d?"✓":loc.icon}</span>
+          <span style={{fontSize:d?20:cur?22:18,filter:lk?"grayscale(1) brightness(.5)":"none"}}>{d?"✓":loc.icon}</span>
         </div>
 
-        {/* Label with background for readability */}
+        {/* Label */}
         <div style={{marginTop:6,padding:"3px 10px",borderRadius:8,
-          background:cur?"rgba(212,165,90,.15)":d?"rgba(74,186,120,.1)":"rgba(0,0,0,.3)",
-          backdropFilter:"blur(4px)",display:"inline-block"}}>
-          <p style={{color:lk?"rgba(255,255,255,.25)":cur?"#FFE8C0":d?"#A0F0C0":"#C0D0E0",fontSize:11,fontWeight:700,fontFamily:C.font,margin:0,whiteSpace:"nowrap"}}>{loc.name}</p>
+          background:cur?(dk?"rgba(212,165,90,.2)":"rgba(180,130,40,.15)")
+            :d?(dk?"rgba(74,186,120,.12)":"rgba(42,138,80,.1)")
+            :(dk?"rgba(0,0,0,.4)":"rgba(255,255,255,.7)"),
+          backdropFilter:"blur(6px)",display:"inline-block",
+          boxShadow:dk?"none":"0 1px 4px rgba(0,0,0,.08)"}}>
+          <p style={{color:lk?(dk?"rgba(255,255,255,.2)":"rgba(0,0,0,.2)")
+            :cur?(dk?"#FFE8C0":"#8A6A2A")
+            :d?(dk?"#A0F0C0":"#2A6A38")
+            :(dk?"#C0D0E0":"#3A5060"),
+            fontSize:11,fontWeight:700,fontFamily:C.font,margin:0,whiteSpace:"nowrap"}}>{loc.name}</p>
         </div>
-        {cur&&<p style={{color:"rgba(212,165,90,.6)",fontSize:9,fontFamily:C.font,margin:"2px 0 0"}}>Tap to explore</p>}
+        {cur&&<p style={{color:dk?"rgba(212,165,90,.5)":"rgba(140,100,30,.5)",fontSize:9,fontFamily:C.font,margin:"2px 0 0"}}>Tap to explore</p>}
       </div>);
     })}
 
     {/* Bottom action bar */}
     <div style={{position:"absolute",bottom:0,left:0,right:0,zIndex:20,padding:"0 12px 12px",paddingBottom:"max(12px,env(safe-area-inset-bottom))"}}>
-      <div style={{display:"flex",gap:8,background:"rgba(6,13,26,.85)",backdropFilter:"blur(16px)",borderRadius:18,padding:8,border:"1px solid rgba(255,255,255,.06)"}}>
-        <button onClick={onOpenChallenge} style={{flex:1,background:"rgba(232,128,96,.08)",border:"1px solid rgba(232,128,96,.15)",borderRadius:12,padding:"12px 10px",display:"flex",alignItems:"center",gap:8,textAlign:"left"}}>
-          <Icon type="challenge" size={22} color="#F0A878"/><div><p style={{color:"#F0A878",fontSize:12,fontWeight:700,fontFamily:C.font,margin:0}}>Daily Challenge</p><p style={{color:"#6A8898",fontSize:9,fontFamily:C.font,margin:0}}>Keep your streak</p></div>
+      <div style={{display:"flex",gap:8,background:dk?"rgba(6,13,26,.85)":"rgba(255,255,255,.85)",backdropFilter:"blur(16px)",borderRadius:18,padding:8,border:`1px solid ${dk?"rgba(255,255,255,.06)":"rgba(0,0,0,.08)"}`,boxShadow:dk?"none":"0 -2px 20px rgba(0,0,0,.06)"}}>
+        <button onClick={onOpenChallenge} style={{flex:1,background:dk?"rgba(232,128,96,.08)":"rgba(232,128,96,.06)",border:`1px solid ${dk?"rgba(232,128,96,.15)":"rgba(232,128,96,.12)"}`,borderRadius:12,padding:"12px 10px",display:"flex",alignItems:"center",gap:8,textAlign:"left"}}>
+          <Icon type="challenge" size={22} color={dk?"#F0A878":"#C08058"}/><div><p style={{color:dk?"#F0A878":"#A06840",fontSize:12,fontWeight:700,fontFamily:C.font,margin:0}}>Daily Challenge</p><p style={{color:C.textDim,fontSize:9,fontFamily:C.font,margin:0}}>Keep your streak</p></div>
         </button>
-        <button onClick={onOpenNews} style={{flex:1,background:"rgba(212,165,90,.06)",border:"1px solid rgba(212,165,90,.12)",borderRadius:12,padding:"12px 10px",display:"flex",alignItems:"center",gap:8,textAlign:"left"}}>
-          <Icon type="news" size={22} color="#E8C878"/><div><p style={{color:"#E8C878",fontSize:12,fontWeight:700,fontFamily:C.font,margin:0}}>AI News</p><p style={{color:"#6A8898",fontSize:9,fontFamily:C.font,margin:0}}>Live today</p></div>
+        <button onClick={onOpenNews} style={{flex:1,background:dk?"rgba(212,165,90,.06)":"rgba(180,130,40,.05)",border:`1px solid ${dk?"rgba(212,165,90,.12)":"rgba(180,130,40,.1)"}`,borderRadius:12,padding:"12px 10px",display:"flex",alignItems:"center",gap:8,textAlign:"left"}}>
+          <Icon type="news" size={22} color={dk?"#E8C878":"#A08838"}/><div><p style={{color:dk?"#E8C878":"#806820",fontSize:12,fontWeight:700,fontFamily:C.font,margin:0}}>AI News</p><p style={{color:C.textDim,fontSize:9,fontFamily:C.font,margin:0}}>Live today</p></div>
         </button>
-        <button onClick={onOpenTools} style={{flex:1,background:"rgba(58,168,160,.06)",border:"1px solid rgba(58,168,160,.12)",borderRadius:12,padding:"12px 10px",display:"flex",alignItems:"center",gap:8,textAlign:"left"}}>
-          <Icon type="tools" size={22} color="#68D8C8"/><div><p style={{color:"#68D8C8",fontSize:12,fontWeight:700,fontFamily:C.font,margin:0}}>AI Tools</p><p style={{color:"#6A8898",fontSize:9,fontFamily:C.font,margin:0}}>6 tools</p></div>
+        <button onClick={onOpenTools} style={{flex:1,background:dk?"rgba(58,168,160,.06)":"rgba(42,128,120,.05)",border:`1px solid ${dk?"rgba(58,168,160,.12)":"rgba(42,128,120,.1)"}`,borderRadius:12,padding:"12px 10px",display:"flex",alignItems:"center",gap:8,textAlign:"left"}}>
+          <Icon type="tools" size={22} color={dk?"#68D8C8":"#388880"}/><div><p style={{color:dk?"#68D8C8":"#2A7068",fontSize:12,fontWeight:700,fontFamily:C.font,margin:0}}>AI Tools</p><p style={{color:C.textDim,fontSize:9,fontFamily:C.font,margin:0}}>6 tools</p></div>
         </button>
       </div>
     </div>
