@@ -1008,7 +1008,8 @@ const NewsView = ({uid,onBack}) => {
   useEffect(()=>{
     const fetchNews=async()=>{
       try{
-        const r=await db.callClaude({feature:"news_fetch",use_search:true,system:`You are Lumi, an AI news curator for "AI Fluent". Search for the latest AI news from today. Return EXACTLY 4 news items as a JSON array. Each item must have: title (string), category (one of: Breaking, Tools, Policy, Business, Research), summary (2-3 sentence ELI5 explanation a non-tech person would understand), impact (1-2 sentences on why this matters to the average person), timeAgo (like "2h ago" or "Today"), source (publication name). Return ONLY valid JSON, no markdown, no backticks, no explanation. Example format: [{"title":"...","category":"...","summary":"...","impact":"...","timeAgo":"...","source":"..."}]`,messages:[{role:"user",content:"What are the top 4 AI news stories from today? Search the web for the very latest."}]});
+        const today=new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
+        const r=await db.callClaude({feature:"news_fetch",use_search:true,system:`You are Lumi, an AI news curator. Today is ${today}. Search for AI news published TODAY or in the last 24 hours ONLY. Do NOT include news older than 24 hours. Return EXACTLY 4 items as a JSON array. Each item: title (string), category (Breaking/Tools/Policy/Business/Research), summary (2-3 sentence ELI5), impact (why it matters to average person), timeAgo (e.g. "3h ago" or "Today"), source (publication name). Return ONLY valid JSON array, no markdown, no backticks, no extra text.`,messages:[{role:"user",content:`Search for the 4 most important AI news stories from ${today}. Only include stories from today or the last 24 hours.`}]});
         try{
           const cleaned=r.text.replace(/```json\n?/g,"").replace(/```\n?/g,"").trim();
           const parsed=JSON.parse(cleaned);
