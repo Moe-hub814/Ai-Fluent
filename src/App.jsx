@@ -49,12 +49,45 @@ const getTheme = () => _theme;
 // LANGUAGE SYSTEM
 const LANGS={en:{name:"English",flag:"🇺🇸",dir:"ltr"},ar:{name:"العربية",flag:"🇸🇦",dir:"rtl"},fr:{name:"Français",flag:"🇫🇷",dir:"ltr"}};
 const UI={
-  en:{greeting:h=>h<12?"Good morning":h<17?"Good afternoon":"Good evening",map:"← Map",back:"← Back",signIn:"Sign In",signUp:"Sign Up",email:"Email",password:"Password",startClimbing:"Start Climbing",createAccount:"Create Account",checkEmail:"Check your email!",weSentLink:"We sent a link to",loading:"Loading AI Fluent...",tapIfStuck:"Tap anywhere if stuck",startPractice:"Start Practice →",completeLesson:"Complete lesson →",nextQ:"Next Question →",seeResults:"See My Results →",retry:"Retry for a higher rating →",tryAgain:"Try Again",reviewFirst:"← Review the lesson first",need70:"You need 70% or higher to pass this lesson",points:"Points earned",shareRating:"📤 Share My Rating",shareProgress:"📤 Share My Progress",askLumi:"Ask Lumi",questionsHelp:"Questions? Ask Lumi",guideHere:"Your guide is here to help",peoplAsk:"People often ask...",lumiGuide:"Lumi — Guide",hint:"Hint",why:"Why?",check:"Check Answer",lumiFeedback:"Lumi's feedback",lumiReviewing:"Lumi is reviewing...",submit:"Submit for Review",dailyChallenge:"Daily Challenge",keepStreak:"Keep your streak",aiNews:"AI News",live:"Live",newsDesc:"Today's AI stories, simplified by Lumi",newsSearch:"Lumi is searching for today's AI news...",aiTools:"AI Tools",toolsDesc:"Guided step-by-step workflows",profile:"Profile",dayStreak:"Day Streak",lessonsDone:"Lessons Done",lumiChats:"Lumi Chats",achievements:"Achievements",altRatings:"Altitude Ratings Earned",summit:"Summit",ridge:"Ridge",graded:"Graded",learningPaths:"Learning Paths",calendar:"Activity Calendar",bestStreak:"Best streak",freezes:"remaining",lightMode:"☀️ Light Mode",darkMode:"🌙 Dark Mode",signOut:"Sign Out",language:"Language",lessons:"lessons",sections:"sections",practice:"practice",completed:"Completed",submitChallenge:"Submit Challenge ⚡",challengeComplete:"🔥 Challenge complete!",challengeDesc:"Complete today's challenge to keep your streak alive",simpleVersion:"The simple version",whyMatters:"Why it matters to you",askAboutThis:"Ask Lumi about this",explainPlain:"Get it explained in plain language",claimSummit:"🏔️ Claim Summit Rating!",claimRidge:"⛰️ Claim Ridge Rating!",completeBtn:"✦ Complete Lesson",next:"Next",skip:"Skip",startJourney:"Start My Journey →",altitude:"Altitude",toSummit:"to summit",tapExplore:"Tap to explore",tools6:"6 tools"},
+  en:{greeting:h=>h<12?"Good morning":h<17?"Good afternoon":"Good evening",map:"← Map",back:"← Back",signIn:"Sign In",signUp:"Sign Up",email:"Email",password:"Password",startClimbing:"Start Climbing",createAccount:"Create Account",checkEmail:"Check your email!",weSentLink:"We sent a link to",loading:"Loading AI Fluent...",tapIfStuck:"Tap anywhere if stuck",startPractice:"Start Practice →",completeLesson:"Complete lesson →",nextQ:"Next Question →",seeResults:"See My Results →",retry:"Retry for a higher rating →",tryAgain:"Try Again",reviewFirst:"← Review the lesson first",need70:"You need 70% or higher to pass this lesson",points:"Points earned",shareRating:"📤 Share My Rating",shareProgress:"📤 Share My Progress",askLumi:"Ask Lumi",questionsHelp:"Questions? Ask Lumi",guideHere:"Your guide is here to help",peoplAsk:"People often ask...",lumiGuide:"Lumi — Guide",hint:"Hint",why:"Why?",check:"Check Answer",lumiFeedback:"Lumi's feedback",lumiReviewing:"Lumi is reviewing...",submit:"Submit for Review",dailyChallenge:"Daily Challenge",keepStreak:"Keep your streak",aiNews:"AI News",live:"Live",newsDesc:"Today's AI stories, simplified by Lumi",newsSearch:"Lumi is searching for today's AI news...",aiTools:"AI Tools",toolsDesc:"Guided step-by-step workflows",profile:"Profile",dayStreak:"Day Streak",lessonsDone:"Lessons Done",lumiChats:"Lumi Chats",achievements:"Achievements",altRatings:"Altitude Ratings Earned",summit:"Summit",ridge:"Ridge",graded:"Graded",learningPaths:"Learning Paths",calendar:"Activity Calendar",bestStreak:"Best streak",freezes:"remaining",lightMode:"☀️ Light Mode",darkMode:"🌙 Dark Mode",signOut:"Sign Out",language:"Language",lessons:"lessons",sections:"sections",practice:"practice",completed:"Completed",submitChallenge:"Submit Challenge ⚡",challengeComplete:"🔥 Challenge complete!",challengeDesc:"Complete today's challenge to keep your streak alive",simpleVersion:"The simple version",whyMatters:"Why it matters to you",askAboutThis:"Ask Lumi about this",explainPlain:"Get it explained in plain language",claimSummit:"🏔️ Claim Summit Rating!",claimRidge:"⛰️ Claim Ridge Rating!",completeBtn:"✦ Complete Lesson",next:"Next",skip:"Skip",startJourney:"Start My Journey →",altitude:"Altitude",toSummit:T.toSummit,tapExplore:T.tapExplore,tools6:"6 tools"},
   ar:{greeting:h=>h<12?"صباح الخير":h<17?"مساء الخير":"مساء الخير",map:"الخريطة →",back:"رجوع →",signIn:"تسجيل الدخول",signUp:"إنشاء حساب",email:"البريد الإلكتروني",password:"كلمة المرور",startClimbing:"ابدأ التسلق",createAccount:"إنشاء حساب",checkEmail:"!تحقق من بريدك",weSentLink:"أرسلنا رابطاً إلى",loading:"...جاري تحميل AI Fluent",tapIfStuck:"اضغط في أي مكان إذا توقف",startPractice:"← ابدأ التمرين",completeLesson:"← أكمل الدرس",nextQ:"← السؤال التالي",seeResults:"← عرض نتائجي",retry:"← أعد المحاولة لتقييم أعلى",tryAgain:"حاول مرة أخرى",reviewFirst:"راجع الدرس أولاً →",need70:"تحتاج 70% أو أعلى لاجتياز هذا الدرس",points:"النقاط المكتسبة",shareRating:"📤 شارك تقييمي",shareProgress:"📤 شارك تقدمي",askLumi:"اسأل لومي",questionsHelp:"أسئلة؟ اسأل لومي",guideHere:"مرشدك هنا للمساعدة",peoplAsk:"...الناس يسألون عادة",lumiGuide:"لومي — المرشد",hint:"تلميح",why:"لماذا؟",check:"تحقق من الإجابة",lumiFeedback:"ملاحظات لومي",lumiReviewing:"...لومي يراجع",submit:"أرسل للمراجعة",dailyChallenge:"التحدي اليومي",keepStreak:"حافظ على سلسلتك",aiNews:"أخبار الذكاء",live:"مباشر",newsDesc:"أخبار الذكاء اليوم مبسطة بواسطة لومي",newsSearch:"...لومي يبحث عن أخبار اليوم",aiTools:"أدوات الذكاء",toolsDesc:"سير عمل موجه خطوة بخطوة",profile:"الملف الشخصي",dayStreak:"أيام متتالية",lessonsDone:"دروس مكتملة",lumiChats:"محادثات لومي",achievements:"الإنجازات",altRatings:"تقييمات الارتفاع المكتسبة",summit:"القمة",ridge:"التلال",graded:"مُقيَّم",learningPaths:"مسارات التعلم",calendar:"تقويم النشاط",bestStreak:"أفضل سلسلة",freezes:"متبقية",lightMode:"☀️ وضع فاتح",darkMode:"🌙 وضع داكن",signOut:"تسجيل الخروج",language:"اللغة",lessons:"دروس",sections:"أقسام",practice:"تمارين",completed:"مكتمل",submitChallenge:"أرسل التحدي ⚡",challengeComplete:"!🔥 التحدي مكتمل",challengeDesc:"أكمل تحدي اليوم للحفاظ على سلسلتك",simpleVersion:"النسخة المبسطة",whyMatters:"لماذا يهمك هذا",askAboutThis:"اسأل لومي عن هذا",explainPlain:"احصل على شرح بلغة بسيطة",claimSummit:"🏔️ !احصل على تقييم القمة",claimRidge:"⛰️ !احصل على تقييم التلال",completeBtn:"✦ أكمل الدرس",next:"التالي",skip:"تخطي",startJourney:"← ابدأ رحلتي",altitude:"الارتفاع",toSummit:"إلى القمة",tapExplore:"اضغط للاستكشاف",tools6:"6 أدوات"},
   fr:{greeting:h=>h<12?"Bonjour":h<17?"Bon après-midi":"Bonsoir",map:"← Carte",back:"← Retour",signIn:"Se connecter",signUp:"S'inscrire",email:"E-mail",password:"Mot de passe",startClimbing:"Commencer",createAccount:"Créer un compte",checkEmail:"Vérifiez votre e-mail !",weSentLink:"Nous avons envoyé un lien à",loading:"Chargement d'AI Fluent...",tapIfStuck:"Appuyez si bloqué",startPractice:"Commencer →",completeLesson:"Terminer →",nextQ:"Suivante →",seeResults:"Voir mes résultats →",retry:"Réessayer →",tryAgain:"Réessayer",reviewFirst:"← Revoir la leçon",need70:"70% minimum pour réussir",points:"Points gagnés",shareRating:"📤 Partager ma note",shareProgress:"📤 Partager mes progrès",askLumi:"Demander à Lumi",questionsHelp:"Questions ? Demandez à Lumi",guideHere:"Votre guide est là",peoplAsk:"Questions fréquentes...",lumiGuide:"Lumi — Guide",hint:"Indice",why:"Pourquoi ?",check:"Vérifier",lumiFeedback:"Avis de Lumi",lumiReviewing:"Lumi examine...",submit:"Soumettre",dailyChallenge:"Défi du jour",keepStreak:"Gardez votre série",aiNews:"Actu IA",live:"Direct",newsDesc:"Actus IA simplifiées par Lumi",newsSearch:"Lumi cherche les actus...",aiTools:"Outils IA",toolsDesc:"Workflows guidés",profile:"Profil",dayStreak:"Jours consécutifs",lessonsDone:"Leçons faites",lumiChats:"Discussions",achievements:"Réussites",altRatings:"Notes d'altitude",summit:"Sommet",ridge:"Crête",graded:"Noté",learningPaths:"Parcours",calendar:"Calendrier d'activité",bestStreak:"Meilleure série",freezes:"restantes",lightMode:"☀️ Mode clair",darkMode:"🌙 Mode sombre",signOut:"Se déconnecter",language:"Langue",lessons:"leçons",sections:"sections",practice:"exercices",completed:"Terminé",submitChallenge:"Soumettre ⚡",challengeComplete:"🔥 Défi terminé !",challengeDesc:"Complétez le défi pour garder votre série",simpleVersion:"Version simple",whyMatters:"Pourquoi c'est important",askAboutThis:"Demander à Lumi",explainPlain:"Explication simple",claimSummit:"🏔️ Note Sommet !",claimRidge:"⛰️ Note Crête !",completeBtn:"✦ Terminer",next:"Suivant",skip:"Passer",startJourney:"Commencer →",altitude:"Altitude",toSummit:"vers le sommet",tapExplore:"Appuyez pour explorer",tools6:"6 outils"},
 };
 let _lang=localStorage.getItem("ai_fluent_lang")||"en";
 let T={...UI[_lang]};
+
+// Translated location & tool names
+const LOC_NAMES={
+  en:{basics:"Base Camp",writing:"Forest Lodge",images:"Artist's Outlook",business:"Market Pass",data:"Signal Peak",daily:"Village Rest",master:"The Summit"},
+  ar:{basics:"المخيم الأساسي",writing:"نزل الغابة",images:"مرصد الفنان",business:"ممر السوق",data:"قمة الإشارة",daily:"استراحة القرية",master:"القمة"},
+  fr:{basics:"Camp de Base",writing:"Lodge Forestier",images:"Point de Vue Artistique",business:"Col du Marché",data:"Pic du Signal",daily:"Repos du Village",master:"Le Sommet"},
+};
+const LOC_SUBS={
+  en:{basics:"AI Basics",writing:"AI for Writing",images:"AI Images",business:"AI for Business",data:"AI for Data",daily:"AI Daily Life",master:"AI Mastery"},
+  ar:{basics:"أساسيات الذكاء",writing:"الذكاء للكتابة",images:"صور الذكاء",business:"الذكاء للأعمال",data:"الذكاء للبيانات",daily:"الذكاء اليومي",master:"إتقان الذكاء"},
+  fr:{basics:"Bases de l'IA",writing:"IA pour l'écriture",images:"Images IA",business:"IA pour les affaires",data:"IA pour les données",daily:"IA au quotidien",master:"Maîtrise de l'IA"},
+};
+const LOC_DESCS={
+  en:{basics:"Where every climber begins",writing:"Master writing with AI",images:"Create visuals from any vantage",business:"AI meets real business results",data:"See clearly through any data",daily:"AI woven into everyday life",master:"You've reached AI fluency"},
+  ar:{basics:"حيث يبدأ كل متسلق",writing:"أتقن الكتابة مع الذكاء",images:"أنشئ صوراً من أي زاوية",business:"الذكاء يحقق نتائج حقيقية",data:"انظر بوضوح عبر البيانات",daily:"الذكاء في الحياة اليومية",master:"لقد وصلت إلى إتقان الذكاء"},
+  fr:{basics:"Où chaque grimpeur commence",writing:"Maîtrisez l'écriture avec l'IA",images:"Créez des visuels de partout",business:"L'IA au service des résultats",data:"Voyez clair dans vos données",daily:"L'IA au quotidien",master:"Vous maîtrisez l'IA"},
+};
+const TOOL_NAMES={
+  en:{email:"Write an Email",prompt:"Build a Prompt",summarize:"Summarize Text",resume:"Resume Helper",social:"Social Post Writer",study:"Study Helper"},
+  ar:{email:"اكتب بريداً إلكترونياً",prompt:"ابنِ أمر ذكاء",summarize:"لخّص نصاً",resume:"مساعد السيرة",social:"كاتب منشورات",study:"مساعد الدراسة"},
+  fr:{email:"Écrire un e-mail",prompt:"Construire un prompt",summarize:"Résumer un texte",resume:"Aide CV",social:"Rédiger un post",study:"Aide aux études"},
+};
+const TOOL_DESCS={
+  en:{email:"Professional emails in seconds",prompt:"Master the art of talking to AI",summarize:"Long docs into key points",resume:"Stand out from the crowd",social:"Scroll-stopping content",study:"Learn anything faster"},
+  ar:{email:"رسائل احترافية في ثوانٍ",prompt:"أتقن فن التحدث للذكاء",summarize:"وثائق طويلة في نقاط",resume:"تميّز عن الآخرين",social:"محتوى يوقف التمرير",study:"تعلم أي شيء أسرع"},
+  fr:{email:"E-mails pro en secondes",prompt:"L'art de parler à l'IA",summarize:"Docs longs en points clés",resume:"Démarquez-vous",social:"Contenu captivant",study:"Apprenez plus vite"},
+};
+// Helper functions
+const locName=(id)=>(LOC_NAMES[_lang]||LOC_NAMES.en)[id]||id;
+const locSub=(id)=>(LOC_SUBS[_lang]||LOC_SUBS.en)[id]||id;
+const locDesc=(id)=>(LOC_DESCS[_lang]||LOC_DESCS.en)[id]||id;
+const toolName=(id)=>(TOOL_NAMES[_lang]||TOOL_NAMES.en)[id]||id;
+const toolDesc=(id)=>(TOOL_DESCS[_lang]||TOOL_DESCS.en)[id]||id;
 const setLang=(l)=>{_lang=l;T={...UI[l]};localStorage.setItem("ai_fluent_lang",l);document.documentElement.dir=LANGS[l].dir;document.documentElement.lang=l};
 const getLang=()=>_lang;
 const isRTL=()=>LANGS[_lang]?.dir==="rtl";
@@ -723,7 +756,7 @@ const WorldMap = ({profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfi
         <Lumi size={32} mood={streak>=7?"excited":"happy"} level={level}/>
         <div>
           <p style={{color:C.text,fontSize:14,fontFamily:C.fontDisplay,fontWeight:700,margin:0}}>{T.greeting(new Date().getHours())}, {name}</p>
-          <p style={{color:C.textMuted,fontSize:11,fontFamily:C.font,margin:0}}>Altitude {level} · {pct}% to summit</p>
+          <p style={{color:C.textMuted,fontSize:11,fontFamily:C.font,margin:0}}>{T.altitude} {level} · {pct}% {T.toSummit}</p>
         </div>
       </div>
       <div style={{display:"flex",gap:6,alignItems:"center"}}>
@@ -796,7 +829,7 @@ const WorldMap = ({profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfi
             :cur?(dk?"#FFE8C0":"#8A6A2A")
             :d?(dk?"#A0F0C0":"#2A6A38")
             :(dk?"#C0D0E0":"#3A5060"),
-            fontSize:11,fontWeight:700,fontFamily:C.font,margin:0,whiteSpace:"nowrap"}}>{loc.name}</p>
+            fontSize:11,fontWeight:700,fontFamily:C.font,margin:0,whiteSpace:"nowrap"}}>{locName(loc.id)}</p>
         </div>
         {cur&&<p style={{color:dk?"rgba(212,165,90,.5)":"rgba(140,100,30,.5)",fontSize:9,fontFamily:C.font,margin:"2px 0 0"}}>Tap to explore</p>}
       </div>);
@@ -888,7 +921,7 @@ const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
 
   // PRACTICE MODE
   if(view==="practice"&&practice.length>0&&!showResults)return(<div style={{height:"100vh",overflowY:"auto",background:`linear-gradient(180deg,${C.bgDark},${C.bgCard})`,padding:"14px 20px 100px"}}>
-    <button onClick={()=>setView("lesson")} style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700,marginBottom:14}}>← Back to lesson</button>
+    <button onClick={()=>setView("lesson")} style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700,marginBottom:14}}>{T.back}</button>
     {showConfetti&&<Confetti/>}
     <div style={{display:"flex",gap:4,marginBottom:16}}>{practice.map((_,i)=><div key={i} style={{flex:1,height:5,borderRadius:3,background:i<practiceIdx?C.green:i===practiceIdx?C.gold:"rgba(255,255,255,.06)",transition:"all .3s"}}/>)}</div>
     <div className="fu" style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}><Lumi size={28} mood={submitted?"excited":"happy"} level={level}/><span style={{color:C.textDim,fontSize:12,fontFamily:C.font,fontWeight:600}}>Practice {practiceIdx+1} of {practice.length}</span></div>
@@ -968,7 +1001,7 @@ const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
       <div style={{flex:1,textAlign:"center",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><Lumi size={22} level={level}/><span style={{color:C.text,fontSize:13,fontWeight:700,fontFamily:C.font}}>{T.lumiGuide}</span></div>
     </div>
     <div ref={ref} style={{flex:1,overflowY:"auto",padding:16}}>
-      <Bub from="lumi" text={`Hey ${userName}! Welcome to ${loc.name}. I'm here to help with "${lesson?.title}" — ask me anything, nothing is too basic!`}/>
+      <Bub from="lumi" text={`Hey ${userName}! Welcome to ${locName(loc.id)}. I'm here to help with "${lesson?.title}" — ask me anything!`}/>
       {msgs.map((m,i)=><Bub key={i} from={m.from} text={m.text}/>)}{typing&&<Bub from="lumi" typing/>}
       {msgs.length===0&&lesson&&<div className="fu s2" style={{marginTop:14}}><p style={{color:C.textDim,fontSize:12,fontFamily:C.font,fontWeight:600,margin:"0 0 10px"}}>{T.peoplAsk}</p>{lesson.questions.map((q,i)=><button key={i} onClick={()=>ask(q)} style={{display:"block",width:"100%",background:"rgba(255,255,255,.03)",border:`1px solid ${C.border}`,borderRadius:12,padding:"10px 14px",marginBottom:7,textAlign:"left"}}><span style={{color:C.textMuted,fontSize:13,fontFamily:C.font}}>{q}</span></button>)}</div>}
     </div>
@@ -979,7 +1012,7 @@ const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
 
   // LESSON CONTENT
   if(view==="lesson"&&lesson)return(<div style={{height:"100vh",overflowY:"auto",background:`linear-gradient(180deg,${C.bgDark},${C.bgCard})`,padding:"14px 20px 100px"}}>
-    <button onClick={()=>{setView("intro");setLessonIdx(null)}} style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700,marginBottom:14}}>← {loc.name}</button>
+    <button onClick={()=>{setView("intro");setLessonIdx(null)}} style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700,marginBottom:14}}>{T.back} {locName(loc.id)}</button>
     <div className="fu" style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}><span style={{fontSize:18}}>{loc.icon}</span><span style={{color:loc.color,fontSize:10,fontWeight:700,fontFamily:C.font,textTransform:"uppercase",letterSpacing:1}}>{loc.sub} · Lesson {lessonIdx+1}</span></div>
     <h1 className="fu s1" style={{color:C.text,fontSize:24,fontFamily:C.fontDisplay,fontWeight:700,margin:"0 0 22px",lineHeight:1.3}}>{lesson.title}</h1>
     {lesson.sections.map((sec,i)=>(<div key={i} className={`fu s${Math.min(i+2,5)}`} style={{marginBottom:26}}><h3 style={{color:C.text,fontSize:16,fontWeight:700,fontFamily:C.font,margin:"0 0 8px"}}>{sec.h}</h3><p style={{color:C.textMuted,fontSize:14,lineHeight:1.8,fontFamily:C.font,whiteSpace:"pre-wrap"}}>{sec.body}</p></div>))}
@@ -997,9 +1030,9 @@ const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
     <div style={{position:"relative",zIndex:5}}>
       <div className="fu" style={{display:"flex",alignItems:"center",gap:12,marginBottom:6}}>
         <span style={{fontSize:40}}>{loc.icon}</span>
-        <div><h1 style={{color:C.text,fontSize:26,fontFamily:C.fontDisplay,fontWeight:700,margin:0}}>{loc.name}</h1><p style={{color:C.textMuted,fontSize:13,fontFamily:C.font,margin:"2px 0 0"}}>{loc.sub} · {lessons.length} lessons</p></div>
+        <div><h1 style={{color:C.text,fontSize:26,fontFamily:C.fontDisplay,fontWeight:700,margin:0}}>{locName(loc.id)}</h1><p style={{color:C.textMuted,fontSize:13,fontFamily:C.font,margin:"2px 0 0"}}>{locSub(loc.id)} · {lessons.length} {T.lessons}</p></div>
       </div>
-      <p className="fu s1" style={{color:C.textDim,fontSize:13,fontFamily:C.font,marginBottom:20,lineHeight:1.6}}>{loc.desc}</p>
+      <p className="fu s1" style={{color:C.textDim,fontSize:13,fontFamily:C.font,marginBottom:20,lineHeight:1.6}}>{locDesc(loc.id)}</p>
 
       {/* Progress bar */}
       <div className="fu s2" style={{display:"flex",alignItems:"center",gap:8,marginBottom:20}}>
@@ -1175,7 +1208,7 @@ const ToolsView = ({uid,onBack}) => {
     :<div style={{display:"flex",flexDirection:"column",gap:8}}>{s.opts.map((o,i)=><button key={o} className={`pop s${Math.min(i+1,5)}`} onClick={()=>pick(o)} style={{background:"rgba(255,255,255,.03)",border:`1.5px solid ${C.border}`,borderRadius:12,padding:"12px 16px",textAlign:"left",width:"100%"}}><span style={{color:C.textMuted,fontSize:14,fontFamily:C.font}}>{o}</span></button>)}</div>}
   </div>)}
   return(<div style={{height:"100vh",overflowY:"auto",background:C.bgDark,padding:"14px 20px 40px"}}><button onClick={onBack} style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700,marginBottom:16}}>{T.map}</button><h1 style={{color:C.text,fontSize:24,fontFamily:C.fontDisplay,fontWeight:700,marginBottom:4}}>{T.aiTools}</h1><p style={{color:C.textDim,fontSize:13,fontFamily:C.font,marginBottom:18}}>{T.toolsDesc}</p>
-    <div style={{display:"flex",flexDirection:"column",gap:10}}>{TOOLS.map((t,i)=>(<button key={t.id} className={`fu s${Math.min(i+1,5)}`} onClick={()=>{setWf(t);setStep(0);setAns([]);setFt("");setResult(null)}} style={{background:C.bgCard,border:`1px solid ${C.border}`,borderRadius:16,padding:"16px 18px",display:"flex",alignItems:"center",gap:14,textAlign:"left",width:"100%"}}><div style={{width:48,height:48,borderRadius:14,background:`${t.color}12`,border:`1px solid ${t.color}20`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Icon type={t.iconType} size={26} color={t.color}/></div><div style={{flex:1}}><p style={{color:C.text,fontSize:15,fontWeight:700,fontFamily:C.font,margin:0}}>{t.name}</p><p style={{color:C.textDim,fontSize:11,fontFamily:C.font,margin:"2px 0 0"}}>{t.desc}</p></div><span style={{color:t.color,fontSize:16,opacity:.5}}>→</span></button>))}</div>
+    <div style={{display:"flex",flexDirection:"column",gap:10}}>{TOOLS.map((t,i)=>(<button key={t.id} className={`fu s${Math.min(i+1,5)}`} onClick={()=>{setWf(t);setStep(0);setAns([]);setFt("");setResult(null)}} style={{background:C.bgCard,border:`1px solid ${C.border}`,borderRadius:16,padding:"16px 18px",display:"flex",alignItems:"center",gap:14,textAlign:"left",width:"100%"}}><div style={{width:48,height:48,borderRadius:14,background:`${t.color}12`,border:`1px solid ${t.color}20`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Icon type={t.iconType} size={26} color={t.color}/></div><div style={{flex:1}}><p style={{color:C.text,fontSize:15,fontWeight:700,fontFamily:C.font,margin:0}}>{toolName(t.id)}</p><p style={{color:C.textDim,fontSize:11,fontFamily:C.font,margin:"2px 0 0"}}>{toolDesc(t.id)}</p></div><span style={{color:t.color,fontSize:16,opacity:.5}}>→</span></button>))}</div>
   </div>);
 };
 
@@ -1241,7 +1274,7 @@ const ProfileView = ({profile,progress,onBack,onSignOut,onToggleTheme,onChangeLa
             <span style={{fontSize:16,width:24,textAlign:"center"}}>{loc.icon}</span>
             <div style={{flex:1}}>
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
-                <span style={{color:C.textMuted,fontSize:11,fontFamily:C.font}}>{loc.name}</span>
+                <span style={{color:C.textMuted,fontSize:11,fontFamily:C.font}}>{locName(loc.id)}</span>
                 <span style={{color:pct===100?C.green:C.textDim,fontSize:10,fontFamily:C.font,fontWeight:600}}>{completed}/{lessons.length}</span>
               </div>
               <div style={{height:4,background:"rgba(255,255,255,.06)",borderRadius:2,overflow:"hidden"}}>
