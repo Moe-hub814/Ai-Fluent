@@ -307,7 +307,7 @@ const ErrorMsg = ({msg,onRetry}) => (
     <Lumi size={36} mood="thinking"/>
     <p style={{color:"#E8A878",fontSize:14,fontWeight:600,fontFamily:C.font,margin:"8px 0 4px"}}>Oops, something went wrong</p>
     <p style={{color:C.textDim,fontSize:12,fontFamily:C.font,margin:"0 0 10px"}}>{msg||"Check your connection and try again."}</p>
-    {onRetry&&<Btn v="ghost" onClick={onRetry} style={{width:"auto",padding:"8px 20px",fontSize:13}}>Try Again</Btn>}
+    {onRetry&&<Btn v="ghost" onClick={onRetry} style={{width:"auto",padding:"8px 20px",fontSize:13}}>{T.tryAgain}</Btn>}
   </div>
 );
 
@@ -421,7 +421,7 @@ const StreakCalendar = () => {
   return (
     <div style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 16, padding: 16 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-        <p style={{ color: C.text, fontSize: 14, fontWeight: 700, fontFamily: C.font, margin: 0 }}>Activity Calendar</p>
+        <p style={{ color: C.text, fontSize: 14, fontWeight: 700, fontFamily: C.font, margin: 0 }}>{T.calendar}</p>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <span style={{ fontSize: 14 }}>🔥</span>
           <span style={{ color: C.gold, fontSize: 14, fontWeight: 800, fontFamily: C.font }}>{data.current || 0} day streak</span>
@@ -569,7 +569,7 @@ const ShareCard = ({type="progress",data={},onClose}) => {
 // CSS
 const getCss = () => `
   @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Quicksand:wght@500;600;700&display=swap');
-  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}body{background:${C.bgDark};overflow:hidden;transition:background .3s}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}body{background:${C.bgDark};direction:${isRTL()?'rtl':'ltr'};overflow:hidden;transition:background .3s}
   ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:${C.mode==="dark"?"#2A4060":"#C0D0E0"};border-radius:2px}
   input::placeholder,textarea::placeholder{color:${C.textDim}}
   @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
@@ -609,19 +609,19 @@ const Confetti = () => <div style={{position:"fixed",inset:0,pointerEvents:"none
 const AuthScreen = () => {
   const [mode,setMode]=useState("signin");const [email,setEmail]=useState("");const [pass,setPass]=useState("");const [loading,setLoading]=useState(false);const [err,setErr]=useState("");
   const go=async()=>{if(!email||!pass){setErr("Please fill in both fields");return}setLoading(true);setErr("");const{error}=mode==="signup"?await db.signUp(email,pass):await db.signIn(email,pass);setLoading(false);if(error){setErr(error.message);return}if(mode==="signup")setMode("check")};
-  if(mode==="check")return(<div style={{minHeight:"100vh",background:`linear-gradient(180deg,${C.skyTop},${C.skyMid})`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:40,position:"relative"}}><Stars/><Lumi size={72} mood="excited" level={1} animate/><h2 style={{color:C.goldLight,fontSize:22,fontFamily:C.fontDisplay,fontWeight:700,marginTop:14,textAlign:"center"}}>Check your email!</h2><p style={{color:C.textMuted,fontSize:14,fontFamily:C.font,textAlign:"center",lineHeight:1.7,maxWidth:300,marginTop:8}}>We sent a link to <strong style={{color:C.gold}}>{email}</strong></p><div style={{marginTop:24,width:"100%",maxWidth:280}}><Btn v="ghost" onClick={()=>setMode("signin")}>Back to Sign In</Btn></div></div>);
+  if(mode==="check")return(<div style={{minHeight:"100vh",background:`linear-gradient(180deg,${C.skyTop},${C.skyMid})`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:40,position:"relative"}}><Stars/><Lumi size={72} mood="excited" level={1} animate/><h2 style={{color:C.goldLight,fontSize:22,fontFamily:C.fontDisplay,fontWeight:700,marginTop:14,textAlign:"center"}}>Check your email!</h2><p style={{color:C.textMuted,fontSize:14,fontFamily:C.font,textAlign:"center",lineHeight:1.7,maxWidth:300,marginTop:8}}>We sent a link to <strong style={{color:C.gold}}>{email}</strong></p><div style={{marginTop:24,width:"100%",maxWidth:280}}><Btn v="ghost" onClick={()=>setMode("signin")}>{T.backToSignIn}</Btn></div></div>);
   return(<div style={{minHeight:"100vh",background:`linear-gradient(180deg,${C.skyTop} 0%,${C.skyMid} 50%,${C.mountain} 80%,${C.green} 100%)`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"40px 28px",position:"relative"}}>
     <Stars/><div className="fu" style={{position:"relative",zIndex:1}}><Lumi size={80} mood="happy" level={1} animate/></div>
     <h1 className="fu s1" style={{color:C.goldLight,fontSize:34,fontFamily:C.fontDisplay,fontWeight:700,marginTop:8}}>AI Fluent</h1>
     <p className="fu s2" style={{color:C.textMuted,fontSize:14,fontFamily:C.font,marginBottom:28}}>Your climb to AI fluency starts here</p>
     <div style={{width:"100%",maxWidth:340,position:"relative",zIndex:1}}>
-      <div className="fu s3" style={{display:"flex",gap:4,marginBottom:18,background:"rgba(255,255,255,.04)",borderRadius:12,padding:3,border:`1px solid ${C.border}`}}>{["signin","signup"].map(m=><button key={m} onClick={()=>{setMode(m);setErr("")}} style={{flex:1,padding:"10px 0",borderRadius:10,border:"none",background:mode===m?"rgba(212,165,90,.12)":"transparent",color:mode===m?C.gold:C.textDim,fontSize:14,fontWeight:700,fontFamily:C.font}}>{m==="signin"?"Sign In":"Sign Up"}</button>)}</div>
+      <div className="fu s3" style={{display:"flex",gap:4,marginBottom:18,background:"rgba(255,255,255,.04)",borderRadius:12,padding:3,border:`1px solid ${C.border}`}}>{["signin","signup"].map(m=><button key={m} onClick={()=>{setMode(m);setErr("")}} style={{flex:1,padding:"10px 0",borderRadius:10,border:"none",background:mode===m?"rgba(212,165,90,.12)":"transparent",color:mode===m?C.gold:C.textDim,fontSize:14,fontWeight:700,fontFamily:C.font}}>{m==="signin"?T.signIn:T.signUp}</button>)}</div>
       <div className="fu s4" style={{display:"flex",flexDirection:"column",gap:10,marginBottom:14}}>
-        <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email" type="email" style={{width:"100%",background:"rgba(255,255,255,.05)",borderRadius:12,border:`1.5px solid ${C.border}`,padding:"13px 16px",color:C.text,fontSize:15,fontFamily:C.font,outline:"none"}}/>
-        <input value={pass} onChange={e=>setPass(e.target.value)} placeholder="Password" type="password" onKeyDown={e=>e.key==="Enter"&&go()} style={{width:"100%",background:"rgba(255,255,255,.05)",borderRadius:12,border:`1.5px solid ${C.border}`,padding:"13px 16px",color:C.text,fontSize:15,fontFamily:C.font,outline:"none"}}/>
+        <input value={email} onChange={e=>setEmail(e.target.value)} placeholder={T.email} type="email" style={{width:"100%",background:"rgba(255,255,255,.05)",borderRadius:12,border:`1.5px solid ${C.border}`,padding:"13px 16px",color:C.text,fontSize:15,fontFamily:C.font,outline:"none"}}/>
+        <input value={pass} onChange={e=>setPass(e.target.value)} placeholder={T.password} type="password" onKeyDown={e=>e.key==="Enter"&&go()} style={{width:"100%",background:"rgba(255,255,255,.05)",borderRadius:12,border:`1.5px solid ${C.border}`,padding:"13px 16px",color:C.text,fontSize:15,fontFamily:C.font,outline:"none"}}/>
       </div>
       {err&&<p className="fi" style={{color:C.red,fontSize:13,fontFamily:C.font,marginBottom:12,textAlign:"center"}}>{err}</p>}
-      <Btn onClick={go} disabled={loading}>{loading?"...":mode==="signin"?"Start Climbing":"Create Account"}</Btn>
+      <Btn onClick={go} disabled={loading}>{loading?"...":mode==="signin"?T.startClimbing:T.createAccount}</Btn>
     </div></div>);
 };
 
@@ -722,7 +722,7 @@ const WorldMap = ({profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfi
       <div style={{display:"flex",alignItems:"center",gap:10}}>
         <Lumi size={32} mood={streak>=7?"excited":"happy"} level={level}/>
         <div>
-          <p style={{color:C.text,fontSize:14,fontFamily:C.fontDisplay,fontWeight:700,margin:0}}>{greet()}, {name}</p>
+          <p style={{color:C.text,fontSize:14,fontFamily:C.fontDisplay,fontWeight:700,margin:0}}>{T.greeting(new Date().getHours())}, {name}</p>
           <p style={{color:C.textMuted,fontSize:11,fontFamily:C.font,margin:0}}>Altitude {level} · {pct}% to summit</p>
         </div>
       </div>
@@ -806,13 +806,13 @@ const WorldMap = ({profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfi
     <div style={{position:"absolute",bottom:0,left:0,right:0,zIndex:20,padding:"0 12px 12px",paddingBottom:"max(12px,env(safe-area-inset-bottom))"}}>
       <div style={{display:"flex",gap:8,background:dk?"rgba(6,13,26,.85)":"rgba(255,255,255,.85)",backdropFilter:"blur(16px)",borderRadius:18,padding:8,border:`1px solid ${dk?"rgba(255,255,255,.06)":"rgba(0,0,0,.08)"}`,boxShadow:dk?"none":"0 -2px 20px rgba(0,0,0,.06)"}}>
         <button onClick={onOpenChallenge} style={{flex:1,background:dk?"rgba(232,128,96,.08)":"rgba(232,128,96,.06)",border:`1px solid ${dk?"rgba(232,128,96,.15)":"rgba(232,128,96,.12)"}`,borderRadius:12,padding:"12px 10px",display:"flex",alignItems:"center",gap:8,textAlign:"left"}}>
-          <Icon type="challenge" size={22} color={dk?"#F0A878":"#C08058"}/><div><p style={{color:dk?"#F0A878":"#A06840",fontSize:12,fontWeight:700,fontFamily:C.font,margin:0}}>Daily Challenge</p><p style={{color:C.textDim,fontSize:9,fontFamily:C.font,margin:0}}>Keep your streak</p></div>
+          <Icon type="challenge" size={22} color={dk?"#F0A878":"#C08058"}/><div><p style={{color:dk?"#F0A878":"#A06840",fontSize:12,fontWeight:700,fontFamily:C.font,margin:0}}>{T.dailyChallenge}</p><p style={{color:C.textDim,fontSize:9,fontFamily:C.font,margin:0}}>{T.keepStreak}</p></div>
         </button>
         <button onClick={onOpenNews} style={{flex:1,background:dk?"rgba(212,165,90,.06)":"rgba(180,130,40,.05)",border:`1px solid ${dk?"rgba(212,165,90,.12)":"rgba(180,130,40,.1)"}`,borderRadius:12,padding:"12px 10px",display:"flex",alignItems:"center",gap:8,textAlign:"left"}}>
-          <Icon type="news" size={22} color={dk?"#E8C878":"#A08838"}/><div><p style={{color:dk?"#E8C878":"#806820",fontSize:12,fontWeight:700,fontFamily:C.font,margin:0}}>AI News</p><p style={{color:C.textDim,fontSize:9,fontFamily:C.font,margin:0}}>Live today</p></div>
+          <Icon type="news" size={22} color={dk?"#E8C878":"#A08838"}/><div><p style={{color:dk?"#E8C878":"#806820",fontSize:12,fontWeight:700,fontFamily:C.font,margin:0}}>{T.aiNews}</p><p style={{color:C.textDim,fontSize:9,fontFamily:C.font,margin:0}}>{T.live}</p></div>
         </button>
         <button onClick={onOpenTools} style={{flex:1,background:dk?"rgba(58,168,160,.06)":"rgba(42,128,120,.05)",border:`1px solid ${dk?"rgba(58,168,160,.12)":"rgba(42,128,120,.1)"}`,borderRadius:12,padding:"12px 10px",display:"flex",alignItems:"center",gap:8,textAlign:"left"}}>
-          <Icon type="tools" size={22} color={dk?"#68D8C8":"#388880"}/><div><p style={{color:dk?"#68D8C8":"#2A7068",fontSize:12,fontWeight:700,fontFamily:C.font,margin:0}}>AI Tools</p><p style={{color:C.textDim,fontSize:9,fontFamily:C.font,margin:0}}>6 tools</p></div>
+          <Icon type="tools" size={22} color={dk?"#68D8C8":"#388880"}/><div><p style={{color:dk?"#68D8C8":"#2A7068",fontSize:12,fontWeight:700,fontFamily:C.font,margin:0}}>{T.aiTools}</p><p style={{color:C.textDim,fontSize:9,fontFamily:C.font,margin:0}}>{T.tools6}</p></div>
         </button>
       </div>
     </div>
@@ -898,18 +898,18 @@ const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
         return<button key={i} onClick={()=>{if(!submitted)setSelected(i)}} disabled={submitted} className={`pop s${Math.min(i+1,5)}`}
           style={{background:showResult?(isCorrect?"rgba(74,186,120,.12)":isSelected?"rgba(216,88,88,.12)":"rgba(255,255,255,.03)"):(isSelected?"rgba(212,165,90,.1)":"rgba(255,255,255,.03)"),border:`1.5px solid ${showResult?(isCorrect?C.green:isSelected?C.red:C.border):(isSelected?C.gold:C.border)}`,borderRadius:14,padding:"13px 16px",textAlign:"left",width:"100%"}}>
           <span style={{color:showResult?(isCorrect?C.green:isSelected?C.red:C.textMuted):(isSelected?C.goldLight:C.textMuted),fontSize:14,fontWeight:isSelected?700:500,fontFamily:C.font}}>{showResult?(isCorrect?"✓ ":isSelected?"✗ ":""):isSelected?"● ":""}{o}</span></button>})}
-      {!submitted&&selected!==null&&<div style={{marginTop:8}}><Btn onClick={()=>{setSubmitted(true);setTotalPossible(tp=>tp+10);if(selected===currentP.correct){setPracticeScore(ps=>ps+10);SFX.play("correct")}else{SFX.play("wrong")}}}>Check Answer</Btn></div>}
+      {!submitted&&selected!==null&&<div style={{marginTop:8}}><Btn onClick={()=>{setSubmitted(true);setTotalPossible(tp=>tp+10);if(selected===currentP.correct){setPracticeScore(ps=>ps+10);SFX.play("correct")}else{SFX.play("wrong")}}}>{T.check}</Btn></div>}
       {submitted&&<div className="fu" style={{background:"rgba(212,165,90,.06)",border:`1px solid ${C.borderGold}`,borderRadius:14,padding:14,marginTop:10}}><p style={{color:C.goldLight,fontSize:13,fontWeight:700,fontFamily:C.font,margin:"0 0 4px"}}>💡 Why?</p><p style={{color:C.textMuted,fontSize:13,lineHeight:1.6,fontFamily:C.font,margin:0}}>{currentP.explain}</p></div>}
     </div>}
     {currentP.type==="free_response"&&<div>
       {currentP.hint&&!submitted&&<div className="fu" style={{background:"rgba(212,165,90,.04)",border:`1px solid ${C.borderGold}`,borderRadius:12,padding:10,marginBottom:12}}><p style={{color:C.gold,fontSize:12,fontFamily:C.font,margin:0}}>💡 Hint: {currentP.hint}</p></div>}
       <textarea value={freeAns} onChange={e=>setFreeAns(e.target.value)} placeholder="Type your answer..." disabled={submitted} style={{width:"100%",minHeight:120,background:"rgba(255,255,255,.03)",borderRadius:14,border:`1px solid ${C.border}`,padding:14,color:C.text,fontSize:14,fontFamily:C.font,outline:"none",resize:"vertical",marginBottom:10}}/>
-      {!submitted&&<Btn onClick={gradeFreeResponse} disabled={!freeAns.trim()||grading}>{grading?"Lumi is reviewing...":"Submit for Review"}</Btn>}
-      {submitted&&feedback&&<div className="fu" style={{background:"rgba(212,165,90,.06)",border:`1px solid ${C.borderGold}`,borderRadius:14,padding:14,marginTop:10}}><div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}><Lumi size={22}/><span style={{color:C.goldLight,fontSize:13,fontWeight:700,fontFamily:C.font}}>Lumi's feedback</span></div><p style={{color:C.textMuted,fontSize:13,lineHeight:1.65,fontFamily:C.font,margin:0}}><Md text={feedback}/></p></div>}
+      {!submitted&&<Btn onClick={gradeFreeResponse} disabled={!freeAns.trim()||grading}>{grading?T.lumiReviewing:"Submit for Review"}</Btn>}
+      {submitted&&feedback&&<div className="fu" style={{background:"rgba(212,165,90,.06)",border:`1px solid ${C.borderGold}`,borderRadius:14,padding:14,marginTop:10}}><div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}><Lumi size={22}/><span style={{color:C.goldLight,fontSize:13,fontWeight:700,fontFamily:C.font}}>{T.lumiFeedback}</span></div><p style={{color:C.textMuted,fontSize:13,lineHeight:1.65,fontFamily:C.font,margin:0}}><Md text={feedback}/></p></div>}
     </div>}
     {submitted&&<div style={{marginTop:14}}>
-      {practiceIdx<practice.length-1?<Btn v="teal" onClick={()=>{setPracticeIdx(practiceIdx+1);setSelected(null);setSubmitted(false);setFreeAns("");setFeedback("")}}>Next Question →</Btn>
-      :<Btn v="gold" onClick={()=>{const p=totalPossible>0?Math.round((practiceScore/totalPossible)*100):0;try{SFX.play(p>=70?"triumph":p>=50?"sparkle":"fail")}catch(e){}setShowResults(true)}}>See My Results →</Btn>}
+      {practiceIdx<practice.length-1?<Btn v="teal" onClick={()=>{setPracticeIdx(practiceIdx+1);setSelected(null);setSubmitted(false);setFreeAns("");setFeedback("")}}>{T.nextQ}</Btn>
+      :<Btn v="gold" onClick={()=>{const p=totalPossible>0?Math.round((practiceScore/totalPossible)*100):0;try{SFX.play(p>=70?"triumph":p>=50?"sparkle":"fail")}catch(e){}setShowResults(true)}}>{T.seeResults}</Btn>}
     </div>}
   </div>);
 
@@ -928,7 +928,7 @@ const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
         <p style={{color:C.textMuted,fontSize:14,fontFamily:C.font,lineHeight:1.6,margin:"0 0 24px"}}>{alt.msg}</p>
         <div style={{background:"rgba(255,255,255,.03)",borderRadius:14,padding:16,marginBottom:20,border:`1px solid ${C.border}`}}>
           <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}>
-            <span style={{color:C.textDim,fontSize:13,fontFamily:C.font}}>Points earned</span>
+            <span style={{color:C.textDim,fontSize:13,fontFamily:C.font}}>{T.points}</span>
             <span style={{color:C.text,fontSize:13,fontWeight:700,fontFamily:C.font}}>{practiceScore}/{totalPossible}</span>
           </div>
           <div style={{height:8,background:"rgba(255,255,255,.06)",borderRadius:4,overflow:"hidden"}}>
@@ -948,14 +948,14 @@ const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
           }}>
             {pct>=90?"🏔️ Claim Summit Rating!":"⛰️ Claim Ridge Rating!"}
           </Btn>
-          {pct<90&&<Btn v="ghost" onClick={()=>{setShowResults(false);setPracticeIdx(0);setSelected(null);setSubmitted(false);setFreeAns("");setFeedback("");setPracticeScore(0);setTotalPossible(0);setView("practice")}}>Retry for a higher rating →</Btn>}
-          <Btn v="ghost" onClick={()=>setShowShare(true)}>📤 Share My Rating</Btn>
+          {pct<90&&<Btn v="ghost" onClick={()=>{setShowResults(false);setPracticeIdx(0);setSelected(null);setSubmitted(false);setFreeAns("");setFeedback("");setPracticeScore(0);setTotalPossible(0);setView("practice")}}>{T.retry}</Btn>}
+          <Btn v="ghost" onClick={()=>setShowShare(true)}>{T.shareRating}</Btn>
           {showShare&&<ShareCard type="altitude" data={{altitude:alt.label,pct,lesson:lesson?.title||""}} onClose={()=>setShowShare(false)}/>}
         </div>
         :<div style={{display:"flex",flexDirection:"column",gap:8}}>
-          <p style={{color:C.textMuted,fontSize:13,fontFamily:C.font,margin:"0 0 8px"}}>You need 70% or higher to pass this lesson</p>
-          <Btn v="gold" onClick={()=>{setShowResults(false);setPracticeIdx(0);setSelected(null);setSubmitted(false);setFreeAns("");setFeedback("");setPracticeScore(0);setTotalPossible(0);setView("practice")}}>Try Again</Btn>
-          <Btn v="ghost" onClick={()=>{setShowResults(false);setView("lesson")}}>← Review the lesson first</Btn>
+          <p style={{color:C.textMuted,fontSize:13,fontFamily:C.font,margin:"0 0 8px"}}>{T.need70}</p>
+          <Btn v="gold" onClick={()=>{setShowResults(false);setPracticeIdx(0);setSelected(null);setSubmitted(false);setFreeAns("");setFeedback("");setPracticeScore(0);setTotalPossible(0);setView("practice")}}>{T.tryAgain}</Btn>
+          <Btn v="ghost" onClick={()=>{setShowResults(false);setView("lesson")}}>{T.reviewFirst}</Btn>
         </div>}
       </div>
     </div>);
@@ -964,16 +964,16 @@ const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
   // TUTOR
   if(view==="tutor")return(<div style={{height:"100vh",display:"flex",flexDirection:"column",background:C.bgDark}}>
     <div style={{padding:"12px 16px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",gap:8,flexShrink:0,background:C.bgCard}}>
-      <button onClick={()=>setView("lesson")} style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700}}>← Back</button>
-      <div style={{flex:1,textAlign:"center",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><Lumi size={22} level={level}/><span style={{color:C.text,fontSize:13,fontWeight:700,fontFamily:C.font}}>Lumi — Guide</span></div>
+      <button onClick={()=>setView("lesson")} style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700}}>{T.back}</button>
+      <div style={{flex:1,textAlign:"center",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><Lumi size={22} level={level}/><span style={{color:C.text,fontSize:13,fontWeight:700,fontFamily:C.font}}>{T.lumiGuide}</span></div>
     </div>
     <div ref={ref} style={{flex:1,overflowY:"auto",padding:16}}>
       <Bub from="lumi" text={`Hey ${userName}! Welcome to ${loc.name}. I'm here to help with "${lesson?.title}" — ask me anything, nothing is too basic!`}/>
       {msgs.map((m,i)=><Bub key={i} from={m.from} text={m.text}/>)}{typing&&<Bub from="lumi" typing/>}
-      {msgs.length===0&&lesson&&<div className="fu s2" style={{marginTop:14}}><p style={{color:C.textDim,fontSize:12,fontFamily:C.font,fontWeight:600,margin:"0 0 10px"}}>People often ask...</p>{lesson.questions.map((q,i)=><button key={i} onClick={()=>ask(q)} style={{display:"block",width:"100%",background:"rgba(255,255,255,.03)",border:`1px solid ${C.border}`,borderRadius:12,padding:"10px 14px",marginBottom:7,textAlign:"left"}}><span style={{color:C.textMuted,fontSize:13,fontFamily:C.font}}>{q}</span></button>)}</div>}
+      {msgs.length===0&&lesson&&<div className="fu s2" style={{marginTop:14}}><p style={{color:C.textDim,fontSize:12,fontFamily:C.font,fontWeight:600,margin:"0 0 10px"}}>{T.peoplAsk}</p>{lesson.questions.map((q,i)=><button key={i} onClick={()=>ask(q)} style={{display:"block",width:"100%",background:"rgba(255,255,255,.03)",border:`1px solid ${C.border}`,borderRadius:12,padding:"10px 14px",marginBottom:7,textAlign:"left"}}><span style={{color:C.textMuted,fontSize:13,fontFamily:C.font}}>{q}</span></button>)}</div>}
     </div>
     <div style={{padding:"8px 14px 12px",borderTop:`1px solid ${C.border}`,display:"flex",gap:8,flexShrink:0,background:C.bgCard,paddingBottom:"max(12px,env(safe-area-inset-bottom))"}}>
-      <input value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} placeholder="Ask Lumi..." style={{flex:1,background:"rgba(255,255,255,.04)",borderRadius:12,border:`1px solid ${C.border}`,padding:"11px 14px",color:C.text,fontSize:14,fontFamily:C.font,outline:"none"}}/>
+      <input value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} placeholder={T.askLumi+"..."} style={{flex:1,background:"rgba(255,255,255,.04)",borderRadius:12,border:`1px solid ${C.border}`,padding:"11px 14px",color:C.text,fontSize:14,fontFamily:C.font,outline:"none"}}/>
       <button onClick={send} style={{width:42,height:42,borderRadius:12,background:`linear-gradient(135deg,${C.gold},${C.goldDark})`,border:"none",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><span style={{color:"#fff",fontSize:16}}>↑</span></button>
     </div></div>);
 
@@ -984,16 +984,16 @@ const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
     <h1 className="fu s1" style={{color:C.text,fontSize:24,fontFamily:C.fontDisplay,fontWeight:700,margin:"0 0 22px",lineHeight:1.3}}>{lesson.title}</h1>
     {lesson.sections.map((sec,i)=>(<div key={i} className={`fu s${Math.min(i+2,5)}`} style={{marginBottom:26}}><h3 style={{color:C.text,fontSize:16,fontWeight:700,fontFamily:C.font,margin:"0 0 8px"}}>{sec.h}</h3><p style={{color:C.textMuted,fontSize:14,lineHeight:1.8,fontFamily:C.font,whiteSpace:"pre-wrap"}}>{sec.body}</p></div>))}
     <button onClick={()=>setView("tutor")} className="fu" style={{width:"100%",background:"rgba(212,165,90,.06)",border:`1px solid ${C.borderGold}`,borderRadius:16,padding:16,textAlign:"left",marginBottom:10}}>
-      <div style={{display:"flex",alignItems:"center",gap:10}}><Lumi size={32} mood="happy" level={level} animate/><div><p style={{color:C.goldLight,fontSize:14,fontWeight:700,fontFamily:C.font,margin:0}}>Questions? Ask Lumi</p><p style={{color:C.textDim,fontSize:12,fontFamily:C.font,margin:"2px 0 0"}}>Your guide is here to help</p></div></div>
+      <div style={{display:"flex",alignItems:"center",gap:10}}><Lumi size={32} mood="happy" level={level} animate/><div><p style={{color:C.goldLight,fontSize:14,fontWeight:700,fontFamily:C.font,margin:0}}>{T.questionsHelp}</p><p style={{color:C.textDim,fontSize:12,fontFamily:C.font,margin:"2px 0 0"}}>{T.guideHere}</p></div></div>
     </button>
-    {practice.length>0?<Btn v="teal" onClick={()=>{setView("practice");resetPractice()}}>Start Practice →</Btn>
-    :<Btn onClick={async()=>{await db.completeLesson(uid,locId,lessonIdx);onComplete();setView("intro");setLessonIdx(null)}}>Complete lesson →</Btn>}
+    {practice.length>0?<Btn v="teal" onClick={()=>{setView("practice");resetPractice()}}>{T.startPractice}</Btn>
+    :<Btn onClick={async()=>{await db.completeLesson(uid,locId,lessonIdx);onComplete();setView("intro");setLessonIdx(null)}}>{T.completeLesson}</Btn>}
   </div>);
 
   // INTRO — LESSON SELECTOR
   return(<div style={{height:"100vh",overflowY:"auto",background:`linear-gradient(180deg,${C.skyTop},${C.skyMid} 40%,${C.bgDark})`,padding:"14px 20px 40px",position:"relative"}}>
     <Stars/>
-    <button onClick={onBack} style={{background:"rgba(255,255,255,.05)",border:`1px solid ${C.border}`,borderRadius:10,padding:"7px 14px",color:C.gold,fontSize:13,fontFamily:C.font,fontWeight:700,position:"relative",zIndex:10,marginBottom:16}}>← Map</button>
+    <button onClick={onBack} style={{background:"rgba(255,255,255,.05)",border:`1px solid ${C.border}`,borderRadius:10,padding:"7px 14px",color:C.gold,fontSize:13,fontFamily:C.font,fontWeight:700,position:"relative",zIndex:10,marginBottom:16}}>{T.map}</button>
     <div style={{position:"relative",zIndex:5}}>
       <div className="fu" style={{display:"flex",alignItems:"center",gap:12,marginBottom:6}}>
         <span style={{fontSize:40}}>{loc.icon}</span>
@@ -1076,29 +1076,29 @@ const NewsView = ({uid,onBack}) => {
 
   // Chat
   if(chat&&art)return(<div style={{height:"100vh",display:"flex",flexDirection:"column",background:C.bgDark}}>
-    <div style={{padding:"12px 16px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",gap:8,flexShrink:0,background:C.bgCard}}><button onClick={()=>{setChat(false);setMsgs([]);setSid(null)}} style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700}}>← Story</button><div style={{flex:1,textAlign:"center"}}><span style={{color:C.text,fontSize:13,fontWeight:700,fontFamily:C.font}}>Ask Lumi</span></div></div>
+    <div style={{padding:"12px 16px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",gap:8,flexShrink:0,background:C.bgCard}}><button onClick={()=>{setChat(false);setMsgs([]);setSid(null)}} style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700}}>{T.back}</button><div style={{flex:1,textAlign:"center"}}><span style={{color:C.text,fontSize:13,fontWeight:700,fontFamily:C.font}}>Ask Lumi</span></div></div>
     <div ref={ref} style={{flex:1,overflowY:"auto",padding:16}}><Bub from="lumi" text={`I've got the details on "${art.title}" — what would you like to know?`}/>{msgs.map((m,i)=><Bub key={i} from={m.from} text={m.text}/>)}{typing&&<Bub from="lumi" typing/>}</div>
     <div style={{padding:"8px 14px 12px",borderTop:`1px solid ${C.border}`,display:"flex",gap:8,flexShrink:0,paddingBottom:"max(12px,env(safe-area-inset-bottom))"}}><input value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} placeholder="Ask about this..." style={{flex:1,background:"rgba(255,255,255,.04)",borderRadius:12,border:`1px solid ${C.border}`,padding:"11px 14px",color:C.text,fontSize:14,fontFamily:C.font,outline:"none"}}/><button onClick={send} style={{width:42,height:42,borderRadius:12,background:`linear-gradient(135deg,${C.gold},${C.goldDark})`,border:"none",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><span style={{color:"#fff",fontSize:16}}>↑</span></button></div>
   </div>);
 
   // Article detail
   if(art)return(<div style={{height:"100vh",overflowY:"auto",background:C.bgDark,padding:"14px 20px 100px"}}>
-    <button onClick={()=>setOpen(null)} style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700,marginBottom:14}}>← Back</button>
+    <button onClick={()=>setOpen(null)} style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700,marginBottom:14}}>{T.back}</button>
     <div className="fu" style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}><span style={{fontSize:10,color:C.gold,fontWeight:700,fontFamily:C.font,textTransform:"uppercase",letterSpacing:.8}}>{art.category}</span>{art.source&&<span style={{color:C.textDim,fontSize:10,fontFamily:C.font}}>· {art.source}</span>}</div>
     <h1 className="fu s1" style={{color:C.text,fontSize:21,fontFamily:C.fontDisplay,fontWeight:700,margin:"0 0 18px",lineHeight:1.35}}>{art.title}</h1>
-    <div className="fu s2" style={{background:"rgba(74,186,120,.06)",border:"1px solid rgba(74,186,120,.12)",borderRadius:16,padding:16,marginBottom:12}}><p style={{color:C.green,fontSize:13,fontWeight:700,fontFamily:C.font,margin:"0 0 6px"}}>The simple version</p><p style={{color:C.textMuted,fontSize:14,lineHeight:1.7,fontFamily:C.font,margin:0}}>{art.summary}</p></div>
-    <div className="fu s3" style={{background:"rgba(212,165,90,.05)",border:`1px solid ${C.borderGold}`,borderRadius:16,padding:16,marginBottom:12}}><p style={{color:C.gold,fontSize:13,fontWeight:700,fontFamily:C.font,margin:"0 0 6px"}}>Why it matters to you</p><p style={{color:C.textMuted,fontSize:14,lineHeight:1.7,fontFamily:C.font,margin:0}}>{art.impact}</p></div>
-    <button onClick={()=>setChat(true)} className="fu s4" style={{width:"100%",background:"rgba(212,165,90,.05)",border:`1px solid ${C.borderGold}`,borderRadius:16,padding:14,textAlign:"left"}}><div style={{display:"flex",alignItems:"center",gap:10}}><Lumi size={30}/><div><p style={{color:C.goldLight,fontSize:14,fontWeight:700,fontFamily:C.font,margin:0}}>Ask Lumi about this</p><p style={{color:C.textDim,fontSize:11,fontFamily:C.font,margin:"2px 0 0"}}>Get it explained in plain language</p></div></div></button>
+    <div className="fu s2" style={{background:"rgba(74,186,120,.06)",border:"1px solid rgba(74,186,120,.12)",borderRadius:16,padding:16,marginBottom:12}}><p style={{color:C.green,fontSize:13,fontWeight:700,fontFamily:C.font,margin:"0 0 6px"}}>{T.simpleVersion}</p><p style={{color:C.textMuted,fontSize:14,lineHeight:1.7,fontFamily:C.font,margin:0}}>{art.summary}</p></div>
+    <div className="fu s3" style={{background:"rgba(212,165,90,.05)",border:`1px solid ${C.borderGold}`,borderRadius:16,padding:16,marginBottom:12}}><p style={{color:C.gold,fontSize:13,fontWeight:700,fontFamily:C.font,margin:"0 0 6px"}}>{T.whyMatters}</p><p style={{color:C.textMuted,fontSize:14,lineHeight:1.7,fontFamily:C.font,margin:0}}>{art.impact}</p></div>
+    <button onClick={()=>setChat(true)} className="fu s4" style={{width:"100%",background:"rgba(212,165,90,.05)",border:`1px solid ${C.borderGold}`,borderRadius:16,padding:14,textAlign:"left"}}><div style={{display:"flex",alignItems:"center",gap:10}}><Lumi size={30}/><div><p style={{color:C.goldLight,fontSize:14,fontWeight:700,fontFamily:C.font,margin:0}}>{T.askAboutThis}</p><p style={{color:C.textDim,fontSize:11,fontFamily:C.font,margin:"2px 0 0"}}>{T.explainPlain}</p></div></div></button>
   </div>);
 
   // News list
   return(<div style={{height:"100vh",overflowY:"auto",background:C.bgDark,padding:"14px 20px 40px"}}>
-    <button onClick={onBack} style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700,marginBottom:16}}>← Map</button>
-    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:4}}><h1 style={{color:C.text,fontSize:24,fontFamily:C.fontDisplay,fontWeight:700}}>AI News</h1><div style={{display:"flex",alignItems:"center",gap:4}}><div style={{width:6,height:6,borderRadius:"50%",background:C.green,animation:"twinkle 2s infinite"}}/><span style={{color:C.green,fontSize:11,fontFamily:C.font,fontWeight:600}}>Live</span></div></div>
-    <p style={{color:C.textDim,fontSize:13,fontFamily:C.font,marginBottom:18}}>Today's AI stories, simplified by Lumi</p>
+    <button onClick={onBack} style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700,marginBottom:16}}>{T.map}</button>
+    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:4}}><h1 style={{color:C.text,fontSize:24,fontFamily:C.fontDisplay,fontWeight:700}}>{T.aiNews}</h1><div style={{display:"flex",alignItems:"center",gap:4}}><div style={{width:6,height:6,borderRadius:"50%",background:C.green,animation:"twinkle 2s infinite"}}/><span style={{color:C.green,fontSize:11,fontFamily:C.font,fontWeight:600}}>{T.live}</span></div></div>
+    <p style={{color:C.textDim,fontSize:13,fontFamily:C.font,marginBottom:18}}>{T.newsDesc}</p>
     {loading?<div style={{display:"flex",flexDirection:"column",gap:10}}>
       {[1,2,3,4].map(i=><div key={i} className={`fu s${i}`} style={{background:C.bgCard,border:`1px solid ${C.border}`,borderRadius:14,padding:16}}><Skeleton lines={2}/></div>)}
-      <p style={{color:C.textDim,fontSize:12,fontFamily:C.font,textAlign:"center",marginTop:8}}>Lumi is searching for today's AI news...</p>
+      <p style={{color:C.textDim,fontSize:12,fontFamily:C.font,textAlign:"center",marginTop:8}}>{T.newsSearch}</p>
     </div>
     :<div style={{display:"flex",flexDirection:"column",gap:10}}>{articles.map((n,i)=>(<button key={i} className={`fu s${Math.min(i+1,5)}`} onClick={()=>setOpen(i)} style={{background:C.bgCard,border:`1px solid ${C.border}`,borderRadius:14,padding:14,textAlign:"left",width:"100%"}}>
       <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}><span style={{fontSize:10,color:C.gold,fontWeight:700,fontFamily:C.font,textTransform:"uppercase",letterSpacing:.8}}>{n.category}</span><span style={{color:C.textDim,fontSize:10,fontFamily:C.font}}>{n.timeAgo}</span>{n.source&&<span style={{color:C.textDim,fontSize:10,fontFamily:C.font}}>· {n.source}</span>}</div>
@@ -1123,9 +1123,9 @@ const ChallengeView = ({uid,onBack}) => {
 
   return(<div style={{height:"100vh",overflowY:"auto",background:`linear-gradient(180deg,${C.bgDark},${C.bgCard})`,padding:"14px 20px 40px"}}>
     {showConfetti&&<Confetti/>}
-    <button onClick={onBack} style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700,marginBottom:16}}>← Map</button>
-    <div className="fu" style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}><span style={{fontSize:24}}>⚡</span><h1 style={{color:C.text,fontSize:22,fontFamily:C.fontDisplay,fontWeight:700,margin:0}}>Daily Challenge</h1></div>
-    <p style={{color:C.textDim,fontSize:12,fontFamily:C.font,marginBottom:18}}>Complete today's challenge to keep your streak alive</p>
+    <button onClick={onBack} style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700,marginBottom:16}}>{T.map}</button>
+    <div className="fu" style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}><span style={{fontSize:24}}>⚡</span><h1 style={{color:C.text,fontSize:22,fontFamily:C.fontDisplay,fontWeight:700,margin:0}}>{T.dailyChallenge}</h1></div>
+    <p style={{color:C.textDim,fontSize:12,fontFamily:C.font,marginBottom:18}}>{T.challengeDesc}</p>
 
     <div className="fu s1" style={{background:"rgba(232,128,96,.06)",border:"1px solid rgba(232,128,96,.15)",borderRadius:16,padding:16,marginBottom:16}}>
       <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}><Lumi size={28} mood="excited"/><div><p style={{color:C.coral,fontSize:15,fontWeight:700,fontFamily:C.font,margin:0}}>{challenge.title}</p><p style={{color:C.textDim,fontSize:11,fontFamily:C.font,margin:"2px 0 0"}}>{challenge.desc}</p></div></div>
@@ -1134,7 +1134,7 @@ const ChallengeView = ({uid,onBack}) => {
 
     {!submitted?<>
       <textarea value={response} onChange={e=>setResponse(e.target.value)} placeholder="Type your response here..." style={{width:"100%",minHeight:140,background:"rgba(255,255,255,.03)",borderRadius:14,border:`1px solid ${C.border}`,padding:14,color:C.text,fontSize:14,fontFamily:C.font,outline:"none",resize:"vertical",marginBottom:12}}/>
-      <Btn onClick={submit} disabled={!response.trim()||grading} v="teal">{grading?"Lumi is reviewing...":"Submit Challenge ⚡"}</Btn>
+      <Btn onClick={submit} disabled={!response.trim()||grading} v="teal">{grading?T.lumiReviewing:"Submit Challenge ⚡"}</Btn>
     </>:<div className="fu" style={{background:"rgba(212,165,90,.06)",border:`1px solid ${C.borderGold}`,borderRadius:16,padding:16}}>
       <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}><Lumi size={28} mood="excited" animate/><span style={{color:C.goldLight,fontSize:15,fontWeight:700,fontFamily:C.font}}>Lumi's Review</span></div>
       <p style={{color:C.textMuted,fontSize:14,lineHeight:1.7,fontFamily:C.font,margin:0,whiteSpace:"pre-wrap"}}>{feedback}</p>
@@ -1148,8 +1148,8 @@ const AchievementsView = ({profile,progress,onBack}) => {
   const earned=ACHIEVEMENTS.filter(a=>a.condition(progress,profile));
   const locked=ACHIEVEMENTS.filter(a=>!a.condition(progress,profile));
   return(<div style={{height:"100vh",overflowY:"auto",background:`linear-gradient(180deg,${C.bgDark},${C.bgCard})`,padding:"14px 20px 40px"}}>
-    <button onClick={onBack} style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700,marginBottom:16}}>← Map</button>
-    <div className="fu" style={{display:"flex",alignItems:"center",gap:10,marginBottom:18}}><span style={{fontSize:24}}>🏆</span><h1 style={{color:C.text,fontSize:22,fontFamily:C.fontDisplay,fontWeight:700,margin:0}}>Achievements</h1><span style={{color:C.gold,fontSize:14,fontWeight:700,fontFamily:C.font}}>{earned.length}/{ACHIEVEMENTS.length}</span></div>
+    <button onClick={onBack} style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700,marginBottom:16}}>{T.map}</button>
+    <div className="fu" style={{display:"flex",alignItems:"center",gap:10,marginBottom:18}}><span style={{fontSize:24}}>🏆</span><h1 style={{color:C.text,fontSize:22,fontFamily:C.fontDisplay,fontWeight:700,margin:0}}>{T.achievements}</h1><span style={{color:C.gold,fontSize:14,fontWeight:700,fontFamily:C.font}}>{earned.length}/{ACHIEVEMENTS.length}</span></div>
     {earned.length>0&&<><p style={{color:C.green,fontSize:12,fontWeight:700,fontFamily:C.font,textTransform:"uppercase",letterSpacing:1,marginBottom:10}}>Earned</p>
       <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:20}}>{earned.map(a=>(<div key={a.id} className="fu" style={{background:"rgba(74,186,120,.06)",border:"1px solid rgba(74,186,120,.12)",borderRadius:14,padding:"12px 16px",display:"flex",alignItems:"center",gap:12}}>
         <span style={{fontSize:28}}>{a.icon}</span><div><p style={{color:C.text,fontSize:14,fontWeight:700,fontFamily:C.font,margin:0}}>{a.name}</p><p style={{color:C.textMuted,fontSize:12,fontFamily:C.font,margin:"2px 0 0"}}>{a.desc}</p></div>
@@ -1170,11 +1170,11 @@ const ToolsView = ({uid,onBack}) => {
 
   if(result)return(<div style={{height:"100vh",overflowY:"auto",background:C.bgDark,padding:"14px 20px 40px"}}><button onClick={reset} style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700,marginBottom:14}}>← Tools</button><div className="fu" style={{display:"flex",alignItems:"center",gap:8,marginBottom:14}}><Lumi size={24}/><h2 style={{color:C.text,fontSize:18,fontFamily:C.fontDisplay,fontWeight:700,margin:0}}>Here's your result</h2></div><div className="fu s1" style={{background:"rgba(212,165,90,.05)",border:`1px solid ${C.borderGold}`,borderRadius:16,padding:16,marginBottom:14}}><p style={{color:C.text,fontSize:14,lineHeight:1.75,fontFamily:C.font,whiteSpace:"pre-wrap"}}>{result}</p></div><div style={{display:"flex",gap:8}}><div style={{flex:1}}><Btn v="ghost" onClick={()=>navigator.clipboard?.writeText(result)}>Copy</Btn></div><div style={{flex:1}}><Btn v="ghost" onClick={reset}>New</Btn></div></div></div>);
   if(gen)return(<div style={{height:"100vh",background:C.bgDark,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}><Lumi size={56} mood="thinking" animate/><p className="fu" style={{color:C.textMuted,fontSize:15,fontFamily:C.font,marginTop:14}}>Working on it...</p></div>);
-  if(wf){const s=wf.steps[step];return(<div style={{height:"100vh",overflowY:"auto",background:C.bgDark,padding:"14px 20px 40px"}}><button onClick={reset} style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700,marginBottom:10}}>← Back</button><div style={{display:"flex",gap:3,marginBottom:18}}>{wf.steps.map((_,i)=><div key={i} style={{flex:1,height:4,borderRadius:2,background:i<=step?C.gold:"rgba(255,255,255,.06)",transition:"all .3s"}}/>)}</div><p style={{color:C.textDim,fontSize:11,fontFamily:C.font,fontWeight:700,marginBottom:3}}>Step {step+1}/{wf.steps.length}</p><h2 className="fu" style={{color:C.text,fontSize:20,fontFamily:C.fontDisplay,fontWeight:700,margin:"0 0 18px"}}>{s.q}</h2>
+  if(wf){const s=wf.steps[step];return(<div style={{height:"100vh",overflowY:"auto",background:C.bgDark,padding:"14px 20px 40px"}}><button onClick={reset} style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700,marginBottom:10}}>{T.back}</button><div style={{display:"flex",gap:3,marginBottom:18}}>{wf.steps.map((_,i)=><div key={i} style={{flex:1,height:4,borderRadius:2,background:i<=step?C.gold:"rgba(255,255,255,.06)",transition:"all .3s"}}/>)}</div><p style={{color:C.textDim,fontSize:11,fontFamily:C.font,fontWeight:700,marginBottom:3}}>Step {step+1}/{wf.steps.length}</p><h2 className="fu" style={{color:C.text,fontSize:20,fontFamily:C.fontDisplay,fontWeight:700,margin:"0 0 18px"}}>{s.q}</h2>
     {s.free?<div className="fu s1"><textarea value={ft} onChange={e=>setFt(e.target.value)} placeholder={s.ph} style={{width:"100%",minHeight:100,background:"rgba(255,255,255,.03)",borderRadius:14,border:`1px solid ${C.border}`,padding:14,color:C.text,fontSize:14,fontFamily:C.font,outline:"none",resize:"vertical"}}/><div style={{marginTop:10}}><Btn onClick={()=>pick(ft||"General")} disabled={!ft.trim()}>{step<wf.steps.length-1?"Next →":"Generate"}</Btn></div></div>
     :<div style={{display:"flex",flexDirection:"column",gap:8}}>{s.opts.map((o,i)=><button key={o} className={`pop s${Math.min(i+1,5)}`} onClick={()=>pick(o)} style={{background:"rgba(255,255,255,.03)",border:`1.5px solid ${C.border}`,borderRadius:12,padding:"12px 16px",textAlign:"left",width:"100%"}}><span style={{color:C.textMuted,fontSize:14,fontFamily:C.font}}>{o}</span></button>)}</div>}
   </div>)}
-  return(<div style={{height:"100vh",overflowY:"auto",background:C.bgDark,padding:"14px 20px 40px"}}><button onClick={onBack} style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700,marginBottom:16}}>← Map</button><h1 style={{color:C.text,fontSize:24,fontFamily:C.fontDisplay,fontWeight:700,marginBottom:4}}>AI Tools</h1><p style={{color:C.textDim,fontSize:13,fontFamily:C.font,marginBottom:18}}>Guided step-by-step workflows</p>
+  return(<div style={{height:"100vh",overflowY:"auto",background:C.bgDark,padding:"14px 20px 40px"}}><button onClick={onBack} style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700,marginBottom:16}}>{T.map}</button><h1 style={{color:C.text,fontSize:24,fontFamily:C.fontDisplay,fontWeight:700,marginBottom:4}}>{T.aiTools}</h1><p style={{color:C.textDim,fontSize:13,fontFamily:C.font,marginBottom:18}}>{T.toolsDesc}</p>
     <div style={{display:"flex",flexDirection:"column",gap:10}}>{TOOLS.map((t,i)=>(<button key={t.id} className={`fu s${Math.min(i+1,5)}`} onClick={()=>{setWf(t);setStep(0);setAns([]);setFt("");setResult(null)}} style={{background:C.bgCard,border:`1px solid ${C.border}`,borderRadius:16,padding:"16px 18px",display:"flex",alignItems:"center",gap:14,textAlign:"left",width:"100%"}}><div style={{width:48,height:48,borderRadius:14,background:`${t.color}12`,border:`1px solid ${t.color}20`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Icon type={t.iconType} size={26} color={t.color}/></div><div style={{flex:1}}><p style={{color:C.text,fontSize:15,fontWeight:700,fontFamily:C.font,margin:0}}>{t.name}</p><p style={{color:C.textDim,fontSize:11,fontFamily:C.font,margin:"2px 0 0"}}>{t.desc}</p></div><span style={{color:t.color,fontSize:16,opacity:.5}}>→</span></button>))}</div>
   </div>);
 };
@@ -1191,7 +1191,7 @@ const ProfileView = ({profile,progress,onBack,onSignOut,onToggleTheme,onChangeLa
   const [showShare,setShowShare]=useState(false);
 
   return(<div style={{height:"100vh",overflowY:"auto",background:`linear-gradient(180deg,${C.skyTop},${C.bgDark})`,padding:"14px 20px 40px",position:"relative"}}><Stars/>
-    <button onClick={onBack} style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700,marginBottom:18,position:"relative",zIndex:1}}>← Map</button>
+    <button onClick={onBack} style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700,marginBottom:18,position:"relative",zIndex:1}}>{T.map}</button>
 
     {/* Profile header */}
     <div className="fu" style={{display:"flex",flexDirection:"column",alignItems:"center",marginBottom:20,position:"relative",zIndex:1}}>
@@ -1221,17 +1221,17 @@ const ProfileView = ({profile,progress,onBack,onSignOut,onToggleTheme,onChangeLa
 
     {/* Altitude ratings earned */}
     {totalScored>0&&<div className="fu s2" style={{background:C.bgCard,border:`1px solid ${C.border}`,borderRadius:16,padding:16,marginBottom:16,position:"relative",zIndex:1}}>
-      <p style={{color:C.text,fontSize:14,fontWeight:700,fontFamily:C.font,margin:"0 0 12px"}}>Altitude Ratings Earned</p>
+      <p style={{color:C.text,fontSize:14,fontWeight:700,fontFamily:C.font,margin:"0 0 12px"}}>{T.altRatings}</p>
       <div style={{display:"flex",gap:12,justifyContent:"center"}}>
-        <div style={{textAlign:"center"}}><span style={{fontSize:24}}>🏔️</span><p style={{color:"#FFD700",fontSize:18,fontWeight:800,fontFamily:C.font,margin:"2px 0 0"}}>{summitCount}</p><p style={{color:C.textDim,fontSize:9,fontFamily:C.font}}>Summit</p></div>
-        <div style={{textAlign:"center"}}><span style={{fontSize:24}}>⛰️</span><p style={{color:C.green,fontSize:18,fontWeight:800,fontFamily:C.font,margin:"2px 0 0"}}>{ridgeCount}</p><p style={{color:C.textDim,fontSize:9,fontFamily:C.font}}>Ridge</p></div>
-        <div style={{textAlign:"center"}}><span style={{fontSize:24}}>📊</span><p style={{color:C.teal,fontSize:18,fontWeight:800,fontFamily:C.font,margin:"2px 0 0"}}>{totalScored}</p><p style={{color:C.textDim,fontSize:9,fontFamily:C.font}}>Graded</p></div>
+        <div style={{textAlign:"center"}}><span style={{fontSize:24}}>🏔️</span><p style={{color:"#FFD700",fontSize:18,fontWeight:800,fontFamily:C.font,margin:"2px 0 0"}}>{summitCount}</p><p style={{color:C.textDim,fontSize:9,fontFamily:C.font}}>{T.summit}</p></div>
+        <div style={{textAlign:"center"}}><span style={{fontSize:24}}>⛰️</span><p style={{color:C.green,fontSize:18,fontWeight:800,fontFamily:C.font,margin:"2px 0 0"}}>{ridgeCount}</p><p style={{color:C.textDim,fontSize:9,fontFamily:C.font}}>{T.ridge}</p></div>
+        <div style={{textAlign:"center"}}><span style={{fontSize:24}}>📊</span><p style={{color:C.teal,fontSize:18,fontWeight:800,fontFamily:C.font,margin:"2px 0 0"}}>{totalScored}</p><p style={{color:C.textDim,fontSize:9,fontFamily:C.font}}>{T.graded}</p></div>
       </div>
     </div>}
 
     {/* Learning paths progress */}
     <div className="fu s3" style={{background:C.bgCard,border:`1px solid ${C.border}`,borderRadius:16,padding:16,marginBottom:16,position:"relative",zIndex:1}}>
-      <p style={{color:C.text,fontSize:14,fontWeight:700,fontFamily:C.font,margin:"0 0 12px"}}>Learning Paths</p>
+      <p style={{color:C.text,fontSize:14,fontWeight:700,fontFamily:C.font,margin:"0 0 12px"}}>{T.learningPaths}</p>
       <div style={{display:"flex",flexDirection:"column",gap:8}}>
         {LOCS.filter(l=>l.id!=="master").map(loc=>{
           const lessons=LESSONS[loc.id]||[];
@@ -1263,15 +1263,15 @@ const ProfileView = ({profile,progress,onBack,onSignOut,onToggleTheme,onChangeLa
 
     {/* Share progress */}
     <div className="fu s4" style={{marginBottom:8,position:"relative",zIndex:1}}>
-      <Btn v="gold" onClick={()=>setShowShare(true)}>📤 Share My Progress</Btn>
+      <Btn v="gold" onClick={()=>setShowShare(true)}>{T.shareProgress}</Btn>
     </div>
     {showShare&&<ShareCard type="progress" data={{lessons:progress.length,paths:donePaths.length,streak:streakData.current||0,level}} onClose={()=>setShowShare(false)}/>}
 
     <div className="fu s5" style={{display:"flex",gap:8,position:"relative",zIndex:1}}>
       <button onClick={onToggleTheme} style={{flex:1,background:C.mode==="dark"?"rgba(255,255,255,.05)":"rgba(0,0,0,.04)",border:`1px solid ${C.border}`,borderRadius:14,padding:"13px 24px",fontSize:15,fontWeight:700,fontFamily:C.font,color:C.text,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-        {C.mode==="dark"?"☀️ Light Mode":"🌙 Dark Mode"}
+        {C.mode==="dark"?T.lightMode:T.darkMode}
       </button>
-      <button onClick={onSignOut} style={{flex:1,background:C.mode==="dark"?"rgba(255,255,255,.05)":"rgba(0,0,0,.04)",border:`1px solid ${C.border}`,borderRadius:14,padding:"13px 24px",fontSize:15,fontWeight:700,fontFamily:C.font,color:C.textMuted}}>Sign Out</button>
+      <button onClick={onSignOut} style={{flex:1,background:C.mode==="dark"?"rgba(255,255,255,.05)":"rgba(0,0,0,.04)",border:`1px solid ${C.border}`,borderRadius:14,padding:"13px 24px",fontSize:15,fontWeight:700,fontFamily:C.font,color:C.textMuted}}>{T.signOut}</button>
     </div>
     <p className="fu s5" style={{textAlign:"center",color:C.textDim,fontSize:11,fontFamily:C.font,marginTop:16,position:"relative",zIndex:1}}>AI Fluent v5 · Powered by Claude</p>
   </div>);
@@ -1371,7 +1371,7 @@ const Tutorial = ({onComplete}) => {
         {slides.map((_,i)=><div key={i} style={{width:i===step?24:8,height:8,borderRadius:4,background:i<=step?C.gold:"rgba(255,255,255,.1)",transition:"all .4s"}}/>)}
       </div>
       {/* Skip */}
-      {!isLast&&<button onClick={onComplete} style={{position:"absolute",top:20,right:20,background:"none",border:"none",color:C.textDim,fontSize:13,fontFamily:C.font,zIndex:10}}>Skip</button>}
+      {!isLast&&<button onClick={onComplete} style={{position:"absolute",top:20,right:20,background:"none",border:"none",color:C.textDim,fontSize:13,fontFamily:C.font,zIndex:10}}>{T.skip}</button>}
       {/* Content */}
       <div className="fu" key={step} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"20px 30px",position:"relative",zIndex:5}}>
         <div style={{marginBottom:24}}>{s.visual}</div>
@@ -1386,7 +1386,7 @@ const Tutorial = ({onComplete}) => {
         }}>
           {isLast?"Start My Journey →":"Next"}
         </Btn>
-        {step>0&&!isLast&&<button onClick={()=>setStep(step-1)} style={{display:"block",width:"100%",background:"none",border:"none",color:C.textDim,fontSize:13,fontFamily:C.font,marginTop:12,textAlign:"center"}}>← Back</button>}
+        {step>0&&!isLast&&<button onClick={()=>setStep(step-1)} style={{display:"block",width:"100%",background:"none",border:"none",color:C.textDim,fontSize:13,fontFamily:C.font,marginTop:12,textAlign:"center"}}>{T.back}</button>}
       </div>
     </div>
   );
@@ -1435,7 +1435,7 @@ export default function AIFluent(){
   // Record streak on initial load if user is active
   useEffect(()=>{if(user) Streak.check()},[user]);
 
-  if(loading)return<><style>{getCss()}</style><div onClick={()=>setLoading(false)} style={{height:"100vh",background:`linear-gradient(180deg,${C.skyTop},${C.skyMid})`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",position:"relative",cursor:"pointer"}}><Stars/><Lumi size={56} mood="happy" level={1} animate/><p style={{color:C.textMuted,fontSize:14,fontFamily:"'Nunito',sans-serif",marginTop:14}}>Loading AI Fluent...</p><p style={{color:C.textDim,fontSize:11,fontFamily:"'Nunito',sans-serif",marginTop:20}}>Tap anywhere if stuck</p></div></>;
+  if(loading)return<><style>{getCss()}</style><div onClick={()=>setLoading(false)} style={{height:"100vh",background:`linear-gradient(180deg,${C.skyTop},${C.skyMid})`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",position:"relative",cursor:"pointer"}}><Stars/><Lumi size={56} mood="happy" level={1} animate/><p style={{color:C.textMuted,fontSize:14,fontFamily:"'Nunito',sans-serif",marginTop:14}}>{T.loading}</p><p style={{color:C.textDim,fontSize:11,fontFamily:"'Nunito',sans-serif",marginTop:20}}>{T.tapIfStuck}</p></div></>;
   if(!user)return<><style>{getCss()}</style><AuthScreen/></>;
   if(profile&&!profile.onboarded)return<><style>{getCss()}</style><Onboarding uid={user.id} onDone={refresh}/></>;
   if(showTutorial&&user)return<><style>{getCss()}</style><Tutorial onComplete={()=>{localStorage.setItem("ai_fluent_tutorial_seen","1");setShowTutorial(false)}}/></>;
