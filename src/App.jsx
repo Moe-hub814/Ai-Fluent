@@ -46,6 +46,45 @@ let C = {...THEMES[_theme]};
 const setTheme = (t) => { _theme = t; C = {...THEMES[t]}; localStorage.setItem("ai_fluent_theme", t) };
 const getTheme = () => _theme;
 
+// LANGUAGE SYSTEM
+const LANGS={en:{name:"English",flag:"🇺🇸",dir:"ltr"},ar:{name:"العربية",flag:"🇸🇦",dir:"rtl"},fr:{name:"Français",flag:"🇫🇷",dir:"ltr"}};
+const UI={
+  en:{greeting:h=>h<12?"Good morning":h<17?"Good afternoon":"Good evening",map:"← Map",back:"← Back",signIn:"Sign In",signUp:"Sign Up",email:"Email",password:"Password",startClimbing:"Start Climbing",createAccount:"Create Account",checkEmail:"Check your email!",weSentLink:"We sent a link to",loading:"Loading AI Fluent...",tapIfStuck:"Tap anywhere if stuck",startPractice:"Start Practice →",completeLesson:"Complete lesson →",nextQ:"Next Question →",seeResults:"See My Results →",retry:"Retry for a higher rating →",tryAgain:"Try Again",reviewFirst:"← Review the lesson first",need70:"You need 70% or higher to pass this lesson",points:"Points earned",shareRating:"📤 Share My Rating",shareProgress:"📤 Share My Progress",askLumi:"Ask Lumi",questionsHelp:"Questions? Ask Lumi",guideHere:"Your guide is here to help",peoplAsk:"People often ask...",lumiGuide:"Lumi — Guide",hint:"Hint",why:"Why?",check:"Check Answer",lumiFeedback:"Lumi's feedback",lumiReviewing:"Lumi is reviewing...",submit:"Submit for Review",dailyChallenge:"Daily Challenge",keepStreak:"Keep your streak",aiNews:"AI News",live:"Live",newsDesc:"Today's AI stories, simplified by Lumi",newsSearch:"Lumi is searching for today's AI news...",aiTools:"AI Tools",toolsDesc:"Guided step-by-step workflows",profile:"Profile",dayStreak:"Day Streak",lessonsDone:"Lessons Done",lumiChats:"Lumi Chats",achievements:"Achievements",altRatings:"Altitude Ratings Earned",summit:"Summit",ridge:"Ridge",graded:"Graded",learningPaths:"Learning Paths",calendar:"Activity Calendar",bestStreak:"Best streak",freezes:"remaining",lightMode:"☀️ Light Mode",darkMode:"🌙 Dark Mode",signOut:"Sign Out",language:"Language",lessons:"lessons",sections:"sections",practice:"practice",completed:"Completed",submitChallenge:"Submit Challenge ⚡",challengeComplete:"🔥 Challenge complete!",challengeDesc:"Complete today's challenge to keep your streak alive",simpleVersion:"The simple version",whyMatters:"Why it matters to you",askAboutThis:"Ask Lumi about this",explainPlain:"Get it explained in plain language",claimSummit:"🏔️ Claim Summit Rating!",claimRidge:"⛰️ Claim Ridge Rating!",completeBtn:"✦ Complete Lesson",next:"Next",skip:"Skip",startJourney:"Start My Journey →",altitude:"Altitude",toSummit:"to summit",tapExplore:"Tap to explore",tools6:"6 tools"},
+  ar:{greeting:h=>h<12?"صباح الخير":h<17?"مساء الخير":"مساء الخير",map:"الخريطة →",back:"رجوع →",signIn:"تسجيل الدخول",signUp:"إنشاء حساب",email:"البريد الإلكتروني",password:"كلمة المرور",startClimbing:"ابدأ التسلق",createAccount:"إنشاء حساب",checkEmail:"!تحقق من بريدك",weSentLink:"أرسلنا رابطاً إلى",loading:"...جاري تحميل AI Fluent",tapIfStuck:"اضغط في أي مكان إذا توقف",startPractice:"← ابدأ التمرين",completeLesson:"← أكمل الدرس",nextQ:"← السؤال التالي",seeResults:"← عرض نتائجي",retry:"← أعد المحاولة لتقييم أعلى",tryAgain:"حاول مرة أخرى",reviewFirst:"راجع الدرس أولاً →",need70:"تحتاج 70% أو أعلى لاجتياز هذا الدرس",points:"النقاط المكتسبة",shareRating:"📤 شارك تقييمي",shareProgress:"📤 شارك تقدمي",askLumi:"اسأل لومي",questionsHelp:"أسئلة؟ اسأل لومي",guideHere:"مرشدك هنا للمساعدة",peoplAsk:"...الناس يسألون عادة",lumiGuide:"لومي — المرشد",hint:"تلميح",why:"لماذا؟",check:"تحقق من الإجابة",lumiFeedback:"ملاحظات لومي",lumiReviewing:"...لومي يراجع",submit:"أرسل للمراجعة",dailyChallenge:"التحدي اليومي",keepStreak:"حافظ على سلسلتك",aiNews:"أخبار الذكاء",live:"مباشر",newsDesc:"أخبار الذكاء اليوم مبسطة بواسطة لومي",newsSearch:"...لومي يبحث عن أخبار اليوم",aiTools:"أدوات الذكاء",toolsDesc:"سير عمل موجه خطوة بخطوة",profile:"الملف الشخصي",dayStreak:"أيام متتالية",lessonsDone:"دروس مكتملة",lumiChats:"محادثات لومي",achievements:"الإنجازات",altRatings:"تقييمات الارتفاع المكتسبة",summit:"القمة",ridge:"التلال",graded:"مُقيَّم",learningPaths:"مسارات التعلم",calendar:"تقويم النشاط",bestStreak:"أفضل سلسلة",freezes:"متبقية",lightMode:"☀️ وضع فاتح",darkMode:"🌙 وضع داكن",signOut:"تسجيل الخروج",language:"اللغة",lessons:"دروس",sections:"أقسام",practice:"تمارين",completed:"مكتمل",submitChallenge:"أرسل التحدي ⚡",challengeComplete:"!🔥 التحدي مكتمل",challengeDesc:"أكمل تحدي اليوم للحفاظ على سلسلتك",simpleVersion:"النسخة المبسطة",whyMatters:"لماذا يهمك هذا",askAboutThis:"اسأل لومي عن هذا",explainPlain:"احصل على شرح بلغة بسيطة",claimSummit:"🏔️ !احصل على تقييم القمة",claimRidge:"⛰️ !احصل على تقييم التلال",completeBtn:"✦ أكمل الدرس",next:"التالي",skip:"تخطي",startJourney:"← ابدأ رحلتي",altitude:"الارتفاع",toSummit:"إلى القمة",tapExplore:"اضغط للاستكشاف",tools6:"6 أدوات"},
+  fr:{greeting:h=>h<12?"Bonjour":h<17?"Bon après-midi":"Bonsoir",map:"← Carte",back:"← Retour",signIn:"Se connecter",signUp:"S'inscrire",email:"E-mail",password:"Mot de passe",startClimbing:"Commencer",createAccount:"Créer un compte",checkEmail:"Vérifiez votre e-mail !",weSentLink:"Nous avons envoyé un lien à",loading:"Chargement d'AI Fluent...",tapIfStuck:"Appuyez si bloqué",startPractice:"Commencer →",completeLesson:"Terminer →",nextQ:"Suivante →",seeResults:"Voir mes résultats →",retry:"Réessayer →",tryAgain:"Réessayer",reviewFirst:"← Revoir la leçon",need70:"70% minimum pour réussir",points:"Points gagnés",shareRating:"📤 Partager ma note",shareProgress:"📤 Partager mes progrès",askLumi:"Demander à Lumi",questionsHelp:"Questions ? Demandez à Lumi",guideHere:"Votre guide est là",peoplAsk:"Questions fréquentes...",lumiGuide:"Lumi — Guide",hint:"Indice",why:"Pourquoi ?",check:"Vérifier",lumiFeedback:"Avis de Lumi",lumiReviewing:"Lumi examine...",submit:"Soumettre",dailyChallenge:"Défi du jour",keepStreak:"Gardez votre série",aiNews:"Actu IA",live:"Direct",newsDesc:"Actus IA simplifiées par Lumi",newsSearch:"Lumi cherche les actus...",aiTools:"Outils IA",toolsDesc:"Workflows guidés",profile:"Profil",dayStreak:"Jours consécutifs",lessonsDone:"Leçons faites",lumiChats:"Discussions",achievements:"Réussites",altRatings:"Notes d'altitude",summit:"Sommet",ridge:"Crête",graded:"Noté",learningPaths:"Parcours",calendar:"Calendrier d'activité",bestStreak:"Meilleure série",freezes:"restantes",lightMode:"☀️ Mode clair",darkMode:"🌙 Mode sombre",signOut:"Se déconnecter",language:"Langue",lessons:"leçons",sections:"sections",practice:"exercices",completed:"Terminé",submitChallenge:"Soumettre ⚡",challengeComplete:"🔥 Défi terminé !",challengeDesc:"Complétez le défi pour garder votre série",simpleVersion:"Version simple",whyMatters:"Pourquoi c'est important",askAboutThis:"Demander à Lumi",explainPlain:"Explication simple",claimSummit:"🏔️ Note Sommet !",claimRidge:"⛰️ Note Crête !",completeBtn:"✦ Terminer",next:"Suivant",skip:"Passer",startJourney:"Commencer →",altitude:"Altitude",toSummit:"vers le sommet",tapExplore:"Appuyez pour explorer",tools6:"6 outils"},
+};
+let _lang=localStorage.getItem("ai_fluent_lang")||"en";
+let T={...UI[_lang]};
+const setLang=(l)=>{_lang=l;T={...UI[l]};localStorage.setItem("ai_fluent_lang",l);document.documentElement.dir=LANGS[l].dir;document.documentElement.lang=l};
+const getLang=()=>_lang;
+const isRTL=()=>LANGS[_lang]?.dir==="rtl";
+
+// Translation cache for lesson content translated by Claude
+const TCache={
+  _k:"ai_fluent_tcache",
+  _g(){try{return JSON.parse(localStorage.getItem(this._k)||"{}")}catch{return{}}},
+  get(lang,key){return this._g()[`${lang}:${key}`]},
+  set(lang,key,data){const c=this._g();c[`${lang}:${key}`]=data;try{localStorage.setItem(this._k,JSON.stringify(c))}catch(e){console.warn("Cache full, clearing old translations");localStorage.removeItem(this._k)}},
+};
+
+// Language selector component
+const LangSelector=({onChangeLang,compact})=>{
+  const[open,setOpen]=useState(false);const cur=LANGS[getLang()];
+  return(<div style={{position:"relative",zIndex:50}}>
+    <button onClick={()=>setOpen(!open)} style={{display:"flex",alignItems:"center",gap:compact?4:6,background:C.mode==="dark"?"rgba(255,255,255,.06)":"rgba(0,0,0,.04)",border:`1px solid ${C.border}`,borderRadius:compact?10:12,padding:compact?"6px 10px":"8px 14px",fontSize:compact?12:14,fontFamily:C.font,color:C.text}}>
+      <span>{cur.flag}</span>{!compact&&<span style={{fontSize:13,fontWeight:600}}>{cur.name}</span>}
+    </button>
+    {open&&<div style={{position:"absolute",top:"110%",[isRTL()?"left":"right"]:0,background:C.bgCard,border:`1px solid ${C.border}`,borderRadius:14,padding:6,zIndex:100,minWidth:160,boxShadow:"0 8px 30px rgba(0,0,0,.3)"}}>
+      {Object.entries(LANGS).map(([code,lang])=>(
+        <button key={code} onClick={()=>{onChangeLang(code);setOpen(false)}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"10px 14px",borderRadius:10,border:"none",background:code===getLang()?"rgba(212,165,90,.1)":"transparent",textAlign:"left"}}>
+          <span style={{fontSize:18}}>{lang.flag}</span>
+          <span style={{color:code===getLang()?C.gold:C.text,fontSize:14,fontWeight:code===getLang()?700:500,fontFamily:C.font}}>{lang.name}</span>
+        </button>
+      ))}
+    </div>}
+  </div>);
+};
+
 const Lumi = ({size=40,level=1,mood="happy",animate=false}) => {
   const s=size;const glow=Math.min(0.2+level*0.05,0.5);const ir=Math.min(16+level,22);
   return(<div style={{width:s,height:s,display:"inline-flex",alignItems:"center",justifyContent:"center",animation:animate?"lumiFloat 3s ease-in-out infinite":"none"}}>
@@ -605,7 +644,7 @@ const Onboarding = ({uid,onDone}) => {
 };
 
 // WORLD MAP — Premium mountain climbing experience
-const WorldMap = ({profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfile,onOpenChallenge,onOpenAchievements,onToggleTheme}) => {
+const WorldMap = ({profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfile,onOpenChallenge,onOpenAchievements,onToggleTheme,onChangeLang}) => {
   const level=Math.max(1,Math.floor(progress.length/2)+1);const done=[...new Set(progress.map(p=>p.path_id))];
   const status=(loc)=>{if(loc.id==="master")return done.length>=6?"current":"locked";const idx=LOCS.findIndex(l=>l.id===loc.id);if(done.includes(loc.id))return"done";if(idx===0)return"current";const prev=LOCS[idx-1];if(prev&&done.includes(prev.id))return"current";return"locked"};
   const pct=Math.round((done.length/6)*100);
@@ -691,6 +730,7 @@ const WorldMap = ({profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfi
         <div style={{display:"flex",alignItems:"center",gap:4,background:dk?"rgba(212,165,90,.1)":"rgba(180,130,40,.1)",padding:"6px 10px",borderRadius:20,border:`1px solid ${dk?"rgba(212,165,90,.2)":"rgba(180,130,40,.2)"}`}}><span style={{fontSize:13}}>🔥</span><span style={{color:C.gold,fontSize:13,fontWeight:800,fontFamily:C.font}}>{streak}</span></div>
         <button onClick={onOpenAchievements} style={{display:"flex",alignItems:"center",gap:3,background:dk?"rgba(58,168,160,.1)":"rgba(42,128,120,.08)",padding:"6px 10px",borderRadius:20,border:`1px solid ${dk?"rgba(58,168,160,.2)":"rgba(42,128,120,.15)"}`,fontSize:13}}>🏆<span style={{color:C.teal,fontSize:13,fontWeight:800,fontFamily:C.font}}>{ACHIEVEMENTS.filter(a=>a.condition(progress,profile)).length}</span></button>
         <ThemeToggle onToggle={onToggleTheme}/>
+        <LangSelector onChangeLang={onChangeLang} compact/>
         <button onClick={onOpenProfile} style={{width:32,height:32,borderRadius:10,background:dk?"rgba(255,255,255,.06)":"rgba(0,0,0,.05)",border:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14}}>👤</button>
       </div>
     </div>
@@ -801,7 +841,8 @@ const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
   const userRole=profile?.role||"learner";
   const completedCount=progress.length;
   const streakDays=Streak.getData().current||0;
-  const lumiPersonality=`You are Lumi, a warm and knowledgeable AI guide in "AI Fluent" at "${loc.name}" teaching "${lesson?.title}". The learner's name is ${userName} and they are a ${userRole}. They have completed ${completedCount} lessons and have a ${streakDays}-day streak. Reference their name occasionally (not every message). If they've done many lessons, acknowledge their progress. Be clear, use simple language, everyday analogies. Encouraging but never condescending. Under 180 words.`;
+  const langInstruction=getLang()==="en"?"":`IMPORTANT: Respond ENTIRELY in ${LANGS[getLang()].name}. The user's interface language is ${LANGS[getLang()].name}.`;
+  const lumiPersonality=`You are Lumi, a warm and knowledgeable AI guide in "AI Fluent" at "${loc.name}" teaching "${lesson?.title}". The learner's name is ${userName} and they are a ${userRole}. They have completed ${completedCount} lessons and have a ${streakDays}-day streak. Reference their name occasionally (not every message). If they've done many lessons, acknowledge their progress. Be clear, use simple language, everyday analogies. Encouraging but never condescending. Under 180 words. ${langInstruction}`;
   const [practiceIdx,setPracticeIdx]=useState(0);const [selected,setSelected]=useState(null);const [submitted,setSubmitted]=useState(false);
   const [freeAns,setFreeAns]=useState("");const [feedback,setFeedback]=useState("");const [grading,setGrading]=useState(false);
   const [showConfetti,setShowConfetti]=useState(false);const [practiceScore,setPracticeScore]=useState(0);
@@ -831,7 +872,7 @@ const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
 
   const gradeFreeResponse=async()=>{
     setGrading(true);
-    try{const r=await db.callClaude({feature:"tutor",system:`You are Lumi, grading a practice exercise. The question was: "${currentP.q}". The hint was: "${currentP.hint||""}". IMPORTANT: Start your response with exactly "SCORE: X/10" on the first line (where X is 1-10). Then grade their response: 1) Was it specific enough? 2) Did they follow the lesson's framework? Give brief encouraging feedback and one specific suggestion to improve. Keep under 120 words. Be warm and encouraging.`,messages:[{role:"user",content:freeAns}]});
+    try{const r=await db.callClaude({feature:"tutor",system:`You are Lumi, grading a practice exercise. The question was: "${currentP.q}". The hint was: "${currentP.hint||""}". IMPORTANT: Start your response with exactly "SCORE: X/10" on the first line (where X is 1-10). Then grade their response: 1) Was it specific enough? 2) Did they follow the lesson's framework? Give brief encouraging feedback and one specific suggestion to improve. Keep under 120 words. Be warm and encouraging.${getLang()!=="en"?` Respond ENTIRELY in ${LANGS[getLang()].name} (except the SCORE: X/10 line which must stay in English).`:""}`,messages:[{role:"user",content:freeAns}]});
       const scoreMatch=r.text.match(/SCORE:\s*(\d+)\s*\/\s*10/i);
       const numScore=scoreMatch?parseInt(scoreMatch[1]):6;
       setFeedback(r.text.replace(/SCORE:\s*\d+\s*\/\s*10\s*/i,"").trim());
@@ -1009,7 +1050,8 @@ const NewsView = ({uid,onBack}) => {
     const fetchNews=async()=>{
       try{
         const today=new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
-        const r=await db.callClaude({feature:"news_fetch",use_search:true,system:`You are Lumi, an AI news curator. Today is ${today}. Search for AI news published TODAY or in the last 24 hours ONLY. Do NOT include news older than 24 hours. Return EXACTLY 4 items as a JSON array. Each item: title (string), category (Breaking/Tools/Policy/Business/Research), summary (2-3 sentence ELI5), impact (why it matters to average person), timeAgo (e.g. "3h ago" or "Today"), source (publication name). Return ONLY valid JSON array, no markdown, no backticks, no extra text.`,messages:[{role:"user",content:`Search for the 4 most important AI news stories from ${today}. Only include stories from today or the last 24 hours.`}]});
+        const langNote=getLang()!=="en"?` Write ALL titles, summaries, and impact text in ${LANGS[getLang()].name}.`:"";
+        const r=await db.callClaude({feature:"news_fetch",use_search:true,system:`You are Lumi, an AI news curator. Today is ${today}. Search for AI news published TODAY or in the last 24 hours ONLY. Do NOT include news older than 24 hours. Return EXACTLY 4 items as a JSON array. Each item: title (string), category (Breaking/Tools/Policy/Business/Research), summary (2-3 sentence ELI5), impact (why it matters to average person), timeAgo (e.g. "3h ago" or "Today"), source (publication name). Return ONLY valid JSON array, no markdown, no backticks, no extra text.${langNote}`,messages:[{role:"user",content:`Search for the 4 most important AI news stories from ${today}. Only include stories from today or the last 24 hours.`}]});
         try{
           const cleaned=r.text.replace(/```json\n?/g,"").replace(/```\n?/g,"").trim();
           const parsed=JSON.parse(cleaned);
@@ -1138,7 +1180,7 @@ const ToolsView = ({uid,onBack}) => {
 };
 
 // PROFILE
-const ProfileView = ({profile,progress,onBack,onSignOut,onToggleTheme}) => {
+const ProfileView = ({profile,progress,onBack,onSignOut,onToggleTheme,onChangeLang}) => {
   const level=Math.max(1,Math.floor(progress.length/2)+1);
   const donePaths=[...new Set(progress.map(p=>p.path_id))];
   const scores=(() => {try{return JSON.parse(localStorage.getItem("ai_fluent_scores")||"{}")}catch{return{}}})();
@@ -1208,6 +1250,14 @@ const ProfileView = ({profile,progress,onBack,onSignOut,onToggleTheme}) => {
             </div>
           </div>);
         })}
+      </div>
+    </div>
+
+    {/* Language */}
+    <div className="fu s4" style={{marginBottom:8,position:"relative",zIndex:2}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:C.mode==="dark"?"rgba(255,255,255,.05)":"rgba(0,0,0,.04)",border:`1px solid ${C.border}`,borderRadius:14,padding:"10px 16px"}}>
+        <span style={{color:C.text,fontSize:15,fontWeight:700,fontFamily:C.font}}>{T.language}</span>
+        <LangSelector onChangeLang={onChangeLang}/>
       </div>
     </div>
 
@@ -1349,6 +1399,8 @@ export default function AIFluent(){
   const [showTutorial,setShowTutorial]=useState(()=>!localStorage.getItem("ai_fluent_tutorial_seen"));
   const [theme,setThemeState]=useState(()=>getTheme());
   const toggleTheme=()=>{const nt=theme==="dark"?"light":"dark";setTheme(nt);setThemeState(nt);C={...THEMES[nt]}};
+  const [lang,setLangState]=useState(()=>getLang());
+  const changeLang=(l)=>{setLang(l);setLangState(l);T={...UI[l]}};
 
   useEffect(()=>{
     // Failsafe: if loading takes more than 5 seconds, force it to stop
@@ -1392,11 +1444,11 @@ export default function AIFluent(){
   if(screen==="tools")return<><style>{getCss()}</style><ToolsView uid={user.id} onBack={goMap}/></>;
   if(screen==="challenge")return<><style>{getCss()}</style><ChallengeView uid={user.id} onBack={goMap}/></>;
   if(screen==="achievements")return<><style>{getCss()}</style><AchievementsView profile={profile} progress={progress} onBack={goMap}/></>;
-  if(screen==="profile")return<><style>{getCss()}</style><ProfileView profile={profile} progress={progress} onBack={goMap} onSignOut={out} onToggleTheme={toggleTheme}/></>;
+  if(screen==="profile")return<><style>{getCss()}</style><ProfileView profile={profile} progress={progress} onBack={goMap} onSignOut={out} onToggleTheme={toggleTheme} onChangeLang={changeLang}/></>;
 
   return<><style>{getCss()}</style>
     <MilestoneCheck progress={progress}/>
-    <WorldMap profile={profile} progress={progress} onToggleTheme={toggleTheme}
+    <WorldMap profile={profile} progress={progress} onToggleTheme={toggleTheme} onChangeLang={changeLang}
     onOpenLoc={(id)=>{setActiveLoc(id);setScreen("location")}}
     onOpenNews={()=>setScreen("news")}
     onOpenTools={()=>setScreen("tools")}
