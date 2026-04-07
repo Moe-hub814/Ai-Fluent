@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { db } from "./lib/supabase";
 
 // AI FLUENT — SUMMIT EDITION v2
-// Live news, {T.practice} mode, daily challenges, achievements
+// Live news, practice mode, daily challenges, achievements
 
 // THEME SYSTEM
 const THEMES = {
@@ -233,7 +233,7 @@ const TOOLS = [
   {id:"prompt",iconType:"prompt",name:"Build a Prompt",desc:"Master the art of talking to AI",color:C.gold,steps:[{q:"Help with?",opts:["Writing","Analyzing","Creative ideas","Problem solving"]},{q:"Detail level?",opts:["Quick","Medium","Thorough","Step-by-step"]},{q:"Describe task:",free:true,ph:"e.g. Plan a marketing campaign..."}],sys:"You are an AI prompt expert. Generate a prompt they can copy. Explain why each part works."},
   {id:"summarize",iconType:"summarize",name:"Summarize Text",desc:"Long docs into key points",color:C.blue,steps:[{q:"Content type?",opts:["Article","Report","Email chain","Contract"]},{q:"What do you need?",opts:["Key takeaways","Action items","Simple explanation","Pros and cons"]},{q:"Paste text:",free:true,ph:"Paste or describe content..."}],sys:"Create a clear concise summary in simple language."},
   {id:"resume",iconType:"resume",name:"Resume Helper",desc:"Stand out from the crowd",color:C.purple,steps:[{q:"What do you need?",opts:["Write a summary","Improve bullet points","Tailor for a job posting","Write a cover letter"]},{q:"Your field?",opts:["Tech / IT","Business / Finance","Healthcare","Education","Creative","Other"]},{q:"Details:",free:true,ph:"Paste your current text or describe what you need..."}],sys:"You are an expert resume writer and career coach. Help improve their resume content. Be specific, use action verbs, quantify achievements where possible."},
-  {id:"social",iconType:"social",name:"Social Post Writer",desc:"Scroll-stopping content",color:C.coral,steps:[{q:"Platform?",opts:["LinkedIn","Twitter/X","Instagram","Facebook"]},{q:"Goal?",opts:["Share expertise","Promote something","Tell a story","Ask for engagement"]},{q:"Topic:",free:true,ph:"e.g. I just learned how to use AI for..."}],sys:"You are a social media expert. Write an engaging post for the specified platform. Match the platform's tone and best {T.practice}s. Include relevant hashtag suggestions."},
+  {id:"social",iconType:"social",name:"Social Post Writer",desc:"Scroll-stopping content",color:C.coral,steps:[{q:"Platform?",opts:["LinkedIn","Twitter/X","Instagram","Facebook"]},{q:"Goal?",opts:["Share expertise","Promote something","Tell a story","Ask for engagement"]},{q:"Topic:",free:true,ph:"e.g. I just learned how to use AI for..."}],sys:"You are a social media expert. Write an engaging post for the specified platform. Match the platform's tone and best practices. Include relevant hashtag suggestions."},
   {id:"study",iconType:"study",name:"Study Helper",desc:"Learn anything faster",color:C.green,steps:[{q:"What are you studying?",opts:["A concept I don't understand","Preparing for a test","Researching a topic","Learning a new skill"]},{q:"How should I help?",opts:["Explain it simply","Create flashcards","Quiz me","Give me a study plan"]},{q:"The topic:",free:true,ph:"e.g. How does blockchain work..."}],sys:"You are a patient, encouraging tutor. Explain concepts at the appropriate level. Use analogies and examples. If creating flashcards, format them clearly."},
 ];
 
@@ -865,7 +865,7 @@ const getAltitude=(pct)=>{
   if(pct>=90)return{label:"Summit",icon:"🏔️",color:"#FFD700",bg:"rgba(255,215,0,.12)",border:"rgba(255,215,0,.25)",msg:"Outstanding! You've mastered this lesson."};
   if(pct>=70)return{label:"Ridge",icon:"⛰️",color:"#4ABA78",bg:"rgba(74,186,120,.1)",border:"rgba(74,186,120,.2)",msg:"Solid understanding. Great work!"};
   if(pct>=50)return{label:"Treeline",icon:"◈",color:"#E8B84B",bg:"rgba(232,184,75,.08)",border:"rgba(232,184,75,.18)",msg:"Almost there! You need 70% to pass. Review and try again."};
-  return{label:"Base Camp",icon:"△",color:"#C87858",bg:"rgba(200,120,88,.08)",border:"rgba(200,120,88,.18)",msg:"You need more {T.practice}. Review the lesson and try again."};
+  return{label:"Base Camp",icon:"△",color:"#C87858",bg:"rgba(200,120,88,.08)",border:"rgba(200,120,88,.18)",msg:"You need more practice. Review the lesson and try again."};
 };
 
 const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
@@ -907,12 +907,12 @@ const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
     }catch(e){setTyping(false);setMsgs(m=>[...m,{from:"lumi",text:"Hmm, I lost my connection for a moment. Could you try asking that again? 🌟"}])}};
   const send=()=>{if(inp.trim()){ask(inp.trim());setInp("")}};
 
-  const {T.practice}=lesson?.practice||[];
+  const practice=lesson?.practice||[];
   const currentP=practice[practiceIdx];
 
   const gradeFreeResponse=async()=>{
     setGrading(true);
-    try{const r=await db.callClaude({feature:"tutor",system:`You are Lumi, grading a {T.practice} exercise. The question was: "${currentP.q}". The hint was: "${currentP.hint||""}". IMPORTANT: Start your response with exactly "SCORE: X/10" on the first line (where X is 1-10). Then grade their response: 1) Was it specific enough? 2) Did they follow the lesson's framework? Give brief encouraging feedback and one specific suggestion to improve. Keep under 120 words. Be warm and encouraging.${getLang()!=="en"?` Respond ENTIRELY in ${LANGS[getLang()].name} (except the SCORE: X/10 line which must stay in English).`:""}`,messages:[{role:"user",content:freeAns}]});
+    try{const r=await db.callClaude({feature:"tutor",system:`You are Lumi, grading a practice exercise. The question was: "${currentP.q}". The hint was: "${currentP.hint||""}". IMPORTANT: Start your response with exactly "SCORE: X/10" on the first line (where X is 1-10). Then grade their response: 1) Was it specific enough? 2) Did they follow the lesson's framework? Give brief encouraging feedback and one specific suggestion to improve. Keep under 120 words. Be warm and encouraging.${getLang()!=="en"?` Respond ENTIRELY in ${LANGS[getLang()].name} (except the SCORE: X/10 line which must stay in English).`:""}`,messages:[{role:"user",content:freeAns}]});
       const scoreMatch=r.text.match(/SCORE:\s*(\d+)\s*\/\s*10/i);
       const numScore=scoreMatch?parseInt(scoreMatch[1]):6;
       setFeedback(r.text.replace(/SCORE:\s*\d+\s*\/\s*10\s*/i,"").trim());
@@ -1356,7 +1356,7 @@ const Tutorial = ({onComplete}) => {
     },
     {
       title:"Learn, Practice, Prove It",
-      desc:"Each lesson has three phases: read the content, ask Lumi questions, then prove your understanding in {T.practice} mode. Score 70% or higher to earn your Altitude Rating and unlock the next lesson.",
+      desc:"Each lesson has three phases: read the content, ask Lumi questions, then prove your understanding in practice mode. Score 70% or higher to earn your Altitude Rating and unlock the next lesson.",
       visual:(
         <div style={{display:"flex",flexDirection:"column",gap:10,maxWidth:240,margin:"0 auto"}}>
           <div style={{display:"flex",alignItems:"center",gap:10,background:"rgba(74,186,120,.08)",borderRadius:12,padding:"10px 14px",border:"1px solid rgba(74,186,120,.15)"}}>
@@ -1373,7 +1373,7 @@ const Tutorial = ({onComplete}) => {
     },
     {
       title:"Earn Your Altitude",
-      desc:"Your {T.practice} score earns an Altitude Rating. Push for Summit to show true mastery — or retry anytime to improve your rating.",
+      desc:"Your practice score earns an Altitude Rating. Push for Summit to show true mastery — or retry anytime to improve your rating.",
       visual:(
         <div style={{display:"flex",flexDirection:"column",gap:8,maxWidth:220,margin:"0 auto"}}>
           {[{icon:"🏔️",label:"Summit",pct:"90%+",color:"#FFD700",bg:"rgba(255,215,0,.1)"},{icon:"⛰️",label:"Ridge",pct:"70-89%",color:"#4ABA78",bg:"rgba(74,186,120,.08)"},{icon:"◈",label:"Treeline",pct:"50-69%",color:"#E8B84B",bg:"rgba(232,184,75,.06)"},{icon:"△",label:"Base Camp",pct:"<50%",color:"#C87858",bg:"rgba(200,120,88,.06)"}].map((r,i)=>(
@@ -1388,7 +1388,7 @@ const Tutorial = ({onComplete}) => {
     },
     {
       title:"Stay Sharp Every Day",
-      desc:"Complete Daily Challenges to keep your streak alive, read today's AI News simplified by Lumi, and use 6 AI Tools to {T.practice} real-world skills. You've got everything you need.",
+      desc:"Complete Daily Challenges to keep your streak alive, read today's AI News simplified by Lumi, and use 6 AI Tools to practice real-world skills. You've got everything you need.",
       visual:(
         <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap",maxWidth:280,margin:"0 auto"}}>
           {[{icon:<Icon type="challenge" size={28} color="#F0A878"/>,label:"Daily Challenge",bg:"rgba(232,128,96,.08)"},{icon:<Icon type="news" size={28} color="#E8C878"/>,label:"AI News",bg:"rgba(212,165,90,.06)"},{icon:<Icon type="tools" size={28} color="#68D8C8"/>,label:"6 AI Tools",bg:"rgba(58,168,160,.06)"}].map((f,i)=>(
