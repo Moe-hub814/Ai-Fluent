@@ -900,32 +900,39 @@ const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
   const [tPractice,setTPractice]=useState(null);
   const [translating,setTranslating]=useState(false);
   useEffect(()=>{
-    if(!lesson||getLang()==="en"){setTSections(null);setTPractice(null);return}
+    if(lessonIdx===null||!lesson||getLang()==="en"){setTSections(null);setTPractice(null);return}
+    const lang=getLang();
     const cacheKey=`${locId}-${lessonIdx}`;
-    const cached=TCache.get(getLang(),cacheKey);
+    const cached=TCache.get(lang,cacheKey);
     if(cached){setTSections(cached.sections||null);setTPractice(cached.practice||null);return}
     setTranslating(true);
-    // Build a JSON request for Claude to translate
-    const toTranslate={
-      sections:lesson.sections.map(s=>({h:s.h,body:s.body})),
-      practice:(lesson.practice||[]).map(p=>({q:p.q,opts:p.opts||[],hint:p.hint||"",explain:p.explain||""}))
-    };
-    db.callClaude({feature:"tutor",system:`You are a translator. Translate the following JSON content to ${LANGS[getLang()].name}. Return ONLY valid JSON with the same structure. No markdown backticks. Translate naturally. Keep the JSON keys in English (h, body, q, opts, hint, explain). Only translate the values.`,messages:[{role:"user",content:JSON.stringify(toTranslate)}]}).then(r=>{
+    console.log("Translating lesson:",lesson.title,"to",lang);
+    const secs=lesson.sections.map(s=>({h:s.h,body:s.body}));
+    const prac=(lesson.practice||[]).map(p=>({q:p.q,opts:p.opts||[],hint:p.hint||"",explain:p.explain||""}));
+    const content=JSON.stringify({sections:secs,practice:prac});
+    db.callClaude({feature:"tutor",system:`Translate the JSON below to ${LANGS[lang].name}. Return ONLY the translated JSON object. No backticks, no markdown, no extra text. Keep all JSON keys in English. Only translate string values.`,messages:[{role:"user",content:"Translate this:\n"+content}]}).then(r=>{
+      console.log("Translation response length:",r.text?.length);
       try{
-        // Extract JSON from response
-        let jsonStr=r.text;
-        const jsonMatch=jsonStr.match(/\{[\s\S]*\}/);
-        if(jsonMatch)jsonStr=jsonMatch[0];
+        let jsonStr=r.text||"";
+        // Strip markdown code fences if present
+        jsonStr=jsonStr.replace(/```json\s*/g,"").replace(/```\s*/g,"").trim();
+        // Find the outermost JSON object
+        const firstBrace=jsonStr.indexOf("{");
+        const lastBrace=jsonStr.lastIndexOf("}");
+        if(firstBrace>=0&&lastBrace>firstBrace)jsonStr=jsonStr.substring(firstBrace,lastBrace+1);
         const parsed=JSON.parse(jsonStr);
         if(parsed.sections&&parsed.sections.length===lesson.sections.length){
+          console.log("Translation success:",parsed.sections.length,"sections");
           setTSections(parsed.sections);
           setTPractice(parsed.practice||null);
-          TCache.set(getLang(),cacheKey,{sections:parsed.sections,practice:parsed.practice||null});
+          TCache.set(lang,cacheKey,{sections:parsed.sections,practice:parsed.practice||null});
+        } else {
+          console.warn("Translation mismatch: got",parsed.sections?.length,"expected",lesson.sections.length);
         }
-      }catch(e){console.warn("Translation parse failed:",e,r.text?.substring(0,200))}
+      }catch(e){console.warn("Translation parse failed:",e.message,r.text?.substring(0,300))}
       setTranslating(false);
     }).catch(e=>{console.warn("Translation call failed:",e);setTranslating(false)});
-  },[lessonIdx,lesson]);
+  },[lessonIdx]);
   const displaySections=tSections||lesson?.sections||[];
   const displayPractice=tPractice||lesson?.practice||[];
   // Store scores per lesson: { "basics-0": 85, "writing-1": 70 }
