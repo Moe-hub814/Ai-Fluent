@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { db } from "./lib/supabase";
 
 // AI FLUENT — SUMMIT EDITION v2
-// Live news, practice mode, daily challenges, achievements
+// Live news, {T.practice} mode, daily challenges, achievements
 
 // THEME SYSTEM
 const THEMES = {
@@ -49,7 +49,7 @@ const getTheme = () => _theme;
 // LANGUAGE SYSTEM
 const LANGS={en:{name:"English",flag:"🇺🇸",dir:"ltr"},ar:{name:"العربية",flag:"🇸🇦",dir:"rtl"},fr:{name:"Français",flag:"🇫🇷",dir:"ltr"}};
 const UI={
-  en:{greeting:h=>h<12?"Good morning":h<17?"Good afternoon":"Good evening",map:"← Map",back:"← Back",signIn:"Sign In",signUp:"Sign Up",email:"Email",password:"Password",startClimbing:"Start Climbing",createAccount:"Create Account",checkEmail:"Check your email!",weSentLink:"We sent a link to",loading:"Loading AI Fluent...",tapIfStuck:"Tap anywhere if stuck",startPractice:"Start Practice →",completeLesson:"Complete lesson →",nextQ:"Next Question →",seeResults:"See My Results →",retry:"Retry for a higher rating →",tryAgain:"Try Again",reviewFirst:"← Review the lesson first",need70:"You need 70% or higher to pass this lesson",points:"Points earned",shareRating:"📤 Share My Rating",shareProgress:"📤 Share My Progress",askLumi:"Ask Lumi",questionsHelp:"Questions? Ask Lumi",guideHere:"Your guide is here to help",peoplAsk:"People often ask...",lumiGuide:"Lumi — Guide",hint:"Hint",why:"Why?",check:"Check Answer",lumiFeedback:"Lumi's feedback",lumiReviewing:"Lumi is reviewing...",submit:"Submit for Review",dailyChallenge:"Daily Challenge",keepStreak:"Keep your streak",aiNews:"AI News",live:"Live",newsDesc:"Today's AI stories, simplified by Lumi",newsSearch:"Lumi is searching for today's AI news...",aiTools:"AI Tools",toolsDesc:"Guided step-by-step workflows",profile:"Profile",dayStreak:"Day Streak",lessonsDone:"Lessons Done",lumiChats:"Lumi Chats",achievements:"Achievements",altRatings:"Altitude Ratings Earned",summit:"Summit",ridge:"Ridge",graded:"Graded",learningPaths:"Learning Paths",calendar:"Activity Calendar",bestStreak:"Best streak",freezes:"remaining",lightMode:"☀️ Light Mode",darkMode:"🌙 Dark Mode",signOut:"Sign Out",language:"Language",lessons:"lessons",sections:"sections",practice:"practice",completed:"Completed",submitChallenge:"Submit Challenge ⚡",challengeComplete:"🔥 Challenge complete!",challengeDesc:"Complete today's challenge to keep your streak alive",simpleVersion:"The simple version",whyMatters:"Why it matters to you",askAboutThis:"Ask Lumi about this",explainPlain:"Get it explained in plain language",claimSummit:"🏔️ Claim Summit Rating!",claimRidge:"⛰️ Claim Ridge Rating!",completeBtn:"✦ Complete Lesson",next:"Next",skip:"Skip",startJourney:"Start My Journey →",altitude:"Altitude",toSummit:"to summit",tapExplore:"Tap to explore",tools6:"6 tools"},
+  en:{greeting:h=>h<12?"Good morning":h<17?"Good afternoon":"Good evening",map:"← Map",back:"← Back",signIn:"Sign In",signUp:"Sign Up",email:"Email",password:"Password",startClimbing:"Start Climbing",createAccount:"Create Account",checkEmail:"Check your email!",weSentLink:"We sent a link to",loading:"Loading AI Fluent...",tapIfStuck:"Tap anywhere if stuck",startPractice:"Start Practice →",completeLesson:"Complete lesson →",nextQ:"Next Question →",seeResults:"See My Results →",retry:"Retry for a higher rating →",tryAgain:"Try Again",reviewFirst:"← Review the lesson first",need70:"You need 70% or higher to pass this lesson",points:"Points earned",shareRating:"📤 Share My Rating",shareProgress:"📤 Share My Progress",askLumi:"Ask Lumi",questionsHelp:"Questions? Ask Lumi",guideHere:"Your guide is here to help",peoplAsk:"People often ask...",lumiGuide:"Lumi — Guide",hint:"Hint",why:"Why?",check:"Check Answer",lumiFeedback:"Lumi's feedback",lumiReviewing:"Lumi is reviewing...",submit:"Submit for Review",dailyChallenge:"Daily Challenge",keepStreak:"Keep your streak",aiNews:"AI News",live:"Live",newsDesc:"Today's AI stories, simplified by Lumi",newsSearch:"Lumi is searching for today's AI news...",aiTools:"AI Tools",toolsDesc:"Guided step-by-step workflows",profile:"Profile",dayStreak:T.dayStreak,lessonsDone:T.lessonsDone,lumiChats:T.lumiChats,achievements:T.achievements,altRatings:"Altitude Ratings Earned",summit:"Summit",ridge:"Ridge",graded:"Graded",learningPaths:"Learning Paths",calendar:"Activity Calendar",bestStreak:"Best streak",freezes:"remaining",lightMode:"☀️ Light Mode",darkMode:"🌙 Dark Mode",signOut:"Sign Out",language:"Language",lessons:"lessons",sections:"sections",practice:"practice",completed:"Completed",submitChallenge:"Submit Challenge ⚡",challengeComplete:"🔥 Challenge complete!",challengeDesc:"Complete today's challenge to keep your streak alive",simpleVersion:"The simple version",whyMatters:"Why it matters to you",askAboutThis:"Ask Lumi about this",explainPlain:"Get it explained in plain language",claimSummit:"🏔️ Claim Summit Rating!",claimRidge:"⛰️ Claim Ridge Rating!",completeBtn:"✦ Complete Lesson",next:"Next",skip:"Skip",startJourney:"Start My Journey →",altitude:"Altitude",toSummit:"to summit",tapExplore:"Tap to explore",tools6:"6 tools"},
   ar:{greeting:h=>h<12?"صباح الخير":h<17?"مساء الخير":"مساء الخير",map:"الخريطة →",back:"رجوع →",signIn:"تسجيل الدخول",signUp:"إنشاء حساب",email:"البريد الإلكتروني",password:"كلمة المرور",startClimbing:"ابدأ التسلق",createAccount:"إنشاء حساب",checkEmail:"!تحقق من بريدك",weSentLink:"أرسلنا رابطاً إلى",loading:"...جاري تحميل AI Fluent",tapIfStuck:"اضغط في أي مكان إذا توقف",startPractice:"← ابدأ التمرين",completeLesson:"← أكمل الدرس",nextQ:"← السؤال التالي",seeResults:"← عرض نتائجي",retry:"← أعد المحاولة لتقييم أعلى",tryAgain:"حاول مرة أخرى",reviewFirst:"راجع الدرس أولاً →",need70:"تحتاج 70% أو أعلى لاجتياز هذا الدرس",points:"النقاط المكتسبة",shareRating:"📤 شارك تقييمي",shareProgress:"📤 شارك تقدمي",askLumi:"اسأل لومي",questionsHelp:"أسئلة؟ اسأل لومي",guideHere:"مرشدك هنا للمساعدة",peoplAsk:"...الناس يسألون عادة",lumiGuide:"لومي — المرشد",hint:"تلميح",why:"لماذا؟",check:"تحقق من الإجابة",lumiFeedback:"ملاحظات لومي",lumiReviewing:"...لومي يراجع",submit:"أرسل للمراجعة",dailyChallenge:"التحدي اليومي",keepStreak:"حافظ على سلسلتك",aiNews:"أخبار الذكاء",live:"مباشر",newsDesc:"أخبار الذكاء اليوم مبسطة بواسطة لومي",newsSearch:"...لومي يبحث عن أخبار اليوم",aiTools:"أدوات الذكاء",toolsDesc:"سير عمل موجه خطوة بخطوة",profile:"الملف الشخصي",dayStreak:"أيام متتالية",lessonsDone:"دروس مكتملة",lumiChats:"محادثات لومي",achievements:"الإنجازات",altRatings:"تقييمات الارتفاع المكتسبة",summit:"القمة",ridge:"التلال",graded:"مُقيَّم",learningPaths:"مسارات التعلم",calendar:"تقويم النشاط",bestStreak:"أفضل سلسلة",freezes:"متبقية",lightMode:"☀️ وضع فاتح",darkMode:"🌙 وضع داكن",signOut:"تسجيل الخروج",language:"اللغة",lessons:"دروس",sections:"أقسام",practice:"تمارين",completed:"مكتمل",submitChallenge:"أرسل التحدي ⚡",challengeComplete:"!🔥 التحدي مكتمل",challengeDesc:"أكمل تحدي اليوم للحفاظ على سلسلتك",simpleVersion:"النسخة المبسطة",whyMatters:"لماذا يهمك هذا",askAboutThis:"اسأل لومي عن هذا",explainPlain:"احصل على شرح بلغة بسيطة",claimSummit:"🏔️ !احصل على تقييم القمة",claimRidge:"⛰️ !احصل على تقييم التلال",completeBtn:"✦ أكمل الدرس",next:"التالي",skip:"تخطي",startJourney:"← ابدأ رحلتي",altitude:"الارتفاع",toSummit:"إلى القمة",tapExplore:"اضغط للاستكشاف",tools6:"6 أدوات"},
   fr:{greeting:h=>h<12?"Bonjour":h<17?"Bon après-midi":"Bonsoir",map:"← Carte",back:"← Retour",signIn:"Se connecter",signUp:"S'inscrire",email:"E-mail",password:"Mot de passe",startClimbing:"Commencer",createAccount:"Créer un compte",checkEmail:"Vérifiez votre e-mail !",weSentLink:"Nous avons envoyé un lien à",loading:"Chargement d'AI Fluent...",tapIfStuck:"Appuyez si bloqué",startPractice:"Commencer →",completeLesson:"Terminer →",nextQ:"Suivante →",seeResults:"Voir mes résultats →",retry:"Réessayer →",tryAgain:"Réessayer",reviewFirst:"← Revoir la leçon",need70:"70% minimum pour réussir",points:"Points gagnés",shareRating:"📤 Partager ma note",shareProgress:"📤 Partager mes progrès",askLumi:"Demander à Lumi",questionsHelp:"Questions ? Demandez à Lumi",guideHere:"Votre guide est là",peoplAsk:"Questions fréquentes...",lumiGuide:"Lumi — Guide",hint:"Indice",why:"Pourquoi ?",check:"Vérifier",lumiFeedback:"Avis de Lumi",lumiReviewing:"Lumi examine...",submit:"Soumettre",dailyChallenge:"Défi du jour",keepStreak:"Gardez votre série",aiNews:"Actu IA",live:"Direct",newsDesc:"Actus IA simplifiées par Lumi",newsSearch:"Lumi cherche les actus...",aiTools:"Outils IA",toolsDesc:"Workflows guidés",profile:"Profil",dayStreak:"Jours consécutifs",lessonsDone:"Leçons faites",lumiChats:"Discussions",achievements:"Réussites",altRatings:"Notes d'altitude",summit:"Sommet",ridge:"Crête",graded:"Noté",learningPaths:"Parcours",calendar:"Calendrier d'activité",bestStreak:"Meilleure série",freezes:"restantes",lightMode:"☀️ Mode clair",darkMode:"🌙 Mode sombre",signOut:"Se déconnecter",language:"Langue",lessons:"leçons",sections:"sections",practice:"exercices",completed:"Terminé",submitChallenge:"Soumettre ⚡",challengeComplete:"🔥 Défi terminé !",challengeDesc:"Complétez le défi pour garder votre série",simpleVersion:"Version simple",whyMatters:"Pourquoi c'est important",askAboutThis:"Demander à Lumi",explainPlain:"Explication simple",claimSummit:"🏔️ Note Sommet !",claimRidge:"⛰️ Note Crête !",completeBtn:"✦ Terminer",next:"Suivant",skip:"Passer",startJourney:"Commencer →",altitude:"Altitude",toSummit:"vers le sommet",tapExplore:"Appuyez pour explorer",tools6:"6 outils"},
 };
@@ -88,6 +88,13 @@ const locSub=(id)=>(LOC_SUBS[_lang]||LOC_SUBS.en)[id]||id;
 const locDesc=(id)=>(LOC_DESCS[_lang]||LOC_DESCS.en)[id]||id;
 const toolName=(id)=>(TOOL_NAMES[_lang]||TOOL_NAMES.en)[id]||id;
 const toolDesc=(id)=>(TOOL_DESCS[_lang]||TOOL_DESCS.en)[id]||id;
+
+// Lesson title translations
+const LESSON_TITLES={
+  ar:{"What Is AI, Really?":"ما هو الذكاء الاصطناعي حقاً؟","How AI Actually Learns":"كيف يتعلم الذكاء الاصطناعي","Choosing the Right AI Tool":"اختيار أداة الذكاء المناسبة","AI Safety and Privacy":"أمان الذكاء والخصوصية","Your First AI Email":"أول بريد إلكتروني بالذكاء","Writing Blog Posts & Articles with AI":"كتابة المقالات بالذكاء","Social Media Writing with AI":"كتابة وسائل التواصل بالذكاء","AI for Reports and Documents":"الذكاء للتقارير والوثائق","Creating AI Images":"إنشاء صور بالذكاء","AI Image Tools Compared":"مقارنة أدوات الصور","Advanced Prompting for Images":"أوامر متقدمة للصور","AI Tools That Save Hours":"أدوات توفر ساعات","AI for Customer Communication":"الذكاء للتواصل مع العملاء","AI for Meetings and Notes":"الذكاء للاجتماعات والملاحظات","Measuring AI's Impact on Your Business":"قياس تأثير الذكاء على عملك","AI + Spreadsheets":"الذكاء + جداول البيانات","Analyzing Data with AI":"تحليل البيانات بالذكاء","AI for Data Cleaning":"الذكاء لتنظيف البيانات","AI in Everyday Life":"الذكاء في الحياة اليومية","AI for Health and Wellness":"الذكاء للصحة والعافية","AI for Travel and Planning":"الذكاء للسفر والتخطيط","AI for Learning and Personal Growth":"الذكاء للتعلم والنمو الشخصي"},
+  fr:{"What Is AI, Really?":"Qu'est-ce que l'IA, vraiment ?","How AI Actually Learns":"Comment l'IA apprend réellement","Choosing the Right AI Tool":"Choisir le bon outil d'IA","AI Safety and Privacy":"Sécurité et confidentialité de l'IA","Your First AI Email":"Votre premier e-mail avec l'IA","Writing Blog Posts & Articles with AI":"Écrire des articles avec l'IA","Social Media Writing with AI":"Rédaction réseaux sociaux avec l'IA","AI for Reports and Documents":"L'IA pour rapports et documents","Creating AI Images":"Créer des images avec l'IA","AI Image Tools Compared":"Comparaison des outils d'images","Advanced Prompting for Images":"Prompts avancés pour images","AI Tools That Save Hours":"Outils IA qui font gagner du temps","AI for Customer Communication":"L'IA pour la communication client","AI for Meetings and Notes":"L'IA pour réunions et notes","Measuring AI's Impact on Your Business":"Mesurer l'impact de l'IA sur votre business","AI + Spreadsheets":"IA + Tableurs","Analyzing Data with AI":"Analyser les données avec l'IA","AI for Data Cleaning":"L'IA pour le nettoyage de données","AI in Everyday Life":"L'IA au quotidien","AI for Health and Wellness":"L'IA pour la santé et le bien-être","AI for Travel and Planning":"L'IA pour voyages et planification","AI for Learning and Personal Growth":"L'IA pour l'apprentissage et le développement"},
+};
+const lessonTitle=(title)=>_lang==="en"?title:(LESSON_TITLES[_lang]||{})[title]||title;
 const setLang=(l)=>{_lang=l;T={...UI[l]};localStorage.setItem("ai_fluent_lang",l);document.documentElement.dir=LANGS[l].dir;document.documentElement.lang=l};
 const getLang=()=>_lang;
 const isRTL=()=>LANGS[_lang]?.dir==="rtl";
@@ -226,7 +233,7 @@ const TOOLS = [
   {id:"prompt",iconType:"prompt",name:"Build a Prompt",desc:"Master the art of talking to AI",color:C.gold,steps:[{q:"Help with?",opts:["Writing","Analyzing","Creative ideas","Problem solving"]},{q:"Detail level?",opts:["Quick","Medium","Thorough","Step-by-step"]},{q:"Describe task:",free:true,ph:"e.g. Plan a marketing campaign..."}],sys:"You are an AI prompt expert. Generate a prompt they can copy. Explain why each part works."},
   {id:"summarize",iconType:"summarize",name:"Summarize Text",desc:"Long docs into key points",color:C.blue,steps:[{q:"Content type?",opts:["Article","Report","Email chain","Contract"]},{q:"What do you need?",opts:["Key takeaways","Action items","Simple explanation","Pros and cons"]},{q:"Paste text:",free:true,ph:"Paste or describe content..."}],sys:"Create a clear concise summary in simple language."},
   {id:"resume",iconType:"resume",name:"Resume Helper",desc:"Stand out from the crowd",color:C.purple,steps:[{q:"What do you need?",opts:["Write a summary","Improve bullet points","Tailor for a job posting","Write a cover letter"]},{q:"Your field?",opts:["Tech / IT","Business / Finance","Healthcare","Education","Creative","Other"]},{q:"Details:",free:true,ph:"Paste your current text or describe what you need..."}],sys:"You are an expert resume writer and career coach. Help improve their resume content. Be specific, use action verbs, quantify achievements where possible."},
-  {id:"social",iconType:"social",name:"Social Post Writer",desc:"Scroll-stopping content",color:C.coral,steps:[{q:"Platform?",opts:["LinkedIn","Twitter/X","Instagram","Facebook"]},{q:"Goal?",opts:["Share expertise","Promote something","Tell a story","Ask for engagement"]},{q:"Topic:",free:true,ph:"e.g. I just learned how to use AI for..."}],sys:"You are a social media expert. Write an engaging post for the specified platform. Match the platform's tone and best practices. Include relevant hashtag suggestions."},
+  {id:"social",iconType:"social",name:"Social Post Writer",desc:"Scroll-stopping content",color:C.coral,steps:[{q:"Platform?",opts:["LinkedIn","Twitter/X","Instagram","Facebook"]},{q:"Goal?",opts:["Share expertise","Promote something","Tell a story","Ask for engagement"]},{q:"Topic:",free:true,ph:"e.g. I just learned how to use AI for..."}],sys:"You are a social media expert. Write an engaging post for the specified platform. Match the platform's tone and best {T.practice}s. Include relevant hashtag suggestions."},
   {id:"study",iconType:"study",name:"Study Helper",desc:"Learn anything faster",color:C.green,steps:[{q:"What are you studying?",opts:["A concept I don't understand","Preparing for a test","Researching a topic","Learning a new skill"]},{q:"How should I help?",opts:["Explain it simply","Create flashcards","Quiz me","Give me a study plan"]},{q:"The topic:",free:true,ph:"e.g. How does blockchain work..."}],sys:"You are a patient, encouraging tutor. Explain concepts at the appropriate level. Use analogies and examples. If creating flashcards, format them clearly."},
 ];
 
@@ -457,7 +464,7 @@ const StreakCalendar = () => {
         <p style={{ color: C.text, fontSize: 14, fontWeight: 700, fontFamily: C.font, margin: 0 }}>{T.calendar}</p>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <span style={{ fontSize: 14 }}>🔥</span>
-          <span style={{ color: C.gold, fontSize: 14, fontWeight: 800, fontFamily: C.font }}>{data.current || 0} day streak</span>
+          <span style={{ color: C.gold, fontSize: 14, fontWeight: 800, fontFamily: C.font }}>{data.current || 0} {T.dayStreak}</span>
         </div>
       </div>
       {data.best > 0 && <p style={{ color: C.textDim, fontSize: 11, fontFamily: C.font, margin: "0 0 10px" }}>Best streak: {data.best} days · Freezes: {data.freezes || 0} remaining</p>}
@@ -542,7 +549,7 @@ const ShareCard = ({type="progress",data={},onClose}) => {
       ctx.font="bold 96px 'Quicksand',sans-serif";ctx.fillStyle="#E8EEF4";ctx.fillText(`Level ${lvl}`,cx,440);
 
       // Stats row
-      const stats=[{v:lessons,l:"Lessons"},{v:paths,l:"Paths"},{v:streakVal,l:"Day Streak"}];
+      const stats=[{v:lessons,l:"Lessons"},{v:paths,l:"Paths"},{v:streakVal,l:T.dayStreak}];
       const sw=240;const startX=cx-((stats.length-1)*sw)/2;
       stats.forEach((s,i)=>{
         const sx=startX+i*sw;
@@ -831,7 +838,7 @@ const WorldMap = ({profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfi
             :(dk?"#C0D0E0":"#3A5060"),
             fontSize:11,fontWeight:700,fontFamily:C.font,margin:0,whiteSpace:"nowrap"}}>{locName(loc.id)}</p>
         </div>
-        {cur&&<p style={{color:dk?"rgba(212,165,90,.5)":"rgba(140,100,30,.5)",fontSize:9,fontFamily:C.font,margin:"2px 0 0"}}>Tap to explore</p>}
+        {cur&&<p style={{color:dk?"rgba(212,165,90,.5)":"rgba(140,100,30,.5)",fontSize:9,fontFamily:C.font,margin:"2px 0 0"}}>{T.tapExplore}</p>}
       </div>);
     })}
 
@@ -858,7 +865,7 @@ const getAltitude=(pct)=>{
   if(pct>=90)return{label:"Summit",icon:"🏔️",color:"#FFD700",bg:"rgba(255,215,0,.12)",border:"rgba(255,215,0,.25)",msg:"Outstanding! You've mastered this lesson."};
   if(pct>=70)return{label:"Ridge",icon:"⛰️",color:"#4ABA78",bg:"rgba(74,186,120,.1)",border:"rgba(74,186,120,.2)",msg:"Solid understanding. Great work!"};
   if(pct>=50)return{label:"Treeline",icon:"◈",color:"#E8B84B",bg:"rgba(232,184,75,.08)",border:"rgba(232,184,75,.18)",msg:"Almost there! You need 70% to pass. Review and try again."};
-  return{label:"Base Camp",icon:"△",color:"#C87858",bg:"rgba(200,120,88,.08)",border:"rgba(200,120,88,.18)",msg:"You need more practice. Review the lesson and try again."};
+  return{label:"Base Camp",icon:"△",color:"#C87858",bg:"rgba(200,120,88,.08)",border:"rgba(200,120,88,.18)",msg:"You need more {T.practice}. Review the lesson and try again."};
 };
 
 const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
@@ -900,12 +907,12 @@ const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
     }catch(e){setTyping(false);setMsgs(m=>[...m,{from:"lumi",text:"Hmm, I lost my connection for a moment. Could you try asking that again? 🌟"}])}};
   const send=()=>{if(inp.trim()){ask(inp.trim());setInp("")}};
 
-  const practice=lesson?.practice||[];
+  const {T.practice}=lesson?.practice||[];
   const currentP=practice[practiceIdx];
 
   const gradeFreeResponse=async()=>{
     setGrading(true);
-    try{const r=await db.callClaude({feature:"tutor",system:`You are Lumi, grading a practice exercise. The question was: "${currentP.q}". The hint was: "${currentP.hint||""}". IMPORTANT: Start your response with exactly "SCORE: X/10" on the first line (where X is 1-10). Then grade their response: 1) Was it specific enough? 2) Did they follow the lesson's framework? Give brief encouraging feedback and one specific suggestion to improve. Keep under 120 words. Be warm and encouraging.${getLang()!=="en"?` Respond ENTIRELY in ${LANGS[getLang()].name} (except the SCORE: X/10 line which must stay in English).`:""}`,messages:[{role:"user",content:freeAns}]});
+    try{const r=await db.callClaude({feature:"tutor",system:`You are Lumi, grading a {T.practice} exercise. The question was: "${currentP.q}". The hint was: "${currentP.hint||""}". IMPORTANT: Start your response with exactly "SCORE: X/10" on the first line (where X is 1-10). Then grade their response: 1) Was it specific enough? 2) Did they follow the lesson's framework? Give brief encouraging feedback and one specific suggestion to improve. Keep under 120 words. Be warm and encouraging.${getLang()!=="en"?` Respond ENTIRELY in ${LANGS[getLang()].name} (except the SCORE: X/10 line which must stay in English).`:""}`,messages:[{role:"user",content:freeAns}]});
       const scoreMatch=r.text.match(/SCORE:\s*(\d+)\s*\/\s*10/i);
       const numScore=scoreMatch?parseInt(scoreMatch[1]):6;
       setFeedback(r.text.replace(/SCORE:\s*\d+\s*\/\s*10\s*/i,"").trim());
@@ -1014,7 +1021,7 @@ const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
   if(view==="lesson"&&lesson)return(<div style={{height:"100vh",overflowY:"auto",background:`linear-gradient(180deg,${C.bgDark},${C.bgCard})`,padding:"14px 20px 100px"}}>
     <button onClick={()=>{setView("intro");setLessonIdx(null)}} style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700,marginBottom:14}}>{T.back} {locName(loc.id)}</button>
     <div className="fu" style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}><span style={{fontSize:18}}>{loc.icon}</span><span style={{color:loc.color,fontSize:10,fontWeight:700,fontFamily:C.font,textTransform:"uppercase",letterSpacing:1}}>{loc.sub} · Lesson {lessonIdx+1}</span></div>
-    <h1 className="fu s1" style={{color:C.text,fontSize:24,fontFamily:C.fontDisplay,fontWeight:700,margin:"0 0 22px",lineHeight:1.3}}>{lesson.title}</h1>
+    <h1 className="fu s1" style={{color:C.text,fontSize:24,fontFamily:C.fontDisplay,fontWeight:700,margin:"0 0 22px",lineHeight:1.3}}>{lessonTitle(lesson.title)}</h1>
     {lesson.sections.map((sec,i)=>(<div key={i} className={`fu s${Math.min(i+2,5)}`} style={{marginBottom:26}}><h3 style={{color:C.text,fontSize:16,fontWeight:700,fontFamily:C.font,margin:"0 0 8px"}}>{sec.h}</h3><p style={{color:C.textMuted,fontSize:14,lineHeight:1.8,fontFamily:C.font,whiteSpace:"pre-wrap"}}>{sec.body}</p></div>))}
     <button onClick={()=>setView("tutor")} className="fu" style={{width:"100%",background:"rgba(212,165,90,.06)",border:`1px solid ${C.borderGold}`,borderRadius:16,padding:16,textAlign:"left",marginBottom:10}}>
       <div style={{display:"flex",alignItems:"center",gap:10}}><Lumi size={32} mood="happy" level={level} animate/><div><p style={{color:C.goldLight,fontSize:14,fontWeight:700,fontFamily:C.font,margin:0}}>{T.questionsHelp}</p><p style={{color:C.textDim,fontSize:12,fontFamily:C.font,margin:"2px 0 0"}}>{T.guideHere}</p></div></div>
@@ -1054,11 +1061,11 @@ const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
                 <span style={{fontSize:done&&alt?18:14}}>{done&&alt?alt.icon:done?"✓":unlocked?(i+1):"🔒"}</span>
               </div>
               <div style={{flex:1}}>
-                <p style={{color:unlocked?C.text:C.textDim,fontSize:14,fontWeight:700,fontFamily:C.font,margin:0}}>{l.title}</p>
+                <p style={{color:unlocked?C.text:C.textDim,fontSize:14,fontWeight:700,fontFamily:C.font,margin:0}}>{lessonTitle(l.title)}</p>
                 <div style={{display:"flex",alignItems:"center",gap:6,marginTop:2}}>
-                  <span style={{color:C.textDim,fontSize:11,fontFamily:C.font}}>{l.sections.length} sections{l.practice?.length>0?` · ${l.practice.length} practice`:""}</span>
+                  <span style={{color:C.textDim,fontSize:11,fontFamily:C.font}}>{l.sections.length} {T.sections}{l.practice?.length>0?` · ${l.practice.length} ${T.practice}`:""}</span>
                   {done&&alt&&<span style={{color:alt.color,fontSize:10,fontWeight:700,fontFamily:C.font,background:alt.bg,padding:"1px 8px",borderRadius:8,border:`1px solid ${alt.border}`}}>{alt.icon} {alt.label} · {score}%</span>}
-                  {done&&!alt&&<span style={{color:C.green,fontSize:10,fontFamily:C.font}}>✅ Done</span>}
+                  {done&&!alt&&<span style={{color:C.green,fontSize:10,fontFamily:C.font}}>✅ {T.completed}</span>}
                 </div>
               </div>
               {unlocked&&!done&&<span style={{color:C.gold,fontSize:16}}>→</span>}
@@ -1236,10 +1243,10 @@ const ProfileView = ({profile,progress,onBack,onSignOut,onToggleTheme,onChangeLa
     {/* Stats grid */}
     <div className="fu s1" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16,position:"relative",zIndex:1}}>
       {[
-        {v:streakData.current||0,l:"Day Streak",icon:"🔥",color:C.gold,bg:"rgba(212,165,90,.06)"},
-        {v:progress.length,l:"Lessons Done",icon:"📖",color:C.teal,bg:"rgba(58,168,160,.06)"},
-        {v:profile?.total_tutor_sessions||0,l:"Lumi Chats",icon:"💬",color:C.blue,bg:"rgba(74,144,217,.06)"},
-        {v:ACHIEVEMENTS.filter(a=>a.condition(progress,profile)).length,l:"Achievements",icon:"🏆",color:C.green,bg:"rgba(74,186,120,.06)"},
+        {v:streakData.current||0,l:T.dayStreak,icon:"🔥",color:C.gold,bg:"rgba(212,165,90,.06)"},
+        {v:progress.length,l:T.lessonsDone,icon:"📖",color:C.teal,bg:"rgba(58,168,160,.06)"},
+        {v:profile?.total_tutor_sessions||0,l:T.lumiChats,icon:"💬",color:C.blue,bg:"rgba(74,144,217,.06)"},
+        {v:ACHIEVEMENTS.filter(a=>a.condition(progress,profile)).length,l:T.achievements,icon:"🏆",color:C.green,bg:"rgba(74,186,120,.06)"},
       ].map((s,i)=>(
         <div key={i} className={`fu s${i+1}`} style={{background:s.bg,border:`1px solid ${s.color}20`,borderRadius:14,padding:"14px 12px",textAlign:"center"}}>
           <span style={{fontSize:20}}>{s.icon}</span>
@@ -1349,7 +1356,7 @@ const Tutorial = ({onComplete}) => {
     },
     {
       title:"Learn, Practice, Prove It",
-      desc:"Each lesson has three phases: read the content, ask Lumi questions, then prove your understanding in practice mode. Score 70% or higher to earn your Altitude Rating and unlock the next lesson.",
+      desc:"Each lesson has three phases: read the content, ask Lumi questions, then prove your understanding in {T.practice} mode. Score 70% or higher to earn your Altitude Rating and unlock the next lesson.",
       visual:(
         <div style={{display:"flex",flexDirection:"column",gap:10,maxWidth:240,margin:"0 auto"}}>
           <div style={{display:"flex",alignItems:"center",gap:10,background:"rgba(74,186,120,.08)",borderRadius:12,padding:"10px 14px",border:"1px solid rgba(74,186,120,.15)"}}>
@@ -1366,7 +1373,7 @@ const Tutorial = ({onComplete}) => {
     },
     {
       title:"Earn Your Altitude",
-      desc:"Your practice score earns an Altitude Rating. Push for Summit to show true mastery — or retry anytime to improve your rating.",
+      desc:"Your {T.practice} score earns an Altitude Rating. Push for Summit to show true mastery — or retry anytime to improve your rating.",
       visual:(
         <div style={{display:"flex",flexDirection:"column",gap:8,maxWidth:220,margin:"0 auto"}}>
           {[{icon:"🏔️",label:"Summit",pct:"90%+",color:"#FFD700",bg:"rgba(255,215,0,.1)"},{icon:"⛰️",label:"Ridge",pct:"70-89%",color:"#4ABA78",bg:"rgba(74,186,120,.08)"},{icon:"◈",label:"Treeline",pct:"50-69%",color:"#E8B84B",bg:"rgba(232,184,75,.06)"},{icon:"△",label:"Base Camp",pct:"<50%",color:"#C87858",bg:"rgba(200,120,88,.06)"}].map((r,i)=>(
@@ -1381,7 +1388,7 @@ const Tutorial = ({onComplete}) => {
     },
     {
       title:"Stay Sharp Every Day",
-      desc:"Complete Daily Challenges to keep your streak alive, read today's AI News simplified by Lumi, and use 6 AI Tools to practice real-world skills. You've got everything you need.",
+      desc:"Complete Daily Challenges to keep your streak alive, read today's AI News simplified by Lumi, and use 6 AI Tools to {T.practice} real-world skills. You've got everything you need.",
       visual:(
         <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap",maxWidth:280,margin:"0 auto"}}>
           {[{icon:<Icon type="challenge" size={28} color="#F0A878"/>,label:"Daily Challenge",bg:"rgba(232,128,96,.08)"},{icon:<Icon type="news" size={28} color="#E8C878"/>,label:"AI News",bg:"rgba(212,165,90,.06)"},{icon:<Icon type="tools" size={28} color="#68D8C8"/>,label:"6 AI Tools",bg:"rgba(58,168,160,.06)"}].map((f,i)=>(
