@@ -416,22 +416,28 @@ const Streak = {
 
 // PROGRESS CELEBRATIONS — milestone screens
 const MilestoneCheck = ({progress, onDismiss}) => {
+  const MS_TEXT={
+    en:[{t:"First Lesson!",m:"You've taken your first step up the mountain.",b:"Keep Climbing →"},{t:"Getting Warmed Up!",m:"3 lessons done! You're building real momentum.",b:"Keep Climbing →"},{t:"Trailblazer!",m:"5 lessons complete! You know more about AI than most people.",b:"Keep Climbing →"},{t:"Mountaineer!",m:"Double digits! 10 lessons shows serious commitment.",b:"Keep Climbing →"},{t:"Almost There!",m:"15 lessons! You can see the summit from here.",b:"Keep Climbing →"},{t:"AI Master!",m:"20 lessons! You understand AI better than 99% of people.",b:"Keep Climbing →"}],
+    ar:[{t:"!الدرس الأول",m:"لقد اتخذت خطوتك الأولى على الجبل.",b:"← واصل التسلق"},{t:"!بدأت الحماس",m:"3 دروس مكتملة! أنت تبني زخماً حقيقياً.",b:"← واصل التسلق"},{t:"!رائد الطريق",m:"5 دروس! أنت تعرف عن الذكاء أكثر من معظم الناس.",b:"← واصل التسلق"},{t:"!متسلق الجبال",m:"رقمان! 10 دروس تُظهر التزاماً حقيقياً.",b:"← واصل التسلق"},{t:"!اقتربت",m:"15 درساً! يمكنك رؤية القمة من هنا.",b:"← واصل التسلق"},{t:"!خبير الذكاء",m:"20 درساً! أنت تفهم الذكاء أفضل من 99% من الناس.",b:"← واصل التسلق"}],
+    fr:[{t:"Première leçon !",m:"Vous avez fait votre premier pas sur la montagne.",b:"Continuer →"},{t:"Ça chauffe !",m:"3 leçons terminées ! Vous prenez de l'élan.",b:"Continuer →"},{t:"Pionnier !",m:"5 leçons ! Vous en savez plus que la plupart des gens.",b:"Continuer →"},{t:"Alpiniste !",m:"10 leçons, un engagement sérieux !",b:"Continuer →"},{t:"Presque au sommet !",m:"15 leçons ! Vous voyez le sommet d'ici.",b:"Continuer →"},{t:"Maître de l'IA !",m:"20 leçons ! Vous comprenez l'IA mieux que 99% des gens.",b:"Continuer →"}],
+  };
   const milestones = [
-    { at: 1, title: "First Lesson!", msg: "You've taken your first step up the mountain. The journey of a thousand miles begins with a single step.", icon: "👣", color: C.green },
-    { at: 3, title: "Getting Warmed Up!", msg: "3 lessons done! You're building real momentum. Most people never get this far.", icon: "🔥", color: C.gold },
-    { at: 5, title: "Trailblazer!", msg: "5 lessons complete! You officially know more about AI than most people. Keep climbing!", icon: "🥾", color: C.teal },
-    { at: 10, title: "Mountaineer!", msg: "Double digits! 10 lessons shows serious commitment. You're becoming AI fluent.", icon: "⛰️", color: C.blue },
-    { at: 15, title: "Almost There!", msg: "15 lessons! You can see the summit from here. The air is getting thin but you're strong.", icon: "🌟", color: C.purple },
-    { at: 20, title: "AI Master!", msg: "20 lessons! You've reached near-mastery. You understand AI better than 99% of people.", icon: "🏔️", color: "#FFD700" },
+    { at: 1, icon: "👣", color: C.green },
+    { at: 3, icon: "🔥", color: C.gold },
+    { at: 5, icon: "🥾", color: C.teal },
+    { at: 10, icon: "⛰️", color: C.blue },
+    { at: 15, icon: "🌟", color: C.purple },
+    { at: 20, icon: "🏔️", color: "#FFD700" },
   ];
 
   const [show, setShow] = useState(() => {
     const seen = JSON.parse(localStorage.getItem("ai_fluent_milestones") || "[]");
-    const hit = milestones.find(m => progress.length >= m.at && !seen.includes(m.at));
-    return hit || null;
+    const idx = milestones.findIndex(m => progress.length >= m.at && !seen.includes(m.at));
+    return idx >= 0 ? { ...milestones[idx], idx } : null;
   });
 
   if (!show) return null;
+  const txt = (MS_TEXT[getLang()] || MS_TEXT.en)[show.idx];
 
   const dismiss = () => {
     const seen = JSON.parse(localStorage.getItem("ai_fluent_milestones") || "[]");
@@ -445,10 +451,10 @@ const MilestoneCheck = ({progress, onDismiss}) => {
       <Confetti />
       <div className="fu" style={{ textAlign: "center", maxWidth: 320 }} onClick={e => e.stopPropagation()}>
         <div style={{ fontSize: 64, marginBottom: 12, animation: "celebrate 0.6s ease infinite" }}>{show.icon}</div>
-        <h2 style={{ color: show.color, fontSize: 28, fontFamily: C.fontDisplay, fontWeight: 800, margin: "0 0 8px" }}>{show.title}</h2>
-        <p style={{ color: C.textMuted, fontSize: 15, fontFamily: C.font, lineHeight: 1.7, margin: "0 0 8px" }}>{show.msg}</p>
-        <p style={{ color: C.textDim, fontSize: 12, fontFamily: C.font, margin: "0 0 24px" }}>{progress.length} lessons completed</p>
-        <Btn v="gold" onClick={dismiss}>Keep Climbing →</Btn>
+        <h2 style={{ color: show.color, fontSize: 28, fontFamily: C.fontDisplay, fontWeight: 800, margin: "0 0 8px" }}>{txt.t}</h2>
+        <p style={{ color: C.textMuted, fontSize: 15, fontFamily: C.font, lineHeight: 1.7, margin: "0 0 8px" }}>{txt.m}</p>
+        <p style={{ color: C.textDim, fontSize: 12, fontFamily: C.font, margin: "0 0 24px" }}>{progress.length} {T.lessonsDone}</p>
+        <Btn v="gold" onClick={dismiss}>{txt.b}</Btn>
       </div>
     </div>
   );
@@ -889,6 +895,32 @@ const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
   const [totalPossible,setTotalPossible]=useState(0);
   const [showResults,setShowResults]=useState(false);
   const [showShare,setShowShare]=useState(false);
+  // Translated lesson content
+  const [tSections,setTSections]=useState(null);
+  const [translating,setTranslating]=useState(false);
+  useEffect(()=>{
+    if(!lesson||getLang()==="en"){setTSections(null);return}
+    const cacheKey=`${locId}-${lessonIdx}`;
+    const cached=TCache.get(getLang(),cacheKey);
+    if(cached){setTSections(cached);return}
+    setTranslating(true);
+    const sectionsText=lesson.sections.map((s,i)=>`[${i}] HEADING: ${s.h}\nBODY: ${s.body}`).join("\n---\n");
+    db.callClaude({feature:"tool",system:`Translate the following lesson content to ${LANGS[getLang()].name}. Keep the same structure. For each section, output: [N] HEADING: translated heading\nBODY: translated body. Keep \\n line breaks. Translate naturally, not word-by-word. Do NOT add any extra text.`,messages:[{role:"user",content:sectionsText}]}).then(r=>{
+      try{
+        const parts=r.text.split(/\[\d+\]\s*HEADING:\s*/);
+        const translated=parts.filter(p=>p.trim()).map(p=>{
+          const [h,...rest]=p.split(/\nBODY:\s*/);
+          return{h:h.trim(),body:(rest.join("\nBODY: ")).trim()};
+        });
+        if(translated.length===lesson.sections.length){
+          setTSections(translated);
+          TCache.set(getLang(),cacheKey,translated);
+        }
+      }catch(e){console.warn("Translation parse failed:",e)}
+      setTranslating(false);
+    }).catch(()=>setTranslating(false));
+  },[lessonIdx,lesson]);
+  const displaySections=tSections||lesson?.sections||[];
   // Store scores per lesson: { "basics-0": 85, "writing-1": 70 }
   const [lessonScores,setLessonScores]=useState(()=>{try{return JSON.parse(localStorage.getItem("ai_fluent_scores")||"{}")}catch{return{}}});
   const saveScore=(pathId,li,pct)=>{const k=`${pathId}-${li}`;const ns={...lessonScores,[k]:Math.max(pct,lessonScores[k]||0)};setLessonScores(ns);localStorage.setItem("ai_fluent_scores",JSON.stringify(ns))};
@@ -1022,7 +1054,8 @@ const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
     <button onClick={()=>{setView("intro");setLessonIdx(null)}} style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700,marginBottom:14}}>{T.back} {locName(loc.id)}</button>
     <div className="fu" style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}><span style={{fontSize:18}}>{loc.icon}</span><span style={{color:loc.color,fontSize:10,fontWeight:700,fontFamily:C.font,textTransform:"uppercase",letterSpacing:1}}>{loc.sub} · Lesson {lessonIdx+1}</span></div>
     <h1 className="fu s1" style={{color:C.text,fontSize:24,fontFamily:C.fontDisplay,fontWeight:700,margin:"0 0 22px",lineHeight:1.3}}>{lessonTitle(lesson.title)}</h1>
-    {lesson.sections.map((sec,i)=>(<div key={i} className={`fu s${Math.min(i+2,5)}`} style={{marginBottom:26}}><h3 style={{color:C.text,fontSize:16,fontWeight:700,fontFamily:C.font,margin:"0 0 8px"}}>{sec.h}</h3><p style={{color:C.textMuted,fontSize:14,lineHeight:1.8,fontFamily:C.font,whiteSpace:"pre-wrap"}}>{sec.body}</p></div>))}
+    {translating&&<div style={{display:"flex",alignItems:"center",gap:8,marginBottom:16,padding:"10px 14px",background:"rgba(212,165,90,.06)",borderRadius:12,border:`1px solid ${C.borderGold}`}}><Lumi size={22} mood="thinking" animate/><span style={{color:C.gold,fontSize:13,fontFamily:C.font}}>Lumi is translating...</span></div>}
+    {displaySections.map((sec,i)=>(<div key={i} className={`fu s${Math.min(i+2,5)}`} style={{marginBottom:26}}><h3 style={{color:C.text,fontSize:16,fontWeight:700,fontFamily:C.font,margin:"0 0 8px"}}>{sec.h}</h3><p style={{color:C.textMuted,fontSize:14,lineHeight:1.8,fontFamily:C.font,whiteSpace:"pre-wrap"}}>{sec.body}</p></div>))}
     <button onClick={()=>setView("tutor")} className="fu" style={{width:"100%",background:"rgba(212,165,90,.06)",border:`1px solid ${C.borderGold}`,borderRadius:16,padding:16,textAlign:"left",marginBottom:10}}>
       <div style={{display:"flex",alignItems:"center",gap:10}}><Lumi size={32} mood="happy" level={level} animate/><div><p style={{color:C.goldLight,fontSize:14,fontWeight:700,fontFamily:C.font,margin:0}}>{T.questionsHelp}</p><p style={{color:C.textDim,fontSize:12,fontFamily:C.font,margin:"2px 0 0"}}>{T.guideHere}</p></div></div>
     </button>
