@@ -897,30 +897,37 @@ const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
   const [showShare,setShowShare]=useState(false);
   // Translated lesson content
   const [tSections,setTSections]=useState(null);
+  const [tPractice,setTPractice]=useState(null);
   const [translating,setTranslating]=useState(false);
   useEffect(()=>{
-    if(!lesson||getLang()==="en"){setTSections(null);return}
+    if(!lesson||getLang()==="en"){setTSections(null);setTPractice(null);return}
     const cacheKey=`${locId}-${lessonIdx}`;
     const cached=TCache.get(getLang(),cacheKey);
-    if(cached){setTSections(cached);return}
+    if(cached){setTSections(cached.sections||null);setTPractice(cached.practice||null);return}
     setTranslating(true);
-    const sectionsText=lesson.sections.map((s,i)=>`[${i}] HEADING: ${s.h}\nBODY: ${s.body}`).join("\n---\n");
-    db.callClaude({feature:"tool",system:`Translate the following lesson content to ${LANGS[getLang()].name}. Keep the same structure. For each section, output: [N] HEADING: translated heading\nBODY: translated body. Keep \\n line breaks. Translate naturally, not word-by-word. Do NOT add any extra text.`,messages:[{role:"user",content:sectionsText}]}).then(r=>{
+    // Build a JSON request for Claude to translate
+    const toTranslate={
+      sections:lesson.sections.map(s=>({h:s.h,body:s.body})),
+      practice:(lesson.practice||[]).map(p=>({q:p.q,opts:p.opts||[],hint:p.hint||"",explain:p.explain||""}))
+    };
+    db.callClaude({feature:"tutor",system:`You are a translator. Translate the following JSON content to ${LANGS[getLang()].name}. Return ONLY valid JSON with the same structure. No markdown backticks. Translate naturally. Keep the JSON keys in English (h, body, q, opts, hint, explain). Only translate the values.`,messages:[{role:"user",content:JSON.stringify(toTranslate)}]}).then(r=>{
       try{
-        const parts=r.text.split(/\[\d+\]\s*HEADING:\s*/);
-        const translated=parts.filter(p=>p.trim()).map(p=>{
-          const [h,...rest]=p.split(/\nBODY:\s*/);
-          return{h:h.trim(),body:(rest.join("\nBODY: ")).trim()};
-        });
-        if(translated.length===lesson.sections.length){
-          setTSections(translated);
-          TCache.set(getLang(),cacheKey,translated);
+        // Extract JSON from response
+        let jsonStr=r.text;
+        const jsonMatch=jsonStr.match(/\{[\s\S]*\}/);
+        if(jsonMatch)jsonStr=jsonMatch[0];
+        const parsed=JSON.parse(jsonStr);
+        if(parsed.sections&&parsed.sections.length===lesson.sections.length){
+          setTSections(parsed.sections);
+          setTPractice(parsed.practice||null);
+          TCache.set(getLang(),cacheKey,{sections:parsed.sections,practice:parsed.practice||null});
         }
-      }catch(e){console.warn("Translation parse failed:",e)}
+      }catch(e){console.warn("Translation parse failed:",e,r.text?.substring(0,200))}
       setTranslating(false);
-    }).catch(()=>setTranslating(false));
+    }).catch(e=>{console.warn("Translation call failed:",e);setTranslating(false)});
   },[lessonIdx,lesson]);
   const displaySections=tSections||lesson?.sections||[];
+  const displayPractice=tPractice||lesson?.practice||[];
   // Store scores per lesson: { "basics-0": 85, "writing-1": 70 }
   const [lessonScores,setLessonScores]=useState(()=>{try{return JSON.parse(localStorage.getItem("ai_fluent_scores")||"{}")}catch{return{}}});
   const saveScore=(pathId,li,pct)=>{const k=`${pathId}-${li}`;const ns={...lessonScores,[k]:Math.max(pct,lessonScores[k]||0)};setLessonScores(ns);localStorage.setItem("ai_fluent_scores",JSON.stringify(ns))};
@@ -939,7 +946,13 @@ const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
     }catch(e){setTyping(false);setMsgs(m=>[...m,{from:"lumi",text:"Hmm, I lost my connection for a moment. Could you try asking that again? 🌟"}])}};
   const send=()=>{if(inp.trim()){ask(inp.trim());setInp("")}};
 
-  const practice=lesson?.practice||[];
+  const _rawPractice=lesson?.practice||[];
+  // Merge translated text with original practice (keep type, correct, etc from original)
+  const practice=_rawPractice.map((p,i)=>{
+    const tp=displayPractice[i];
+    if(!tp||getLang()==="en")return p;
+    return{...p,q:tp.q||p.q,opts:tp.opts?.length===p.opts?.length?tp.opts:p.opts,hint:tp.hint||p.hint,explain:tp.explain||p.explain};
+  });
   const currentP=practice[practiceIdx];
 
   const gradeFreeResponse=async()=>{
