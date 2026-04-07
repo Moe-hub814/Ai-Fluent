@@ -270,11 +270,17 @@ const SFX = {
 // Lumi Reaction component for results screen
 const LumiReaction = ({rating,size=100}) => {
   const s=size;
+  const LUMI_MSG={
+    en:{summit:"INCREDIBLE! You absolutely crushed it!",ridge:"Really solid work! You've got this!",treeline:"Getting there! One more try?",base:"Let's review together and try again!"},
+    ar:{summit:"!رائع! لقد أبدعت حقاً",ridge:"!عمل ممتاز! أنت على الطريق الصحيح",treeline:"اقتربت! محاولة أخرى؟",base:"!لنراجع معاً ونحاول مرة أخرى"},
+    fr:{summit:"INCROYABLE ! Vous avez tout déchiré !",ridge:"Excellent travail ! Vous assurez !",treeline:"Presque ! Encore un essai ?",base:"Révisons ensemble et réessayons !"},
+  };
+  const lm=LUMI_MSG[getLang()]||LUMI_MSG.en;
   const config={
-    summit:{eyes:"★ ★",mouth:"▽",color:"#FFD700",msg:"INCREDIBLE! You absolutely crushed it!",anim:"celebrate"},
-    ridge:{eyes:"◠ ◠",mouth:"▽",color:C.green,msg:"Really solid work! You've got this!",anim:"lumiFloat"},
-    treeline:{eyes:"◠ ◠",mouth:"‿",color:"#E8B84B",msg:"Getting there! One more try?",anim:"lumiFloat"},
-    base:{eyes:"• •",mouth:"○",color:C.red,msg:"Let's review together and try again!",anim:"lumiFloat"},
+    summit:{eyes:"★ ★",mouth:"▽",color:"#FFD700",msg:lm.summit,anim:"celebrate"},
+    ridge:{eyes:"◠ ◠",mouth:"▽",color:C.green,msg:lm.ridge,anim:"lumiFloat"},
+    treeline:{eyes:"◠ ◠",mouth:"‿",color:"#E8B84B",msg:lm.treeline,anim:"lumiFloat"},
+    base:{eyes:"• •",mouth:"○",color:C.red,msg:lm.base,anim:"lumiFloat"},
   };
   const c=config[rating]||config.base;
   return(
@@ -867,11 +873,17 @@ const WorldMap = ({profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfi
 
 // LOCATION VIEW + LESSON SELECTOR + TUTOR + PRACTICE MODE
 // Altitude Rating helper
+const ALT_TEXT={
+  en:{summit:{l:"Summit",m:"Outstanding! You've mastered this lesson."},ridge:{l:"Ridge",m:"Solid understanding. Great work!"},treeline:{l:"Treeline",m:"Almost there! You need 70% to pass. Review and try again."},base:{l:"Base Camp",m:"You need more practice. Review the lesson and try again."},rating:"Rating"},
+  ar:{summit:{l:"القمة",m:"!ممتاز! لقد أتقنت هذا الدرس"},ridge:{l:"التلال",m:"!فهم جيد. عمل رائع"},treeline:{l:"خط الشجر",m:"اقتربت! تحتاج 70% للنجاح. راجع وحاول مرة أخرى."},base:{l:"المخيم الأساسي",m:"تحتاج المزيد من التمرين. راجع الدرس وحاول مرة أخرى."},rating:"تقييم"},
+  fr:{summit:{l:"Sommet",m:"Exceptionnel ! Vous avez maîtrisé cette leçon."},ridge:{l:"Crête",m:"Bonne compréhension. Bravo !"},treeline:{l:"Limite forestière",m:"Presque ! Il faut 70% pour réussir. Révisez et réessayez."},base:{l:"Camp de Base",m:"Encore un effort. Révisez la leçon et réessayez."},rating:"Note"},
+};
 const getAltitude=(pct)=>{
-  if(pct>=90)return{label:"Summit",icon:"🏔️",color:"#FFD700",bg:"rgba(255,215,0,.12)",border:"rgba(255,215,0,.25)",msg:"Outstanding! You've mastered this lesson."};
-  if(pct>=70)return{label:"Ridge",icon:"⛰️",color:"#4ABA78",bg:"rgba(74,186,120,.1)",border:"rgba(74,186,120,.2)",msg:"Solid understanding. Great work!"};
-  if(pct>=50)return{label:"Treeline",icon:"◈",color:"#E8B84B",bg:"rgba(232,184,75,.08)",border:"rgba(232,184,75,.18)",msg:"Almost there! You need 70% to pass. Review and try again."};
-  return{label:"Base Camp",icon:"△",color:"#C87858",bg:"rgba(200,120,88,.08)",border:"rgba(200,120,88,.18)",msg:"You need more practice. Review the lesson and try again."};
+  const a=ALT_TEXT[getLang()]||ALT_TEXT.en;
+  if(pct>=90)return{label:a.summit.l,icon:"🏔️",color:"#FFD700",bg:"rgba(255,215,0,.12)",border:"rgba(255,215,0,.25)",msg:a.summit.m};
+  if(pct>=70)return{label:a.ridge.l,icon:"⛰️",color:"#4ABA78",bg:"rgba(74,186,120,.1)",border:"rgba(74,186,120,.2)",msg:a.ridge.m};
+  if(pct>=50)return{label:a.treeline.l,icon:"◈",color:"#E8B84B",bg:"rgba(232,184,75,.08)",border:"rgba(232,184,75,.18)",msg:a.treeline.m};
+  return{label:a.base.l,icon:"△",color:"#C87858",bg:"rgba(200,120,88,.08)",border:"rgba(200,120,88,.18)",msg:a.base.m};
 };
 
 const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
@@ -1015,7 +1027,7 @@ const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
       {passed&&<Confetti/>}
       <div className="fu" style={{textAlign:"center",maxWidth:340}}>
         <LumiReaction rating={ratingKey} size={120}/>
-        <p style={{color:alt.color,fontSize:14,fontWeight:700,fontFamily:C.font,textTransform:"uppercase",letterSpacing:2,margin:"0 0 4px"}}>{alt.label} Rating</p>
+        <p style={{color:alt.color,fontSize:14,fontWeight:700,fontFamily:C.font,textTransform:"uppercase",letterSpacing:2,margin:"0 0 4px"}}>{alt.label} {(ALT_TEXT[getLang()]||ALT_TEXT.en).rating}</p>
         <p style={{color:C.text,fontSize:48,fontWeight:800,fontFamily:C.fontDisplay,margin:"0 0 8px"}}>{pct}%</p>
         <p style={{color:C.textMuted,fontSize:14,fontFamily:C.font,lineHeight:1.6,margin:"0 0 24px"}}>{alt.msg}</p>
         <div style={{background:"rgba(255,255,255,.03)",borderRadius:14,padding:16,marginBottom:20,border:`1px solid ${C.border}`}}>
@@ -1038,7 +1050,7 @@ const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
             setLessonIdx(null);
             setView("intro");
           }}>
-            {pct>=90?"🏔️ Claim Summit Rating!":"⛰️ Claim Ridge Rating!"}
+            {pct>=90?T.claimSummit:T.claimRidge}
           </Btn>
           {pct<90&&<Btn v="ghost" onClick={()=>{setShowResults(false);setPracticeIdx(0);setSelected(null);setSubmitted(false);setFreeAns("");setFeedback("");setPracticeScore(0);setTotalPossible(0);setView("practice")}}>{T.retry}</Btn>}
           <Btn v="ghost" onClick={()=>setShowShare(true)}>{T.shareRating}</Btn>
