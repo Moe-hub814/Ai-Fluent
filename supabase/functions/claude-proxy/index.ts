@@ -88,7 +88,7 @@ serve(async (req) => {
       system: (system || "You are Lumi, a helpful AI guide.").slice(0, 2000), // Cap system prompt length
       messages: messages.slice(-10).map((m: any) => ({ // Max 10 messages, prevent huge context
         role: m.role === "user" ? "user" : "assistant",
-        content: String(m.content || "").slice(0, 3000), // Cap message length
+        content: String(m.content || "").slice(0, feature === "tutor" ? 8000 : 3000), // Higher cap for tutor/translation
       })),
     };
 
