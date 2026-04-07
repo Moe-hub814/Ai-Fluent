@@ -946,7 +946,7 @@ const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
     }).catch(e=>{console.warn("Translation call failed:",e);setTranslating(false)});
   },[lessonIdx]);
   const displaySections=tSections||lesson?.sections||[];
-  const displayPractice=tPractice||lesson?.practice||[];
+  const displayPractice=tPractice; // null if not translated yet
   // Store scores per lesson: { "basics-0": 85, "writing-1": 70 }
   const [lessonScores,setLessonScores]=useState(()=>{try{return JSON.parse(localStorage.getItem("ai_fluent_scores")||"{}")}catch{return{}}});
   const saveScore=(pathId,li,pct)=>{const k=`${pathId}-${li}`;const ns={...lessonScores,[k]:Math.max(pct,lessonScores[k]||0)};setLessonScores(ns);localStorage.setItem("ai_fluent_scores",JSON.stringify(ns))};
@@ -968,9 +968,10 @@ const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
   const _rawPractice=lesson?.practice||[];
   // Merge translated text with original practice (keep type, correct, etc from original)
   const practice=_rawPractice.map((p,i)=>{
+    if(!displayPractice||getLang()==="en")return p;
     const tp=displayPractice[i];
-    if(!tp||getLang()==="en")return p;
-    return{...p,q:tp.q||p.q,opts:tp.opts?.length===p.opts?.length?tp.opts:p.opts,hint:tp.hint||p.hint,explain:tp.explain||p.explain};
+    if(!tp)return p;
+    return{...p,q:tp.q||p.q,opts:(tp.opts&&tp.opts.length===p.opts?.length)?tp.opts:(p.opts||[]),hint:tp.hint||p.hint,explain:tp.explain||p.explain};
   });
   const currentP=practice[practiceIdx];
 
