@@ -619,9 +619,14 @@ const ShareCard = ({type="progress",data={},onClose}) => {
 };
 
 // CSS
+// Detect Capacitor / native Android environment
+const isCapacitor = typeof window !== 'undefined' && (window.Capacitor?.isNativePlatform?.() || navigator.userAgent.includes('CapacitorAndroid'));
+const BOTTOM_SAFE = isCapacitor ? 24 : 0; // Extra padding for Android nav bar in Capacitor
+
 const getCss = () => `
   @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Quicksand:wght@500;600;700&display=swap');
-  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}body{background:${C.bgDark};direction:${isRTL()?'rtl':'ltr'};overflow:hidden;transition:background .3s}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{background:${C.bgDark};direction:${isRTL()?'rtl':'ltr'};overflow:hidden;transition:background .3s;overscroll-behavior:none;-webkit-overflow-scrolling:touch}
   ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:${C.mode==="dark"?"#2A4060":"#C0D0E0"};border-radius:2px}
   input::placeholder,textarea::placeholder{color:${C.textDim}}
   @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
@@ -706,8 +711,8 @@ const WorldMap = ({profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfi
   const dk=C.mode==="dark";
 
   const nodes=[
-    {loc:LOCS[0],nx:22,ny:86},{loc:LOCS[1],nx:42,ny:72},{loc:LOCS[2],nx:68,ny:78},
-    {loc:LOCS[3],nx:78,ny:58},{loc:LOCS[4],nx:55,ny:42},{loc:LOCS[5],nx:32,ny:50},
+    {loc:LOCS[0],nx:22,ny:80},{loc:LOCS[1],nx:42,ny:67},{loc:LOCS[2],nx:68,ny:73},
+    {loc:LOCS[3],nx:78,ny:55},{loc:LOCS[4],nx:55,ny:40},{loc:LOCS[5],nx:32,ny:48},
     {loc:LOCS[6],nx:50,ny:16},
   ];
 
@@ -855,16 +860,16 @@ const WorldMap = ({profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfi
     })}
 
     {/* Bottom action bar */}
-    <div style={{position:"absolute",bottom:0,left:0,right:0,zIndex:20,padding:"0 12px 12px",paddingBottom:"max(12px,env(safe-area-inset-bottom))"}}>
-      <div style={{display:"flex",gap:8,background:dk?"rgba(6,13,26,.85)":"rgba(255,255,255,.85)",backdropFilter:"blur(16px)",borderRadius:18,padding:8,border:`1px solid ${dk?"rgba(255,255,255,.06)":"rgba(0,0,0,.08)"}`,boxShadow:dk?"none":"0 -2px 20px rgba(0,0,0,.06)"}}>
-        <button onClick={onOpenChallenge} style={{flex:1,background:dk?"rgba(232,128,96,.08)":"rgba(232,128,96,.06)",border:`1px solid ${dk?"rgba(232,128,96,.15)":"rgba(232,128,96,.12)"}`,borderRadius:12,padding:"12px 10px",display:"flex",alignItems:"center",gap:8,textAlign:"left"}}>
-          <Icon type="challenge" size={22} color={dk?"#F0A878":"#C08058"}/><div><p style={{color:dk?"#F0A878":"#A06840",fontSize:12,fontWeight:700,fontFamily:C.font,margin:0}}>{T.dailyChallenge}</p><p style={{color:C.textDim,fontSize:9,fontFamily:C.font,margin:0}}>{T.keepStreak}</p></div>
+    <div style={{position:"absolute",bottom:0,left:0,right:0,zIndex:20,padding:`0 12px ${12+BOTTOM_SAFE}px`,paddingBottom:`max(${12+BOTTOM_SAFE}px,calc(env(safe-area-inset-bottom) + 12px))`}}>
+      <div style={{display:"flex",gap:6,background:dk?"rgba(6,13,26,.92)":"rgba(255,255,255,.92)",backdropFilter:"blur(16px)",borderRadius:16,padding:6,border:`1px solid ${dk?"rgba(255,255,255,.06)":"rgba(0,0,0,.08)"}`,boxShadow:dk?"0 -4px 20px rgba(0,0,0,.3)":"0 -2px 20px rgba(0,0,0,.06)"}}>
+        <button onClick={onOpenChallenge} style={{flex:1,background:dk?"rgba(232,128,96,.08)":"rgba(232,128,96,.06)",border:`1px solid ${dk?"rgba(232,128,96,.15)":"rgba(232,128,96,.12)"}`,borderRadius:12,padding:"10px 8px",display:"flex",alignItems:"center",gap:6,textAlign:"left"}}>
+          <Icon type="challenge" size={20} color={dk?"#F0A878":"#C08058"}/><div><p style={{color:dk?"#F0A878":"#A06840",fontSize:11,fontWeight:700,fontFamily:C.font,margin:0,lineHeight:1.2}}>{T.dailyChallenge}</p><p style={{color:C.textDim,fontSize:8,fontFamily:C.font,margin:"1px 0 0",lineHeight:1.2}}>{T.keepStreak}</p></div>
         </button>
-        <button onClick={onOpenNews} style={{flex:1,background:dk?"rgba(212,165,90,.06)":"rgba(180,130,40,.05)",border:`1px solid ${dk?"rgba(212,165,90,.12)":"rgba(180,130,40,.1)"}`,borderRadius:12,padding:"12px 10px",display:"flex",alignItems:"center",gap:8,textAlign:"left"}}>
-          <Icon type="news" size={22} color={dk?"#E8C878":"#A08838"}/><div><p style={{color:dk?"#E8C878":"#806820",fontSize:12,fontWeight:700,fontFamily:C.font,margin:0}}>{T.aiNews}</p><p style={{color:C.textDim,fontSize:9,fontFamily:C.font,margin:0}}>{T.live}</p></div>
+        <button onClick={onOpenNews} style={{flex:1,background:dk?"rgba(212,165,90,.06)":"rgba(180,130,40,.05)",border:`1px solid ${dk?"rgba(212,165,90,.12)":"rgba(180,130,40,.1)"}`,borderRadius:12,padding:"10px 8px",display:"flex",alignItems:"center",gap:6,textAlign:"left"}}>
+          <Icon type="news" size={20} color={dk?"#E8C878":"#A08838"}/><div><p style={{color:dk?"#E8C878":"#806820",fontSize:11,fontWeight:700,fontFamily:C.font,margin:0,lineHeight:1.2}}>{T.aiNews}</p><p style={{color:C.textDim,fontSize:8,fontFamily:C.font,margin:"1px 0 0",lineHeight:1.2}}>{T.live}</p></div>
         </button>
-        <button onClick={onOpenTools} style={{flex:1,background:dk?"rgba(58,168,160,.06)":"rgba(42,128,120,.05)",border:`1px solid ${dk?"rgba(58,168,160,.12)":"rgba(42,128,120,.1)"}`,borderRadius:12,padding:"12px 10px",display:"flex",alignItems:"center",gap:8,textAlign:"left"}}>
-          <Icon type="tools" size={22} color={dk?"#68D8C8":"#388880"}/><div><p style={{color:dk?"#68D8C8":"#2A7068",fontSize:12,fontWeight:700,fontFamily:C.font,margin:0}}>{T.aiTools}</p><p style={{color:C.textDim,fontSize:9,fontFamily:C.font,margin:0}}>{T.tools6}</p></div>
+        <button onClick={onOpenTools} style={{flex:1,background:dk?"rgba(58,168,160,.06)":"rgba(42,128,120,.05)",border:`1px solid ${dk?"rgba(58,168,160,.12)":"rgba(42,128,120,.1)"}`,borderRadius:12,padding:"10px 8px",display:"flex",alignItems:"center",gap:6,textAlign:"left"}}>
+          <Icon type="tools" size={20} color={dk?"#68D8C8":"#388880"}/><div><p style={{color:dk?"#68D8C8":"#2A7068",fontSize:11,fontWeight:700,fontFamily:C.font,margin:0,lineHeight:1.2}}>{T.aiTools}</p><p style={{color:C.textDim,fontSize:8,fontFamily:C.font,margin:"1px 0 0",lineHeight:1.2}}>{T.tools6}</p></div>
         </button>
       </div>
     </div>
@@ -1077,7 +1082,7 @@ const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
       {msgs.map((m,i)=><Bub key={i} from={m.from} text={m.text}/>)}{typing&&<Bub from="lumi" typing/>}
       {msgs.length===0&&lesson&&<div className="fu s2" style={{marginTop:14}}><p style={{color:C.textDim,fontSize:12,fontFamily:C.font,fontWeight:600,margin:"0 0 10px"}}>{T.peoplAsk}</p>{lesson.questions.map((q,i)=><button key={i} onClick={()=>ask(q)} style={{display:"block",width:"100%",background:"rgba(255,255,255,.03)",border:`1px solid ${C.border}`,borderRadius:12,padding:"10px 14px",marginBottom:7,textAlign:"left"}}><span style={{color:C.textMuted,fontSize:13,fontFamily:C.font}}>{q}</span></button>)}</div>}
     </div>
-    <div style={{padding:"8px 14px 12px",borderTop:`1px solid ${C.border}`,display:"flex",gap:8,flexShrink:0,background:C.bgCard,paddingBottom:"max(12px,env(safe-area-inset-bottom))"}}>
+    <div style={{padding:"8px 14px 12px",borderTop:`1px solid ${C.border}`,display:"flex",gap:8,flexShrink:0,background:C.bgCard,paddingBottom:`max(${12+BOTTOM_SAFE}px,calc(env(safe-area-inset-bottom) + 12px))`}}>
       <input value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} placeholder={T.askLumi+"..."} style={{flex:1,background:"rgba(255,255,255,.04)",borderRadius:12,border:`1px solid ${C.border}`,padding:"11px 14px",color:C.text,fontSize:14,fontFamily:C.font,outline:"none"}}/>
       <button onClick={send} style={{width:42,height:42,borderRadius:12,background:`linear-gradient(135deg,${C.gold},${C.goldDark})`,border:"none",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><span style={{color:"#fff",fontSize:16}}>↑</span></button>
     </div></div>);
@@ -1485,7 +1490,7 @@ const Tutorial = ({onComplete}) => {
         <p style={{color:C.textMuted,fontSize:14,fontFamily:C.font,textAlign:"center",lineHeight:1.7,maxWidth:320,margin:0}}>{s.desc}</p>
       </div>
       {/* Navigation */}
-      <div style={{padding:"0 24px 30px",position:"relative",zIndex:10,paddingBottom:"max(30px,env(safe-area-inset-bottom))"}}>
+      <div style={{padding:"0 24px 30px",position:"relative",zIndex:10,paddingBottom:`max(${30+BOTTOM_SAFE}px,calc(env(safe-area-inset-bottom) + 30px))`}}>
         <Btn v={isLast?"gold":"teal"} onClick={()=>{
           try{SFX.play("click")}catch(e){}
           if(isLast){onComplete()}else{setStep(step+1)}

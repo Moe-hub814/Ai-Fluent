@@ -84,7 +84,7 @@ serve(async (req) => {
     // 6. Build Claude request with token limits to prevent abuse
     const claudeBody: any = {
       model,
-      max_tokens: feature === "news_fetch" ? 2048 : 1024,
+      max_tokens: feature === "news_fetch" ? 2048 : feature === "tutor" ? 4096 : 1024,
       system: (system || "You are Lumi, a helpful AI guide.").slice(0, 2000), // Cap system prompt length
       messages: messages.slice(-10).map((m: any) => ({ // Max 10 messages, prevent huge context
         role: m.role === "user" ? "user" : "assistant",
