@@ -621,7 +621,7 @@ const ShareCard = ({type="progress",data={},onClose}) => {
 // CSS
 // Detect Capacitor / native Android environment
 const isCapacitor = typeof window !== 'undefined' && (window.Capacitor?.isNativePlatform?.() || navigator.userAgent.includes('CapacitorAndroid'));
-const BOTTOM_SAFE = isCapacitor ? 24 : 0; // Extra padding for Android nav bar in Capacitor
+const BOTTOM_SAFE = isCapacitor ? 40 : 0; // Extra padding for Android nav bar in Capacitor
 
 const getCss = () => `
   @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Quicksand:wght@500;600;700&display=swap');
@@ -711,9 +711,9 @@ const WorldMap = ({profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfi
   const dk=C.mode==="dark";
 
   const nodes=[
-    {loc:LOCS[0],nx:22,ny:80},{loc:LOCS[1],nx:42,ny:67},{loc:LOCS[2],nx:68,ny:73},
-    {loc:LOCS[3],nx:78,ny:55},{loc:LOCS[4],nx:55,ny:40},{loc:LOCS[5],nx:32,ny:48},
-    {loc:LOCS[6],nx:50,ny:16},
+    {loc:LOCS[0],nx:22,ny:76},{loc:LOCS[1],nx:42,ny:64},{loc:LOCS[2],nx:68,ny:70},
+    {loc:LOCS[3],nx:78,ny:53},{loc:LOCS[4],nx:55,ny:38},{loc:LOCS[5],nx:32,ny:46},
+    {loc:LOCS[6],nx:50,ny:15},
   ];
 
   // Trail colors that work on both themes
@@ -860,7 +860,7 @@ const WorldMap = ({profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfi
     })}
 
     {/* Bottom action bar */}
-    <div style={{position:"absolute",bottom:0,left:0,right:0,zIndex:20,padding:`0 12px ${12+BOTTOM_SAFE}px`,paddingBottom:`max(${12+BOTTOM_SAFE}px,calc(env(safe-area-inset-bottom) + 12px))`}}>
+    <div style={{position:"absolute",bottom:0,left:0,right:0,zIndex:20,padding:`0 12px ${14+BOTTOM_SAFE}px`,paddingBottom:`max(${14+BOTTOM_SAFE}px,calc(env(safe-area-inset-bottom) + 14px))`}}>
       <div style={{display:"flex",gap:6,background:dk?"rgba(6,13,26,.92)":"rgba(255,255,255,.92)",backdropFilter:"blur(16px)",borderRadius:16,padding:6,border:`1px solid ${dk?"rgba(255,255,255,.06)":"rgba(0,0,0,.08)"}`,boxShadow:dk?"0 -4px 20px rgba(0,0,0,.3)":"0 -2px 20px rgba(0,0,0,.06)"}}>
         <button onClick={onOpenChallenge} style={{flex:1,background:dk?"rgba(232,128,96,.08)":"rgba(232,128,96,.06)",border:`1px solid ${dk?"rgba(232,128,96,.15)":"rgba(232,128,96,.12)"}`,borderRadius:12,padding:"10px 8px",display:"flex",alignItems:"center",gap:6,textAlign:"left"}}>
           <Icon type="challenge" size={20} color={dk?"#F0A878":"#C08058"}/><div><p style={{color:dk?"#F0A878":"#A06840",fontSize:11,fontWeight:700,fontFamily:C.font,margin:0,lineHeight:1.2}}>{T.dailyChallenge}</p><p style={{color:C.textDim,fontSize:8,fontFamily:C.font,margin:"1px 0 0",lineHeight:1.2}}>{T.keepStreak}</p></div>
