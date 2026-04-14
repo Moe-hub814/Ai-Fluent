@@ -619,10 +619,6 @@ const ShareCard = ({type="progress",data={},onClose}) => {
 };
 
 // CSS
-// Detect Capacitor native environment
-const _isNative = (typeof window !== 'undefined') && !!(window.Capacitor?.isNativePlatform?.() || window.Capacitor?.getPlatform?.() === 'android' || document.URL.includes('localhost'));
-const BOTTOM_SAFE = _isNative ? 48 : 0;
-
 const getCss = () => `
   @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Quicksand:wght@500;600;700&display=swap');
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}body{background:${C.bgDark};direction:${isRTL()?'rtl':'ltr'};overflow:hidden;transition:background .3s}
@@ -706,14 +702,13 @@ const WorldMap = ({profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfi
   const pct=Math.round((done.length/6)*100);
   const greet=()=>{const h=new Date().getHours();return h<12?"Good morning":h<17?"Good afternoon":"Good evening"};
   const streak=Streak.getData().current||profile?.current_streak||0;
-  const _rawName=profile?.display_name?.split(" ")[0]||"";
-  const name=(_rawName && _rawName.length > 1 && _rawName.toLowerCase() !== "ai") ? _rawName : (profile?.email?.split("@")[0]||"Climber");
+  const name=profile?.display_name?.split(" ")[0]||"Climber";
   const dk=C.mode==="dark";
 
   const nodes=[
-    {loc:LOCS[0],nx:20,ny:72},{loc:LOCS[1],nx:40,ny:60},{loc:LOCS[2],nx:70,ny:66},
-    {loc:LOCS[3],nx:76,ny:49},{loc:LOCS[4],nx:52,ny:36},{loc:LOCS[5],nx:28,ny:44},
-    {loc:LOCS[6],nx:50,ny:20},
+    {loc:LOCS[0],nx:22,ny:86},{loc:LOCS[1],nx:42,ny:72},{loc:LOCS[2],nx:68,ny:78},
+    {loc:LOCS[3],nx:78,ny:58},{loc:LOCS[4],nx:55,ny:42},{loc:LOCS[5],nx:32,ny:50},
+    {loc:LOCS[6],nx:50,ny:16},
   ];
 
   // Trail colors that work on both themes
@@ -774,21 +769,21 @@ const WorldMap = ({profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfi
     </div>
 
     {/* Top bar */}
-    <div style={{position:"absolute",top:0,left:0,right:0,padding:"10px 12px",display:"flex",justifyContent:"space-between",alignItems:"center",zIndex:20,
-      background:dk?"linear-gradient(180deg, rgba(6,13,26,.97) 0%, rgba(6,13,26,.7) 60%, transparent 100%)":"linear-gradient(180deg, rgba(216,232,248,.97) 0%, rgba(216,232,248,.7) 60%, transparent 100%)"}}>
-      <div style={{display:"flex",alignItems:"center",gap:8,minWidth:0,flex:1}}>
-        <Lumi size={28} mood={streak>=7?"excited":"happy"} level={level}/>
-        <div style={{minWidth:0}}>
-          <p style={{color:C.text,fontSize:13,fontFamily:C.fontDisplay,fontWeight:700,margin:0,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{T.greeting(new Date().getHours())}, {name}</p>
-          <p style={{color:C.textMuted,fontSize:10,fontFamily:C.font,margin:0}}>{T.altitude} {level} · {pct}% {T.toSummit}</p>
+    <div style={{position:"absolute",top:0,left:0,right:0,padding:"14px 16px",display:"flex",justifyContent:"space-between",alignItems:"center",zIndex:20,
+      background:dk?"linear-gradient(180deg, rgba(6,13,26,.95) 0%, rgba(6,13,26,.6) 70%, transparent 100%)":"linear-gradient(180deg, rgba(216,232,248,.95) 0%, rgba(216,232,248,.6) 70%, transparent 100%)"}}>
+      <div style={{display:"flex",alignItems:"center",gap:10}}>
+        <Lumi size={32} mood={streak>=7?"excited":"happy"} level={level}/>
+        <div>
+          <p style={{color:C.text,fontSize:14,fontFamily:C.fontDisplay,fontWeight:700,margin:0}}>{T.greeting(new Date().getHours())}, {name}</p>
+          <p style={{color:C.textMuted,fontSize:11,fontFamily:C.font,margin:0}}>{T.altitude} {level} · {pct}% {T.toSummit}</p>
         </div>
       </div>
-      <div style={{display:"flex",gap:4,alignItems:"center",flexShrink:0}}>
-        <div style={{display:"flex",alignItems:"center",gap:3,background:dk?"rgba(212,165,90,.1)":"rgba(180,130,40,.1)",padding:"5px 8px",borderRadius:16,border:`1px solid ${dk?"rgba(212,165,90,.2)":"rgba(180,130,40,.2)"}`}}><span style={{fontSize:12}}>🔥</span><span style={{color:C.gold,fontSize:12,fontWeight:800,fontFamily:C.font}}>{streak}</span></div>
-        <button onClick={onOpenAchievements} style={{display:"flex",alignItems:"center",gap:2,background:dk?"rgba(58,168,160,.1)":"rgba(42,128,120,.08)",padding:"5px 8px",borderRadius:16,border:`1px solid ${dk?"rgba(58,168,160,.2)":"rgba(42,128,120,.15)"}`,fontSize:12}}>🏆<span style={{color:C.teal,fontSize:12,fontWeight:800,fontFamily:C.font}}>{ACHIEVEMENTS.filter(a=>a.condition(progress,profile)).length}</span></button>
+      <div style={{display:"flex",gap:6,alignItems:"center"}}>
+        <div style={{display:"flex",alignItems:"center",gap:4,background:dk?"rgba(212,165,90,.1)":"rgba(180,130,40,.1)",padding:"6px 10px",borderRadius:20,border:`1px solid ${dk?"rgba(212,165,90,.2)":"rgba(180,130,40,.2)"}`}}><span style={{fontSize:13}}>🔥</span><span style={{color:C.gold,fontSize:13,fontWeight:800,fontFamily:C.font}}>{streak}</span></div>
+        <button onClick={onOpenAchievements} style={{display:"flex",alignItems:"center",gap:3,background:dk?"rgba(58,168,160,.1)":"rgba(42,128,120,.08)",padding:"6px 10px",borderRadius:20,border:`1px solid ${dk?"rgba(58,168,160,.2)":"rgba(42,128,120,.15)"}`,fontSize:13}}>🏆<span style={{color:C.teal,fontSize:13,fontWeight:800,fontFamily:C.font}}>{ACHIEVEMENTS.filter(a=>a.condition(progress,profile)).length}</span></button>
         <ThemeToggle onToggle={onToggleTheme}/>
         <LangSelector onChangeLang={onChangeLang} compact/>
-        <button onClick={onOpenProfile} style={{width:30,height:30,borderRadius:8,background:dk?"rgba(255,255,255,.06)":"rgba(0,0,0,.05)",border:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:13}}>👤</button>
+        <button onClick={onOpenProfile} style={{width:32,height:32,borderRadius:10,background:dk?"rgba(255,255,255,.06)":"rgba(0,0,0,.05)",border:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14}}>👤</button>
       </div>
     </div>
 
@@ -859,22 +854,17 @@ const WorldMap = ({profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfi
       </div>);
     })}
 
-    {/* Bottom action bar — edge-to-edge, fills gap to system nav */}
-    <div style={{position:"absolute",bottom:0,left:0,right:0,zIndex:20,
-      background:dk?"rgba(6,13,26,.96)":"rgba(255,255,255,.96)",
-      backdropFilter:"blur(16px)",
-      borderTop:`1px solid ${dk?"rgba(255,255,255,.08)":"rgba(0,0,0,.08)"}`,
-      boxShadow:dk?"0 -4px 24px rgba(0,0,0,.5)":"0 -2px 20px rgba(0,0,0,.08)",
-      padding:`10px 10px ${10+BOTTOM_SAFE}px 10px`}}>
-      <div style={{display:"flex",gap:6}}>
-        <button onClick={onOpenChallenge} style={{flex:1,background:dk?"rgba(232,128,96,.08)":"rgba(232,128,96,.06)",border:`1px solid ${dk?"rgba(232,128,96,.15)":"rgba(232,128,96,.12)"}`,borderRadius:12,padding:"10px 8px",display:"flex",alignItems:"center",gap:6,textAlign:"left"}}>
-          <Icon type="challenge" size={20} color={dk?"#F0A878":"#C08058"}/><div><p style={{color:dk?"#F0A878":"#A06840",fontSize:11,fontWeight:700,fontFamily:C.font,margin:0,lineHeight:1.3}}>{T.dailyChallenge}</p><p style={{color:C.textDim,fontSize:8,fontFamily:C.font,margin:"1px 0 0"}}>{T.keepStreak}</p></div>
+    {/* Bottom action bar */}
+    <div style={{position:"absolute",bottom:0,left:0,right:0,zIndex:20,padding:"0 12px 12px",paddingBottom:"max(12px,env(safe-area-inset-bottom))"}}>
+      <div style={{display:"flex",gap:8,background:dk?"rgba(6,13,26,.85)":"rgba(255,255,255,.85)",backdropFilter:"blur(16px)",borderRadius:18,padding:8,border:`1px solid ${dk?"rgba(255,255,255,.06)":"rgba(0,0,0,.08)"}`,boxShadow:dk?"none":"0 -2px 20px rgba(0,0,0,.06)"}}>
+        <button onClick={onOpenChallenge} style={{flex:1,background:dk?"rgba(232,128,96,.08)":"rgba(232,128,96,.06)",border:`1px solid ${dk?"rgba(232,128,96,.15)":"rgba(232,128,96,.12)"}`,borderRadius:12,padding:"12px 10px",display:"flex",alignItems:"center",gap:8,textAlign:"left"}}>
+          <Icon type="challenge" size={22} color={dk?"#F0A878":"#C08058"}/><div><p style={{color:dk?"#F0A878":"#A06840",fontSize:12,fontWeight:700,fontFamily:C.font,margin:0}}>{T.dailyChallenge}</p><p style={{color:C.textDim,fontSize:9,fontFamily:C.font,margin:0}}>{T.keepStreak}</p></div>
         </button>
-        <button onClick={onOpenNews} style={{flex:1,background:dk?"rgba(212,165,90,.06)":"rgba(180,130,40,.05)",border:`1px solid ${dk?"rgba(212,165,90,.12)":"rgba(180,130,40,.1)"}`,borderRadius:12,padding:"10px 8px",display:"flex",alignItems:"center",gap:6,textAlign:"left"}}>
-          <Icon type="news" size={20} color={dk?"#E8C878":"#A08838"}/><div><p style={{color:dk?"#E8C878":"#806820",fontSize:11,fontWeight:700,fontFamily:C.font,margin:0,lineHeight:1.3}}>{T.aiNews}</p><p style={{color:C.textDim,fontSize:8,fontFamily:C.font,margin:"1px 0 0"}}>{T.live}</p></div>
+        <button onClick={onOpenNews} style={{flex:1,background:dk?"rgba(212,165,90,.06)":"rgba(180,130,40,.05)",border:`1px solid ${dk?"rgba(212,165,90,.12)":"rgba(180,130,40,.1)"}`,borderRadius:12,padding:"12px 10px",display:"flex",alignItems:"center",gap:8,textAlign:"left"}}>
+          <Icon type="news" size={22} color={dk?"#E8C878":"#A08838"}/><div><p style={{color:dk?"#E8C878":"#806820",fontSize:12,fontWeight:700,fontFamily:C.font,margin:0}}>{T.aiNews}</p><p style={{color:C.textDim,fontSize:9,fontFamily:C.font,margin:0}}>{T.live}</p></div>
         </button>
-        <button onClick={onOpenTools} style={{flex:1,background:dk?"rgba(58,168,160,.06)":"rgba(42,128,120,.05)",border:`1px solid ${dk?"rgba(58,168,160,.12)":"rgba(42,128,120,.1)"}`,borderRadius:12,padding:"10px 8px",display:"flex",alignItems:"center",gap:6,textAlign:"left"}}>
-          <Icon type="tools" size={20} color={dk?"#68D8C8":"#388880"}/><div><p style={{color:dk?"#68D8C8":"#2A7068",fontSize:11,fontWeight:700,fontFamily:C.font,margin:0,lineHeight:1.3}}>{T.aiTools}</p><p style={{color:C.textDim,fontSize:8,fontFamily:C.font,margin:"1px 0 0"}}>{T.tools6}</p></div>
+        <button onClick={onOpenTools} style={{flex:1,background:dk?"rgba(58,168,160,.06)":"rgba(42,128,120,.05)",border:`1px solid ${dk?"rgba(58,168,160,.12)":"rgba(42,128,120,.1)"}`,borderRadius:12,padding:"12px 10px",display:"flex",alignItems:"center",gap:8,textAlign:"left"}}>
+          <Icon type="tools" size={22} color={dk?"#68D8C8":"#388880"}/><div><p style={{color:dk?"#68D8C8":"#2A7068",fontSize:12,fontWeight:700,fontFamily:C.font,margin:0}}>{T.aiTools}</p><p style={{color:C.textDim,fontSize:9,fontFamily:C.font,margin:0}}>{T.tools6}</p></div>
         </button>
       </div>
     </div>
@@ -1055,8 +1045,9 @@ const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
             try{SFX.play("triumph")}catch(e){}
             saveScore(locId,lessonIdx,pct);
             try{await db.completeLesson(uid,locId,lessonIdx)}catch(e){console.warn(e)}
-            await onComplete();
+            // Navigate back to map FIRST, then refresh data
             onBack();
+            setTimeout(()=>onComplete(),300);
           }}>
             {pct>=90?T.claimSummit:T.claimRidge}
           </Btn>
@@ -1084,7 +1075,7 @@ const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
       {msgs.map((m,i)=><Bub key={i} from={m.from} text={m.text}/>)}{typing&&<Bub from="lumi" typing/>}
       {msgs.length===0&&lesson&&<div className="fu s2" style={{marginTop:14}}><p style={{color:C.textDim,fontSize:12,fontFamily:C.font,fontWeight:600,margin:"0 0 10px"}}>{T.peoplAsk}</p>{lesson.questions.map((q,i)=><button key={i} onClick={()=>ask(q)} style={{display:"block",width:"100%",background:"rgba(255,255,255,.03)",border:`1px solid ${C.border}`,borderRadius:12,padding:"10px 14px",marginBottom:7,textAlign:"left"}}><span style={{color:C.textMuted,fontSize:13,fontFamily:C.font}}>{q}</span></button>)}</div>}
     </div>
-    <div style={{padding:`8px 14px ${12+BOTTOM_SAFE}px`,borderTop:`1px solid ${C.border}`,display:"flex",gap:8,flexShrink:0,background:C.bgCard}}>
+    <div style={{padding:"8px 14px 12px",borderTop:`1px solid ${C.border}`,display:"flex",gap:8,flexShrink:0,background:C.bgCard,paddingBottom:"max(12px,env(safe-area-inset-bottom))"}}>
       <input value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} placeholder={T.askLumi+"..."} style={{flex:1,background:"rgba(255,255,255,.04)",borderRadius:12,border:`1px solid ${C.border}`,padding:"11px 14px",color:C.text,fontSize:14,fontFamily:C.font,outline:"none"}}/>
       <button onClick={send} style={{width:42,height:42,borderRadius:12,background:`linear-gradient(135deg,${C.gold},${C.goldDark})`,border:"none",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><span style={{color:"#fff",fontSize:16}}>↑</span></button>
     </div></div>);
@@ -1100,7 +1091,7 @@ const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
       <div style={{display:"flex",alignItems:"center",gap:10}}><Lumi size={32} mood="happy" level={level} animate/><div><p style={{color:C.goldLight,fontSize:14,fontWeight:700,fontFamily:C.font,margin:0}}>{T.questionsHelp}</p><p style={{color:C.textDim,fontSize:12,fontFamily:C.font,margin:"2px 0 0"}}>{T.guideHere}</p></div></div>
     </button>
     {practice.length>0?<Btn v="teal" onClick={()=>{setView("practice");resetPractice()}}>{T.startPractice}</Btn>
-    :<Btn onClick={async()=>{await db.completeLesson(uid,locId,lessonIdx);onComplete();setView("intro");setLessonIdx(null)}}>{T.completeLesson}</Btn>}
+    :<Btn onClick={async()=>{await db.completeLesson(uid,locId,lessonIdx);onBack();setTimeout(()=>onComplete(),300)}}>{T.completeLesson}</Btn>}
   </div>);
 
   // INTRO — LESSON SELECTOR
@@ -1492,7 +1483,7 @@ const Tutorial = ({onComplete}) => {
         <p style={{color:C.textMuted,fontSize:14,fontFamily:C.font,textAlign:"center",lineHeight:1.7,maxWidth:320,margin:0}}>{s.desc}</p>
       </div>
       {/* Navigation */}
-      <div style={{padding:`0 24px ${30+BOTTOM_SAFE}px`,position:"relative",zIndex:10}}>
+      <div style={{padding:"0 24px 30px",position:"relative",zIndex:10,paddingBottom:"max(30px,env(safe-area-inset-bottom))"}}>
         <Btn v={isLast?"gold":"teal"} onClick={()=>{
           try{SFX.play("click")}catch(e){}
           if(isLast){onComplete()}else{setStep(step+1)}
