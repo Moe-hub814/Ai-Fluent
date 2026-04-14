@@ -1055,11 +1055,8 @@ const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
             try{SFX.play("triumph")}catch(e){}
             saveScore(locId,lessonIdx,pct);
             try{await db.completeLesson(uid,locId,lessonIdx)}catch(e){console.warn(e)}
-            onComplete();
-            // Navigate directly — don't call resetPractice which conflicts
-            setShowResults(false);
-            setLessonIdx(null);
-            setView("intro");
+            await onComplete();
+            onBack();
           }}>
             {pct>=90?T.claimSummit:T.claimRidge}
           </Btn>
