@@ -9,8 +9,8 @@
 
 ### Layout Fixes
 
-- [ ] **LAYOUT-01**: Android app header does not overlap Summit node (add `TOP_SAFE = _isNative ? 28 : 0` constant applied to WorldMap top bar `paddingTop`)
-- [ ] **LAYOUT-02**: Android app bottom navigation bar does not overlap Base Camp node (`BOTTOM_SAFE = 48` verified on physical device; adjust if needed)
+- [x] **LAYOUT-01**: Android app header does not overlap Summit node (add `TOP_SAFE = _isNative ? 28 : 0` constant applied to WorldMap top bar `paddingTop`)
+- [x] **LAYOUT-02**: Android app bottom navigation bar does not overlap Base Camp node (`BOTTOM_SAFE = 48` verified on physical device; adjust if needed)
 - [ ] **LAYOUT-03**: Greeting shows user's real display name, not "AI" (fix `display_name` fallback in profile fetch — Supabase `profiles.display_name` is stored but wrong fallback used)
 - [ ] **LAYOUT-04**: App startup does not show white flash on Android (add `android.backgroundColor: "#060D1A"` to `capacitor.config.json`)
 
@@ -78,8 +78,8 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| LAYOUT-01 | Phase 1 | Pending |
-| LAYOUT-02 | Phase 1 | Pending |
+| LAYOUT-01 | Phase 1 | Complete |
+| LAYOUT-02 | Phase 1 | Complete |
 | LAYOUT-03 | Phase 1 | Pending |
 | LAYOUT-04 | Phase 1 | Pending |
 | BUILD-01 | Phase 2 | Pending |
