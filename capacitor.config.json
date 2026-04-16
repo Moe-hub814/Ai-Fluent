@@ -1,5 +1,8 @@
 {
   "appId": "com.aifluent.app",
   "appName": "AI Fluent",
-  "webDir": "dist"
+  "webDir": "dist",
+  "android": {
+    "backgroundColor": "#060D1A"
+  }
 }
