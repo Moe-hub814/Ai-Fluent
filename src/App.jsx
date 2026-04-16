@@ -702,7 +702,7 @@ const Onboarding = ({uid,onDone}) => {
 };
 
 // WORLD MAP — Premium mountain climbing experience
-const WorldMap = ({profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfile,onOpenChallenge,onOpenAchievements,onToggleTheme,onChangeLang}) => {
+const WorldMap = ({user,profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfile,onOpenChallenge,onOpenAchievements,onToggleTheme,onChangeLang}) => {
   const level=Math.max(1,Math.floor(progress.length/2)+1);const done=[...new Set(progress.map(p=>p.path_id))];
   const status=(loc)=>{if(loc.id==="master")return done.length>=6?"current":"locked";const idx=LOCS.findIndex(l=>l.id===loc.id);if(done.includes(loc.id))return"done";if(idx===0)return"current";const prev=LOCS[idx-1];if(prev&&done.includes(prev.id))return"current";return"locked"};
   const pct=Math.round((done.length/6)*100);
@@ -892,7 +892,7 @@ const getAltitude=(pct)=>{
   return{label:a.base.l,icon:"△",color:"#C87858",bg:"rgba(200,120,88,.08)",border:"rgba(200,120,88,.18)",msg:a.base.m};
 };
 
-const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
+const LocView = ({user,locId,uid,progress,onBack,onComplete,profile}) => {
   const loc=LOCS.find(l=>l.id===locId)||LOCS[0];
   const lessons=LESSONS[locId]||[];
   const [lessonIdx,setLessonIdx]=useState(null);
@@ -1547,7 +1547,7 @@ export default function AIFluent(){
   if(!user)return<><style>{getCss()}</style><AuthScreen/></>;
   if(profile&&!profile.onboarded)return<><style>{getCss()}</style><Onboarding uid={user.id} onDone={refresh}/></>;
   if(showTutorial&&user)return<><style>{getCss()}</style><Tutorial onComplete={()=>{localStorage.setItem("ai_fluent_tutorial_seen","1");setShowTutorial(false)}}/></>;
-  if(screen==="location"&&activeLoc)return<><style>{getCss()}</style><LocView locId={activeLoc} uid={user.id} progress={progress} profile={profile} onBack={goMap} onComplete={refresh}/></>;
+  if(screen==="location"&&activeLoc)return<><style>{getCss()}</style><LocView user={user} locId={activeLoc} uid={user.id} progress={progress} profile={profile} onBack={goMap} onComplete={refresh}/></>;
   if(screen==="news")return<><style>{getCss()}</style><NewsView uid={user.id} onBack={goMap}/></>;
   if(screen==="tools")return<><style>{getCss()}</style><ToolsView uid={user.id} onBack={goMap}/></>;
   if(screen==="challenge")return<><style>{getCss()}</style><ChallengeView uid={user.id} onBack={goMap}/></>;
@@ -1556,7 +1556,7 @@ export default function AIFluent(){
 
   return<><style>{getCss()}</style>
     <MilestoneCheck progress={progress}/>
-    <WorldMap profile={profile} progress={progress} onToggleTheme={toggleTheme} onChangeLang={changeLang}
+    <WorldMap user={user} profile={profile} progress={progress} onToggleTheme={toggleTheme} onChangeLang={changeLang}
     onOpenLoc={(id)=>{setActiveLoc(id);setScreen("location")}}
     onOpenNews={()=>setScreen("news")}
     onOpenTools={()=>setScreen("tools")}
