@@ -46,6 +46,12 @@ let C = {...THEMES[_theme]};
 const setTheme = (t) => { _theme = t; C = {...THEMES[t]}; localStorage.setItem("ai_fluent_theme", t) };
 const getTheme = () => _theme;
 
+// MOBILE DETECTION
+const _isNative=(typeof window!=="undefined")&&!!(window.Capacitor?.isNativePlatform?.());
+
+const BOTTOM_SAFE=_isNative?48:0;
+const TOP_SAFE=_isNative?28:0;
+
 // LANGUAGE SYSTEM
 const LANGS={en:{name:"English",flag:"🇺🇸",dir:"ltr"},ar:{name:"العربية",flag:"🇸🇦",dir:"rtl"},fr:{name:"Français",flag:"🇫🇷",dir:"ltr"}};
 const UI={
@@ -706,9 +712,9 @@ const WorldMap = ({profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfi
   const dk=C.mode==="dark";
 
   const nodes=[
-    {loc:LOCS[0],nx:22,ny:86},{loc:LOCS[1],nx:42,ny:72},{loc:LOCS[2],nx:68,ny:78},
-    {loc:LOCS[3],nx:78,ny:58},{loc:LOCS[4],nx:55,ny:42},{loc:LOCS[5],nx:32,ny:50},
-    {loc:LOCS[6],nx:50,ny:16},
+    {loc:LOCS[0],nx:22,ny:72},{loc:LOCS[1],nx:42,ny:62},{loc:LOCS[2],nx:68,ny:68},
+    {loc:LOCS[3],nx:78,ny:52},{loc:LOCS[4],nx:55,ny:38},{loc:LOCS[5],nx:32,ny:46},
+    {loc:LOCS[6],nx:50,ny:22},
   ];
 
   // Trail colors that work on both themes
@@ -769,13 +775,13 @@ const WorldMap = ({profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfi
     </div>
 
     {/* Top bar */}
-    <div style={{position:"absolute",top:0,left:0,right:0,padding:"14px 16px",display:"flex",justifyContent:"space-between",alignItems:"center",zIndex:20,
+    <div style={{position:"absolute",top:0,left:0,right:0,padding:"10px 12px",display:"flex",justifyContent:"space-between",alignItems:"center",zIndex:20,
       background:dk?"linear-gradient(180deg, rgba(6,13,26,.95) 0%, rgba(6,13,26,.6) 70%, transparent 100%)":"linear-gradient(180deg, rgba(216,232,248,.95) 0%, rgba(216,232,248,.6) 70%, transparent 100%)"}}>
-      <div style={{display:"flex",alignItems:"center",gap:10}}>
-        <Lumi size={32} mood={streak>=7?"excited":"happy"} level={level}/>
-        <div>
-          <p style={{color:C.text,fontSize:14,fontFamily:C.fontDisplay,fontWeight:700,margin:0}}>{T.greeting(new Date().getHours())}, {name}</p>
-          <p style={{color:C.textMuted,fontSize:11,fontFamily:C.font,margin:0}}>{T.altitude} {level} · {pct}% {T.toSummit}</p>
+      <div style={{display:"flex",alignItems:"center",gap:8,minWidth:0,flex:1}}>
+        <Lumi size={28} mood={streak>=7?"excited":"happy"} level={level}/>
+        <div style={{minWidth:0}}>
+          <p style={{color:C.text,fontSize:13,fontFamily:C.fontDisplay,fontWeight:700,margin:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{T.greeting(new Date().getHours())}, {name}</p>
+          <p style={{color:C.textMuted,fontSize:10,fontFamily:C.font,margin:0}}>{T.altitude} {level} · {pct}% {T.toSummit}</p>
         </div>
       </div>
       <div style={{display:"flex",gap:6,alignItems:"center"}}>
@@ -855,8 +861,8 @@ const WorldMap = ({profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfi
     })}
 
     {/* Bottom action bar */}
-    <div style={{position:"absolute",bottom:0,left:0,right:0,zIndex:20,padding:"0 12px 12px",paddingBottom:"max(12px,env(safe-area-inset-bottom))"}}>
-      <div style={{display:"flex",gap:8,background:dk?"rgba(6,13,26,.85)":"rgba(255,255,255,.85)",backdropFilter:"blur(16px)",borderRadius:18,padding:8,border:`1px solid ${dk?"rgba(255,255,255,.06)":"rgba(0,0,0,.08)"}`,boxShadow:dk?"none":"0 -2px 20px rgba(0,0,0,.06)"}}>
+    <div style={{position:"absolute",bottom:0,left:0,right:0,zIndex:20,paddingBottom:(10+BOTTOM_SAFE)+"px",paddingTop:8,paddingLeft:8,paddingRight:8,background:dk?"rgba(6,13,26,.92)":"rgba(255,255,255,.92)",backdropFilter:"blur(16px)",borderTop:`1px solid ${dk?"rgba(255,255,255,.06)":"rgba(0,0,0,.08)"}`,boxShadow:dk?"none":"0 -2px 20px rgba(0,0,0,.06)"}}>
+      <div style={{display:"flex",gap:8}}>
         <button onClick={onOpenChallenge} style={{flex:1,background:dk?"rgba(232,128,96,.08)":"rgba(232,128,96,.06)",border:`1px solid ${dk?"rgba(232,128,96,.15)":"rgba(232,128,96,.12)"}`,borderRadius:12,padding:"12px 10px",display:"flex",alignItems:"center",gap:8,textAlign:"left"}}>
           <Icon type="challenge" size={22} color={dk?"#F0A878":"#C08058"}/><div><p style={{color:dk?"#F0A878":"#A06840",fontSize:12,fontWeight:700,fontFamily:C.font,margin:0}}>{T.dailyChallenge}</p><p style={{color:C.textDim,fontSize:9,fontFamily:C.font,margin:0}}>{T.keepStreak}</p></div>
         </button>
@@ -1041,13 +1047,11 @@ const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
           </div>
         </div>
         {passed?<div style={{display:"flex",flexDirection:"column",gap:8}}>
-          <Btn v="green" onClick={async()=>{
+          <Btn v="green" onClick={()=>{
             try{SFX.play("triumph")}catch(e){}
             saveScore(locId,lessonIdx,pct);
-            try{await db.completeLesson(uid,locId,lessonIdx)}catch(e){console.warn(e)}
-            // Navigate back to map FIRST, then refresh data
             onBack();
-            setTimeout(()=>onComplete(),300);
+            setTimeout(()=>{db.completeLesson(uid,locId,lessonIdx).catch(e=>console.warn(e));onComplete();},300);
           }}>
             {pct>=90?T.claimSummit:T.claimRidge}
           </Btn>
@@ -1075,7 +1079,7 @@ const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
       {msgs.map((m,i)=><Bub key={i} from={m.from} text={m.text}/>)}{typing&&<Bub from="lumi" typing/>}
       {msgs.length===0&&lesson&&<div className="fu s2" style={{marginTop:14}}><p style={{color:C.textDim,fontSize:12,fontFamily:C.font,fontWeight:600,margin:"0 0 10px"}}>{T.peoplAsk}</p>{lesson.questions.map((q,i)=><button key={i} onClick={()=>ask(q)} style={{display:"block",width:"100%",background:"rgba(255,255,255,.03)",border:`1px solid ${C.border}`,borderRadius:12,padding:"10px 14px",marginBottom:7,textAlign:"left"}}><span style={{color:C.textMuted,fontSize:13,fontFamily:C.font}}>{q}</span></button>)}</div>}
     </div>
-    <div style={{padding:"8px 14px 12px",borderTop:`1px solid ${C.border}`,display:"flex",gap:8,flexShrink:0,background:C.bgCard,paddingBottom:"max(12px,env(safe-area-inset-bottom))"}}>
+    <div style={{padding:"8px 14px",paddingBottom:(12+BOTTOM_SAFE)+"px",borderTop:`1px solid ${C.border}`,display:"flex",gap:8,flexShrink:0,background:C.bgCard}}>
       <input value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} placeholder={T.askLumi+"..."} style={{flex:1,background:"rgba(255,255,255,.04)",borderRadius:12,border:`1px solid ${C.border}`,padding:"11px 14px",color:C.text,fontSize:14,fontFamily:C.font,outline:"none"}}/>
       <button onClick={send} style={{width:42,height:42,borderRadius:12,background:`linear-gradient(135deg,${C.gold},${C.goldDark})`,border:"none",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><span style={{color:"#fff",fontSize:16}}>↑</span></button>
     </div></div>);
@@ -1091,7 +1095,7 @@ const LocView = ({locId,uid,progress,onBack,onComplete,profile}) => {
       <div style={{display:"flex",alignItems:"center",gap:10}}><Lumi size={32} mood="happy" level={level} animate/><div><p style={{color:C.goldLight,fontSize:14,fontWeight:700,fontFamily:C.font,margin:0}}>{T.questionsHelp}</p><p style={{color:C.textDim,fontSize:12,fontFamily:C.font,margin:"2px 0 0"}}>{T.guideHere}</p></div></div>
     </button>
     {practice.length>0?<Btn v="teal" onClick={()=>{setView("practice");resetPractice()}}>{T.startPractice}</Btn>
-    :<Btn onClick={async()=>{await db.completeLesson(uid,locId,lessonIdx);onBack();setTimeout(()=>onComplete(),300)}}>{T.completeLesson}</Btn>}
+    :<Btn onClick={()=>{onBack();setTimeout(()=>{db.completeLesson(uid,locId,lessonIdx).catch(e=>console.warn(e));onComplete();},300)}}>{T.completeLesson}</Btn>}
   </div>);
 
   // INTRO — LESSON SELECTOR
@@ -1182,7 +1186,7 @@ const NewsView = ({uid,onBack}) => {
   if(chat&&art)return(<div style={{height:"100vh",display:"flex",flexDirection:"column",background:C.bgDark}}>
     <div style={{padding:"12px 16px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",gap:8,flexShrink:0,background:C.bgCard}}><button onClick={()=>{setChat(false);setMsgs([]);setSid(null)}} style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700}}>{T.back}</button><div style={{flex:1,textAlign:"center"}}><span style={{color:C.text,fontSize:13,fontWeight:700,fontFamily:C.font}}>Ask Lumi</span></div></div>
     <div ref={ref} style={{flex:1,overflowY:"auto",padding:16}}><Bub from="lumi" text={`I've got the details on "${art.title}" — what would you like to know?`}/>{msgs.map((m,i)=><Bub key={i} from={m.from} text={m.text}/>)}{typing&&<Bub from="lumi" typing/>}</div>
-    <div style={{padding:"8px 14px 12px",borderTop:`1px solid ${C.border}`,display:"flex",gap:8,flexShrink:0,paddingBottom:"max(12px,env(safe-area-inset-bottom))"}}><input value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} placeholder={T.askLumi+"..."} style={{flex:1,background:"rgba(255,255,255,.04)",borderRadius:12,border:`1px solid ${C.border}`,padding:"11px 14px",color:C.text,fontSize:14,fontFamily:C.font,outline:"none"}}/><button onClick={send} style={{width:42,height:42,borderRadius:12,background:`linear-gradient(135deg,${C.gold},${C.goldDark})`,border:"none",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><span style={{color:"#fff",fontSize:16}}>↑</span></button></div>
+    <div style={{padding:"8px 14px",paddingBottom:(12+BOTTOM_SAFE)+"px",borderTop:`1px solid ${C.border}`,display:"flex",gap:8,flexShrink:0}}><input value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} placeholder={T.askLumi+"..."} style={{flex:1,background:"rgba(255,255,255,.04)",borderRadius:12,border:`1px solid ${C.border}`,padding:"11px 14px",color:C.text,fontSize:14,fontFamily:C.font,outline:"none"}}/><button onClick={send} style={{width:42,height:42,borderRadius:12,background:`linear-gradient(135deg,${C.gold},${C.goldDark})`,border:"none",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><span style={{color:"#fff",fontSize:16}}>↑</span></button></div>
   </div>);
 
   // Article detail
@@ -1483,7 +1487,7 @@ const Tutorial = ({onComplete}) => {
         <p style={{color:C.textMuted,fontSize:14,fontFamily:C.font,textAlign:"center",lineHeight:1.7,maxWidth:320,margin:0}}>{s.desc}</p>
       </div>
       {/* Navigation */}
-      <div style={{padding:"0 24px 30px",position:"relative",zIndex:10,paddingBottom:"max(30px,env(safe-area-inset-bottom))"}}>
+      <div style={{padding:"0 24px",paddingBottom:(30+BOTTOM_SAFE)+"px",position:"relative",zIndex:10}}>
         <Btn v={isLast?"gold":"teal"} onClick={()=>{
           try{SFX.play("click")}catch(e){}
           if(isLast){onComplete()}else{setStep(step+1)}
