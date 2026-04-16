@@ -22,7 +22,11 @@ The app is fully built. This milestone ships it to Google Play. Four phases cove
   2. The Base Camp node on the World Map is fully visible and not obscured by the bottom navigation bar on Android
   3. The greeting displays the user's actual display name (e.g., "Good afternoon, Moe"), never the string "AI"
   4. The app opens directly to the dark background with no white flash on Android startup
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 01-01-PLAN.md — Add TOP_SAFE constant and apply to all top headers (WorldMap, LocView tutor, NewsView chat) — LAYOUT-01, LAYOUT-02
+- [ ] 01-02-PLAN.md — Thread `user` prop and replace display_name fallback with 3-step chain — LAYOUT-03
+- [ ] 01-03-PLAN.md — Add android.backgroundColor to capacitor.config.json + device verification checkpoint — LAYOUT-04, LAYOUT-02
 **UI hint**: yes
 
 ### Phase 2: Android Release Build
@@ -62,7 +66,7 @@ The app is fully built. This milestone ships it to Google Play. Four phases cove
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Android Layout Fixes | 0/? | Not started | - |
+| 1. Android Layout Fixes | 0/3 | Planned | - |
 | 2. Android Release Build | 0/? | Not started | - |
 | 3. Play Store Assets | 0/? | Not started | - |
 | 4. Play Store Listing & Submission | 0/? | Not started | - |
