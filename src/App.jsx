@@ -708,7 +708,7 @@ const WorldMap = ({user,profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpen
   const pct=Math.round((done.length/6)*100);
   const greet=()=>{const h=new Date().getHours();return h<12?"Good morning":h<17?"Good afternoon":"Good evening"};
   const streak=Streak.getData().current||profile?.current_streak||0;
-  const name=profile?.display_name?.split(" ")[0]||"Climber";
+  const name=profile?.display_name?.trim().split(" ")[0]||user?.email?.split("@")[0]||"Climber";
   const dk=C.mode==="dark";
 
   const nodes=[
@@ -901,7 +901,7 @@ const LocView = ({user,locId,uid,progress,onBack,onComplete,profile}) => {
   const [inp,setInp]=useState("");const [sid,setSid]=useState(null);const ref=useRef(null);
   const level=Math.max(1,Math.floor(progress.length/2)+1);
   // Lumi personality context
-  const userName=profile?.display_name?.split(" ")[0]||"friend";
+  const userName=profile?.display_name?.trim().split(" ")[0]||user?.email?.split("@")[0]||"friend";
   const userRole=profile?.role||"learner";
   const completedCount=progress.length;
   const streakDays=Streak.getData().current||0;
