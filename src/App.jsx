@@ -775,7 +775,7 @@ const WorldMap = ({profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfi
     </div>
 
     {/* Top bar */}
-    <div style={{position:"absolute",top:0,left:0,right:0,padding:"10px 12px",display:"flex",justifyContent:"space-between",alignItems:"center",zIndex:20,
+    <div style={{position:"absolute",top:0,left:0,right:0,padding:`${TOP_SAFE+10}px 12px 10px`,display:"flex",justifyContent:"space-between",alignItems:"center",zIndex:20,
       background:dk?"linear-gradient(180deg, rgba(6,13,26,.95) 0%, rgba(6,13,26,.6) 70%, transparent 100%)":"linear-gradient(180deg, rgba(216,232,248,.95) 0%, rgba(216,232,248,.6) 70%, transparent 100%)"}}>
       <div style={{display:"flex",alignItems:"center",gap:8,minWidth:0,flex:1}}>
         <Lumi size={28} mood={streak>=7?"excited":"happy"} level={level}/>
