@@ -25,7 +25,7 @@ The app is fully built. This milestone ships it to Google Play. Four phases cove
 **Plans**: 3 plans
 Plans:
 - [x] 01-01-PLAN.md — Add TOP_SAFE constant and apply to all top headers (WorldMap, LocView tutor, NewsView chat) — LAYOUT-01, LAYOUT-02
-- [ ] 01-02-PLAN.md — Thread `user` prop and replace display_name fallback with 3-step chain — LAYOUT-03
+- [x] 01-02-PLAN.md — Thread `user` prop and replace display_name fallback with 3-step chain — LAYOUT-03
 - [ ] 01-03-PLAN.md — Add android.backgroundColor to capacitor.config.json + device verification checkpoint — LAYOUT-04, LAYOUT-02
 **UI hint**: yes
 
