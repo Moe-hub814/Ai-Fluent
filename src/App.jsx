@@ -708,12 +708,12 @@ const WorldMap = ({user,profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpen
   const pct=Math.round((done.length/6)*100);
   const greet=()=>{const h=new Date().getHours();return h<12?"Good morning":h<17?"Good afternoon":"Good evening"};
   const streak=Streak.getData().current||profile?.current_streak||0;
-  const name=profile?.display_name?.trim().split(" ")[0]||user?.email?.split("@")[0]||"Climber";
+  const _dn=profile?.display_name?.trim().split(" ")[0];const name=(_dn&&_dn!=="AI"?_dn:null)||user?.email?.split("@")[0]||"Climber";
   const dk=C.mode==="dark";
 
   const nodes=[
-    {loc:LOCS[0],nx:22,ny:72},{loc:LOCS[1],nx:42,ny:62},{loc:LOCS[2],nx:68,ny:68},
-    {loc:LOCS[3],nx:78,ny:52},{loc:LOCS[4],nx:55,ny:38},{loc:LOCS[5],nx:32,ny:46},
+    {loc:LOCS[0],nx:22,ny:64},{loc:LOCS[1],nx:42,ny:56},{loc:LOCS[2],nx:68,ny:61},
+    {loc:LOCS[3],nx:78,ny:47},{loc:LOCS[4],nx:55,ny:35},{loc:LOCS[5],nx:32,ny:42},
     {loc:LOCS[6],nx:50,ny:22},
   ];
 
@@ -861,7 +861,7 @@ const WorldMap = ({user,profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpen
     })}
 
     {/* Bottom action bar */}
-    <div style={{position:"absolute",bottom:0,left:0,right:0,zIndex:20,paddingBottom:(10+BOTTOM_SAFE)+"px",paddingTop:8,paddingLeft:8,paddingRight:8,background:dk?"rgba(6,13,26,.92)":"rgba(255,255,255,.92)",backdropFilter:"blur(16px)",borderTop:`1px solid ${dk?"rgba(255,255,255,.06)":"rgba(0,0,0,.08)"}`,boxShadow:dk?"none":"0 -2px 20px rgba(0,0,0,.06)"}}>
+    <div style={{position:"fixed",bottom:0,left:0,right:0,zIndex:20,paddingBottom:(10+BOTTOM_SAFE)+"px",paddingTop:8,paddingLeft:8,paddingRight:8,background:dk?"rgba(6,13,26,.92)":"rgba(255,255,255,.92)",backdropFilter:"blur(16px)",borderTop:`1px solid ${dk?"rgba(255,255,255,.06)":"rgba(0,0,0,.08)"}`,boxShadow:dk?"none":"0 -2px 20px rgba(0,0,0,.06)"}}>
       <div style={{display:"flex",gap:8}}>
         <button onClick={onOpenChallenge} style={{flex:1,background:dk?"rgba(232,128,96,.08)":"rgba(232,128,96,.06)",border:`1px solid ${dk?"rgba(232,128,96,.15)":"rgba(232,128,96,.12)"}`,borderRadius:12,padding:"12px 10px",display:"flex",alignItems:"center",gap:8,textAlign:"left"}}>
           <Icon type="challenge" size={22} color={dk?"#F0A878":"#C08058"}/><div><p style={{color:dk?"#F0A878":"#A06840",fontSize:12,fontWeight:700,fontFamily:C.font,margin:0}}>{T.dailyChallenge}</p><p style={{color:C.textDim,fontSize:9,fontFamily:C.font,margin:0}}>{T.keepStreak}</p></div>
@@ -901,7 +901,7 @@ const LocView = ({user,locId,uid,progress,onBack,onComplete,profile}) => {
   const [inp,setInp]=useState("");const [sid,setSid]=useState(null);const ref=useRef(null);
   const level=Math.max(1,Math.floor(progress.length/2)+1);
   // Lumi personality context
-  const userName=profile?.display_name?.trim().split(" ")[0]||user?.email?.split("@")[0]||"friend";
+  const _un=profile?.display_name?.trim().split(" ")[0];const userName=(_un&&_un!=="AI"?_un:null)||user?.email?.split("@")[0]||"friend";
   const userRole=profile?.role||"learner";
   const completedCount=progress.length;
   const streakDays=Streak.getData().current||0;
