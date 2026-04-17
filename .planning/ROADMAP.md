@@ -6,7 +6,7 @@ The app is fully built. This milestone ships it to Google Play. Four phases cove
 
 ## Phases
 
-- [ ] **Phase 1: Android Layout Fixes** - Fix layout bugs before screenshots are taken
+- [x] **Phase 1: Android Layout Fixes** - Fix layout bugs before screenshots are taken
 - [ ] **Phase 2: Android Release Build** - Produce and verify a signed release AAB
 - [ ] **Phase 3: Play Store Assets** - Capture screenshots and create all required graphics
 - [ ] **Phase 4: Play Store Listing & Submission** - Complete the Play Console listing and submit
@@ -26,7 +26,7 @@ The app is fully built. This milestone ships it to Google Play. Four phases cove
 Plans:
 - [x] 01-01-PLAN.md — Add TOP_SAFE constant and apply to all top headers (WorldMap, LocView tutor, NewsView chat) — LAYOUT-01, LAYOUT-02
 - [x] 01-02-PLAN.md — Thread `user` prop and replace display_name fallback with 3-step chain — LAYOUT-03
-- [ ] 01-03-PLAN.md — Add android.backgroundColor to capacitor.config.json + device verification checkpoint — LAYOUT-04, LAYOUT-02
+- [x] 01-03-PLAN.md — Add android.backgroundColor to capacitor.config.json + device verification checkpoint — LAYOUT-04, LAYOUT-02
 **UI hint**: yes
 
 ### Phase 2: Android Release Build
@@ -37,7 +37,11 @@ Plans:
   1. The keystore file and `keystore.properties` are excluded from git and backed up to a secure offline location
   2. Running `./gradlew bundleRelease` produces `app-release.aab` and `jarsigner -verify` confirms it is signed with the release keystore
   3. The AAB installs and runs correctly on a physical Android device via the Internal Testing track in Play Console
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 02-01-PLAN.md — Keystore backup checkpoint + exclude keystore/credentials from git tracking — BUILD-01, BUILD-02
+- [ ] 02-02-PLAN.md — Build signed release AAB and verify signature with jarsigner — BUILD-03, BUILD-04
+- [ ] 02-03-PLAN.md — Upload AAB to Play Console Internal Testing + device smoke test — BUILD-05
 
 ### Phase 3: Play Store Assets
 **Goal**: All required Play Store graphics exist — screenshots with caption overlays, feature graphic, app icon, and a published privacy policy
@@ -66,7 +70,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Android Layout Fixes | 0/3 | Planned | - |
-| 2. Android Release Build | 0/? | Not started | - |
+| 1. Android Layout Fixes | 3/3 | Complete | 2026-04-17 |
+| 2. Android Release Build | 0/3 | Active | - |
 | 3. Play Store Assets | 0/? | Not started | - |
 | 4. Play Store Listing & Submission | 0/? | Not started | - |
