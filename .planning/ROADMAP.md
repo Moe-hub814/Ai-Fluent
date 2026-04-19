@@ -40,7 +40,7 @@ Plans:
 **Plans**: 3 plans
 Plans:
 - [x] 02-01-PLAN.md — Keystore backup checkpoint + exclude keystore/credentials from git tracking — BUILD-01, BUILD-02
-- [ ] 02-02-PLAN.md — Build signed release AAB and verify signature with jarsigner — BUILD-03, BUILD-04
+- [x] 02-02-PLAN.md — Build signed release AAB and verify signature with jarsigner — BUILD-03, BUILD-04
 - [ ] 02-03-PLAN.md — Upload AAB to Play Console Internal Testing + device smoke test — BUILD-05
 
 ### Phase 3: Play Store Assets
