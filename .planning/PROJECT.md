@@ -30,8 +30,10 @@ Users can learn AI concepts through daily structured lessons, practice on real A
 - [ ] Fix bottom navigation bar overlapping Base Camp node on Android (pixel-based safe area constant, not CSS env())
 - [ ] Fix top header bar overlapping Summit node on Android
 - [ ] Fix display name fallback — shows "Good afternoon, AI" instead of user's real name (wrong fallback on display_name in Supabase profile)
-- [ ] Generate Android signing keystore (android/app/, alias: aifluent, JDK 21)
-- [ ] Build signed release AAB for Google Play
+- ✓ Generate Android signing keystore (android/app/, alias: aifluent, JDK 21) — Validated in Phase 1
+- ✓ Build signed release AAB for Google Play — Validated in Phase 2
+- ✓ Keystore backed up and excluded from git tracking — Validated in Phase 2
+- ✓ AAB uploaded to Internal Testing and verified on device — Validated in Phase 2
 - [ ] Capture app screenshots (dark theme, Lumi visible)
 - [ ] Create Play Store screenshot graphics with Canva caption overlays
 - [ ] Create app listing in Google Play Console
@@ -53,7 +55,7 @@ Users can learn AI concepts through daily structured lessons, practice on real A
 - **Android safe area issue**: `env(safe-area-inset-bottom)` does not reliably work in Android WebView — requires a hardcoded pixel constant (`BOTTOM_SAFE`) passed to layout components.
 - **Name bug cause**: The greeting falls back to something that resolves to the string "AI" — likely `user.email.split('@')[0]` returning "AI" for an email like `ai@...`, or a missing `display_name` check. `display_name` is stored in Supabase profiles but not correctly read.
 - **Google Play Developer account**: Account exists, app listing not yet created.
-- **No keystore yet**: Must generate via `keytool`, JDK 21 required for Gradle compatibility.
+- **Keystore generated**: Release keystore at `android/ai-fluent-release.keystore` (alias: aifluent), backed up to password manager. Excluded from git tracking.
 - **Play Store short description (final)**: "Master AI with guided lessons, daily news & hands-on tools. Meet Lumi."
 - **Screenshots**: None yet — need to capture from device/emulator, then create Canva overlays with captions (dark theme, Lumi visible).
 
@@ -70,8 +72,8 @@ Users can learn AI concepts through daily structured lessons, practice on real A
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
 | Pixel-based BOTTOM_SAFE constant instead of CSS env() | Android WebView doesn't honor safe-area-inset-bottom reliably | — Pending |
-| AAB format (not APK) | Google Play requires AAB for new app submissions | — Pending |
-| JDK 21 for build | Gradle compatibility requirement | — Pending |
+| AAB format (not APK) | Google Play requires AAB for new app submissions | ✓ Phase 2 |
+| JDK 21 for build | Gradle compatibility requirement | ✓ Phase 2 |
 | Dark theme screenshots with Lumi | Brand identity and visual appeal for Play Store | — Pending |
 
 ## Evolution
@@ -92,4 +94,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-16 after initialization*
+*Last updated: 2026-05-13 after Phase 2 completion*
