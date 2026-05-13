@@ -10,8 +10,8 @@ requires:
     plan: 02
     provides: "Signed release AAB at android/app/build/outputs/bundle/release/app-release.aab"
 provides:
-  - "AAB uploaded to Play Console Internal Testing track (pending human action)"
-  - "Release build verified installable on physical Android device (pending human action)"
+  - "AAB uploaded to Play Console Internal Testing track — CONFIRMED by user"
+  - "Release build verified installable on physical Android device (pending Task 2 smoke test)"
 affects: [03-play-store-assets, 04-play-store-listing]
 
 # Tech tracking
@@ -38,21 +38,22 @@ completed: 2026-04-17
 
 # Phase 02 Plan 03: Upload AAB to Internal Testing Summary
 
-**Signed AAB (3.1 MB) confirmed ready for upload to Play Console Internal Testing — human action required to complete upload and device smoke test**
+**Signed AAB uploaded to Play Console Internal Testing (user confirmed) — awaiting Task 2 physical device smoke test**
 
 ## Performance
 
 - **Duration:** ~5 min (automated pre-check only)
 - **Started:** 2026-04-17T00:00:00Z
 - **Completed:** 2026-04-17T00:00:00Z
-- **Tasks:** 0 of 2 completed (both are human-action/human-verify checkpoints)
+- **Tasks:** 1 of 2 completed (Task 1: upload confirmed; Task 2: smoke test pending)
 - **Files modified:** 0
 
 ## Accomplishments
 
 - Confirmed the signed AAB exists on disk: `android/app/build/outputs/bundle/release/app-release.aab` (3.1 MB, built April 19)
 - Verified app identity: package `com.aifluent.app`, version code 1, version name 1.0
-- Presented Play Console upload instructions and smoke test checklist for human execution
+- User confirmed AAB successfully uploaded to Play Console Internal Testing track (Task 1 COMPLETE)
+- Smoke test checklist presented for Task 2 — awaiting physical device verification
 
 ## Task Commits
 
@@ -77,25 +78,9 @@ None during the automated pre-check phase.
 
 ## User Setup Required
 
-**Task 1 — Play Console upload (BLOCKING):**
+**Task 1 — Play Console upload: COMPLETE** (user confirmed "uploaded")
 
-1. Open Google Play Console: https://play.google.com/console
-2. Select "AI Fluent" app (package: `com.aifluent.app`)
-   - If the app does not exist yet: "Create app" -> Title: "AI Fluent", Default language: English, App type: App, Free
-3. Navigate to: **Testing** -> **Internal testing**
-4. Click **"Create new release"**
-5. Upload the AAB file from:
-   `C:\Users\hamou\ai-fluent\android\app\build\outputs\bundle\release\app-release.aab`
-6. Release name: `1.0 (1)` (or accept the default)
-7. Release notes: `Initial internal testing release`
-8. Click **"Review release"** then **"Start rollout to Internal testing"**
-9. Add yourself as a tester:
-   - Go to **Internal testing** -> **Testers** tab
-   - Create a testers list (e.g., "Internal") and add email: `hamoudi98@gmail.com`
-   - Copy the **opt-in URL** that appears
-10. Confirm by pasting the opt-in URL, or type "uploaded"
-
-**Task 2 — Physical device smoke test (after Task 1):**
+**Task 2 — Physical device smoke test (CURRENT ACTION):**
 
 1. On your Android device, open the Internal Testing opt-in URL in a browser
 2. Accept the tester invitation and install from Google Play Store
