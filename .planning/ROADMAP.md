@@ -52,7 +52,12 @@ Plans:
   2. All screenshots have Canva caption overlays with the app name and feature callouts
   3. A 1024×500px feature graphic and a 512×512px app icon PNG exist and meet Play Store dimension/format requirements
   4. A privacy policy is live at a stable public URL disclosing email collection, Supabase storage, and Anthropic API processing
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 03-01-PLAN.md — Install ImageMagick, capture 5 raw screenshots via adb, convert to RGB PNG — ASSETS-01
+- [ ] 03-02-PLAN.md — Apply Canva caption overlays to all 5 screenshots — ASSETS-02
+- [ ] 03-03-PLAN.md — Design 1024x500 feature graphic and 512x512 app icon in Canva — ASSETS-03, ASSETS-04
+- [ ] 03-04-PLAN.md — Write privacy policy HTML and publish to GitHub Pages — ASSETS-05
 **UI hint**: yes
 
 ### Phase 4: Play Store Listing & Submission
