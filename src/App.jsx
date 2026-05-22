@@ -708,7 +708,7 @@ const WorldMap = ({user,profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpen
   const pct=Math.round((done.length/6)*100);
   const greet=()=>{const h=new Date().getHours();return h<12?"Good morning":h<17?"Good afternoon":"Good evening"};
   const streak=Streak.getData().current||profile?.current_streak||0;
-  const _dn=profile?.display_name?.trim().split(" ")[0];const name=(_dn&&_dn!=="AI"?_dn:null)||user?.email?.split("@")[0]||"Climber";
+  const _rawName = profile?.display_name?.split(" ")[0] || ""; const name = (_rawName && _rawName.length > 1 && _rawName.toLowerCase() !== "ai") ? _rawName : (user?.email?.split("@")[0] || "Climber");
   const dk=C.mode==="dark";
 
   const nodes=[
@@ -901,7 +901,7 @@ const LocView = ({user,locId,uid,progress,onBack,onComplete,profile}) => {
   const [inp,setInp]=useState("");const [sid,setSid]=useState(null);const ref=useRef(null);
   const level=Math.max(1,Math.floor(progress.length/2)+1);
   // Lumi personality context
-  const _un=profile?.display_name?.trim().split(" ")[0];const userName=(_un&&_un!=="AI"?_un:null)||user?.email?.split("@")[0]||"friend";
+  const _rawUser = profile?.display_name?.split(" ")[0] || ""; const userName = (_rawUser && _rawUser.length > 1 && _rawUser.toLowerCase() !== "ai") ? _rawUser : (user?.email?.split("@")[0] || "friend");
   const userRole=profile?.role||"learner";
   const completedCount=progress.length;
   const streakDays=Streak.getData().current||0;
@@ -1543,7 +1543,7 @@ export default function AIFluent(){
   // Record streak on initial load if user is active
   useEffect(()=>{if(user) Streak.check()},[user]);
 
-  if(loading)return<><style>{getCss()}</style><div onClick={()=>setLoading(false)} style={{height:"100vh",background:`linear-gradient(180deg,${C.skyTop},${C.skyMid})`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",position:"relative",cursor:"pointer"}}><Stars/><Lumi size={56} mood="happy" level={1} animate/><p style={{color:C.textMuted,fontSize:14,fontFamily:"'Nunito',sans-serif",marginTop:14}}>{T.loading}</p><p style={{color:C.textDim,fontSize:11,fontFamily:"'Nunito',sans-serif",marginTop:20}}>{T.tapIfStuck}</p></div></>;
+  if(loading)return<><style>{getCss()}</style><div onClick={()=>setLoading(false)} style={{height:"100vh",background:`linear-gradient(180deg,${C.skyTop},${C.skyMid})`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",position:"relative",cursor:"pointer"}}><Stars/><Lumi size={56} mood="happy" level={1} animate/><p style={{color:C.textMuted,fontSize:14,fontFamily:"'Nunito',sans-serif",marginTop:14}}>{T.loading}</p></div></>;
   if(!user)return<><style>{getCss()}</style><AuthScreen/></>;
   if(profile&&!profile.onboarded)return<><style>{getCss()}</style><Onboarding uid={user.id} onDone={refresh}/></>;
   if(showTutorial&&user)return<><style>{getCss()}</style><Tutorial onComplete={()=>{localStorage.setItem("ai_fluent_tutorial_seen","1");setShowTutorial(false)}}/></>;
