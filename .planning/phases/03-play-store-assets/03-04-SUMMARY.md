@@ -110,3 +110,6 @@ Do NOT proceed to Phase 4 (Play Store listing) until the URL returns 200.
 ---
 *Phase: 03-play-store-assets*
 *Completed: 2026-05-21*
+
+## Task 2 Resolution (2026-05-21)
+User confirmed: privacy policy is live at https://Moe-hub814.github.io/Ai-Fluent/privacy-policy.html. URL ready for Phase 4 Play Console upload.
