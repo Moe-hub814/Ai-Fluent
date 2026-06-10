@@ -1,3 +1,9 @@
+# GSD tooling (installed per-machine via `npx get-shit-done-cc@latest`)
+.claude/
+
+# Temp scratch scripts
+.planning/write_summary.*
+
 # Logs
 logs
 *.log
