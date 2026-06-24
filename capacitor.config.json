@@ -1,6 +1,6 @@
 {
   "appId": "com.aifluent.app",
-  "appName": "AI Fluent",
+  "appName": "Lumicamp",
   "webDir": "dist",
   "android": {
     "backgroundColor": "#060D1A"
