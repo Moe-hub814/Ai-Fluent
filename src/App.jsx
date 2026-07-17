@@ -1,7 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { db } from "./lib/supabase";
 
-// AI FLUENT — SUMMIT EDITION v2
+// One-time migration of legacy (pre-rebrand) storage keys
+try{Object.keys(localStorage).filter(k=>k.startsWith("ai_fluent_")).forEach(k=>{const nk="lumicamp_"+k.slice(10);if(localStorage.getItem(nk)===null)localStorage.setItem(nk,localStorage.getItem(k))})}catch{/* storage unavailable */}
+
+// LUMICAMP — SUMMIT EDITION v2
 // Live news, practice mode, daily challenges, achievements
 
 // THEME SYSTEM
@@ -41,9 +44,9 @@ const THEMES = {
 };
 
 // Theme state — persisted in localStorage
-let _theme = localStorage.getItem("ai_fluent_theme") || "dark";
+let _theme = localStorage.getItem("lumicamp_theme") || "dark";
 let C = {...THEMES[_theme]};
-const setTheme = (t) => { _theme = t; C = {...THEMES[t]}; localStorage.setItem("ai_fluent_theme", t) };
+const setTheme = (t) => { _theme = t; C = {...THEMES[t]}; localStorage.setItem("lumicamp_theme", t) };
 const getTheme = () => _theme;
 
 // MOBILE DETECTION
@@ -51,6 +54,14 @@ const _isNative=(typeof window!=="undefined")&&!!(window.Capacitor?.isNativePlat
 
 const BOTTOM_SAFE=_isNative?48:0;
 const TOP_SAFE=_isNative?28:0;
+const SYNC_QUEUE_KEY="lumicamp_sync_queue";
+const LOCAL_PROGRESS_KEY="lumicamp_local_progress";
+const MAX_SYNC_QUEUE=200;
+
+const getLocalProgress=()=>{try{return JSON.parse(localStorage.getItem(LOCAL_PROGRESS_KEY)||"[]")}catch{return[]}};
+const setLocalProgress=(rows)=>{try{localStorage.setItem(LOCAL_PROGRESS_KEY,JSON.stringify(rows))}catch(e){console.warn("Local progress save failed",e)}};
+const getSyncQueue=()=>{try{return JSON.parse(localStorage.getItem(SYNC_QUEUE_KEY)||"[]")}catch{return[]}};
+const setSyncQueue=(rows)=>{try{localStorage.setItem(SYNC_QUEUE_KEY,JSON.stringify(rows))}catch(e){console.warn("Sync queue save failed",e)}};
 
 // LANGUAGE SYSTEM
 const LANGS={en:{name:"English",flag:"🇺🇸",dir:"ltr"},ar:{name:"العربية",flag:"🇸🇦",dir:"rtl"},fr:{name:"Français",flag:"🇫🇷",dir:"ltr"}};
@@ -59,7 +70,7 @@ const UI={
   ar:{greeting:h=>h<12?"صباح الخير":h<17?"مساء الخير":"مساء الخير",map:"الخريطة →",back:"رجوع →",signIn:"تسجيل الدخول",signUp:"إنشاء حساب",email:"البريد الإلكتروني",password:"كلمة المرور",startClimbing:"ابدأ التسلق",createAccount:"إنشاء حساب",checkEmail:"!تحقق من بريدك",weSentLink:"أرسلنا رابطاً إلى",loading:"...جاري تحميل Lumicamp",tapIfStuck:"اضغط في أي مكان إذا توقف",startPractice:"← ابدأ التمرين",completeLesson:"← أكمل الدرس",nextQ:"← السؤال التالي",seeResults:"← عرض نتائجي",retry:"← أعد المحاولة لتقييم أعلى",tryAgain:"حاول مرة أخرى",reviewFirst:"راجع الدرس أولاً →",need70:"تحتاج 70% أو أعلى لاجتياز هذا الدرس",points:"النقاط المكتسبة",shareRating:"📤 شارك تقييمي",shareProgress:"📤 شارك تقدمي",askLumi:"اسأل لومي",questionsHelp:"أسئلة؟ اسأل لومي",guideHere:"مرشدك هنا للمساعدة",peoplAsk:"...الناس يسألون عادة",lumiGuide:"لومي — المرشد",hint:"تلميح",why:"لماذا؟",check:"تحقق من الإجابة",lumiFeedback:"ملاحظات لومي",lumiReviewing:"...لومي يراجع",submit:"أرسل للمراجعة",dailyChallenge:"التحدي اليومي",keepStreak:"حافظ على سلسلتك",aiNews:"أخبار الذكاء",live:"مباشر",newsDesc:"أخبار الذكاء اليوم مبسطة بواسطة لومي",newsSearch:"...لومي يبحث عن أخبار اليوم",aiTools:"أدوات الذكاء",toolsDesc:"سير عمل موجه خطوة بخطوة",profile:"الملف الشخصي",dayStreak:"أيام متتالية",lessonsDone:"دروس مكتملة",lumiChats:"محادثات لومي",achievements:"الإنجازات",altRatings:"تقييمات الارتفاع المكتسبة",summit:"القمة",ridge:"التلال",graded:"مُقيَّم",learningPaths:"مسارات التعلم",calendar:"تقويم النشاط",bestStreak:"أفضل سلسلة",freezes:"متبقية",lightMode:"☀️ وضع فاتح",darkMode:"🌙 وضع داكن",signOut:"تسجيل الخروج",language:"اللغة",lessons:"دروس",sections:"أقسام",practice:"تمارين",completed:"مكتمل",submitChallenge:"أرسل التحدي ⚡",challengeComplete:"!🔥 التحدي مكتمل",challengeDesc:"أكمل تحدي اليوم للحفاظ على سلسلتك",simpleVersion:"النسخة المبسطة",whyMatters:"لماذا يهمك هذا",askAboutThis:"اسأل لومي عن هذا",explainPlain:"احصل على شرح بلغة بسيطة",claimSummit:"🏔️ !احصل على تقييم القمة",claimRidge:"⛰️ !احصل على تقييم التلال",completeBtn:"✦ أكمل الدرس",next:"التالي",skip:"تخطي",startJourney:"← ابدأ رحلتي",altitude:"الارتفاع",toSummit:"إلى القمة",tapExplore:"اضغط للاستكشاف",tools6:"6 أدوات",typeAnswer:"...اكتب إجابتك",practiceOf:"من",backToLesson:"العودة للدرس →",lesson:"درس"},
   fr:{greeting:h=>h<12?"Bonjour":h<17?"Bon après-midi":"Bonsoir",map:"← Carte",back:"← Retour",signIn:"Se connecter",signUp:"S'inscrire",email:"E-mail",password:"Mot de passe",startClimbing:"Commencer",createAccount:"Créer un compte",checkEmail:"Vérifiez votre e-mail !",weSentLink:"Nous avons envoyé un lien à",loading:"Chargement de Lumicamp...",tapIfStuck:"Appuyez si bloqué",startPractice:"Commencer →",completeLesson:"Terminer →",nextQ:"Suivante →",seeResults:"Voir mes résultats →",retry:"Réessayer →",tryAgain:"Réessayer",reviewFirst:"← Revoir la leçon",need70:"70% minimum pour réussir",points:"Points gagnés",shareRating:"📤 Partager ma note",shareProgress:"📤 Partager mes progrès",askLumi:"Demander à Lumi",questionsHelp:"Questions ? Demandez à Lumi",guideHere:"Votre guide est là",peoplAsk:"Questions fréquentes...",lumiGuide:"Lumi — Guide",hint:"Indice",why:"Pourquoi ?",check:"Vérifier",lumiFeedback:"Avis de Lumi",lumiReviewing:"Lumi examine...",submit:"Soumettre",dailyChallenge:"Défi du jour",keepStreak:"Gardez votre série",aiNews:"Actu IA",live:"Direct",newsDesc:"Actus IA simplifiées par Lumi",newsSearch:"Lumi cherche les actus...",aiTools:"Outils IA",toolsDesc:"Workflows guidés",profile:"Profil",dayStreak:"Jours consécutifs",lessonsDone:"Leçons faites",lumiChats:"Discussions",achievements:"Réussites",altRatings:"Notes d'altitude",summit:"Sommet",ridge:"Crête",graded:"Noté",learningPaths:"Parcours",calendar:"Calendrier d'activité",bestStreak:"Meilleure série",freezes:"restantes",lightMode:"☀️ Mode clair",darkMode:"🌙 Mode sombre",signOut:"Se déconnecter",language:"Langue",lessons:"leçons",sections:"sections",practice:"exercices",completed:"Terminé",submitChallenge:"Soumettre ⚡",challengeComplete:"🔥 Défi terminé !",challengeDesc:"Complétez le défi pour garder votre série",simpleVersion:"Version simple",whyMatters:"Pourquoi c'est important",askAboutThis:"Demander à Lumi",explainPlain:"Explication simple",claimSummit:"🏔️ Note Sommet !",claimRidge:"⛰️ Note Crête !",completeBtn:"✦ Terminer",next:"Suivant",skip:"Passer",startJourney:"Commencer →",altitude:"Altitude",toSummit:"vers le sommet",tapExplore:"Appuyez pour explorer",tools6:"6 outils",typeAnswer:"Tapez votre réponse...",practiceOf:"sur",backToLesson:"← Retour à la leçon",lesson:"Leçon"},
 };
-let _lang=localStorage.getItem("ai_fluent_lang")||"en";
+let _lang=localStorage.getItem("lumicamp_lang")||"en";
 let T={...UI[_lang]};
 
 // Translated location & tool names
@@ -101,13 +112,13 @@ const LESSON_TITLES={
   fr:{"What Is AI, Really?":"Qu'est-ce que l'IA, vraiment ?","How AI Actually Learns":"Comment l'IA apprend réellement","Choosing the Right AI Tool":"Choisir le bon outil d'IA","AI Safety and Privacy":"Sécurité et confidentialité de l'IA","Your First AI Email":"Votre premier e-mail avec l'IA","Writing Blog Posts & Articles with AI":"Écrire des articles avec l'IA","Social Media Writing with AI":"Rédaction réseaux sociaux avec l'IA","AI for Reports and Documents":"L'IA pour rapports et documents","Creating AI Images":"Créer des images avec l'IA","AI Image Tools Compared":"Comparaison des outils d'images","Advanced Prompting for Images":"Prompts avancés pour images","AI Tools That Save Hours":"Outils IA qui font gagner du temps","AI for Customer Communication":"L'IA pour la communication client","AI for Meetings and Notes":"L'IA pour réunions et notes","Measuring AI's Impact on Your Business":"Mesurer l'impact de l'IA sur votre business","AI + Spreadsheets":"IA + Tableurs","Analyzing Data with AI":"Analyser les données avec l'IA","AI for Data Cleaning":"L'IA pour le nettoyage de données","AI in Everyday Life":"L'IA au quotidien","AI for Health and Wellness":"L'IA pour la santé et le bien-être","AI for Travel and Planning":"L'IA pour voyages et planification","AI for Learning and Personal Growth":"L'IA pour l'apprentissage et le développement"},
 };
 const lessonTitle=(title)=>_lang==="en"?title:(LESSON_TITLES[_lang]||{})[title]||title;
-const setLang=(l)=>{_lang=l;T={...UI[l]};localStorage.setItem("ai_fluent_lang",l);document.documentElement.dir=LANGS[l].dir;document.documentElement.lang=l};
+const setLang=(l)=>{_lang=l;T={...UI[l]};localStorage.setItem("lumicamp_lang",l);document.documentElement.dir=LANGS[l].dir;document.documentElement.lang=l};
 const getLang=()=>_lang;
 const isRTL=()=>LANGS[_lang]?.dir==="rtl";
 
 // Translation cache for lesson content translated by Claude
 const TCache={
-  _k:"ai_fluent_tcache",
+  _k:"lumicamp_tcache",
   _g(){try{return JSON.parse(localStorage.getItem(this._k)||"{}")}catch{return{}}},
   get(lang,key){return this._g()[`${lang}:${key}`]},
   set(lang,key,data){const c=this._g();c[`${lang}:${key}`]=data;try{localStorage.setItem(this._k,JSON.stringify(c))}catch(e){console.warn("Cache full, clearing old translations");localStorage.removeItem(this._k)}},
@@ -217,7 +228,7 @@ const ACHIEVEMENTS = [
   {id:"summit",name:"Summit Reached",desc:"Complete all learning paths",icon:"🏆",condition:(p)=>[...new Set(p.map(x=>x.path_id))].length>=6},
 ];
 
-// Custom SVG Icons — AI Fluent branded
+// Custom SVG Icons — Lumicamp branded
 const Icon = ({type,size=24,color="#D4A55A"}) => {
   const s=size;const p={width:s,height:s,display:"inline-block",verticalAlign:"middle"};
   const icons={
@@ -365,7 +376,7 @@ const ErrorMsg = ({msg,onRetry}) => (
 
 // STREAK SYSTEM — tracks daily activity, streak freeze, calendar
 const Streak = {
-  _key: "ai_fluent_streak",
+  _key: "lumicamp_streak",
   _get() { try { return JSON.parse(localStorage.getItem(this._key) || "{}") } catch { return {} } },
   _set(data) { localStorage.setItem(this._key, JSON.stringify(data)) },
 
@@ -443,7 +454,7 @@ const MilestoneCheck = ({progress, onDismiss}) => {
   ];
 
   const [show, setShow] = useState(() => {
-    const seen = JSON.parse(localStorage.getItem("ai_fluent_milestones") || "[]");
+    const seen = JSON.parse(localStorage.getItem("lumicamp_milestones") || "[]");
     const idx = milestones.findIndex(m => progress.length >= m.at && !seen.includes(m.at));
     return idx >= 0 ? { ...milestones[idx], idx } : null;
   });
@@ -452,8 +463,8 @@ const MilestoneCheck = ({progress, onDismiss}) => {
   const txt = (MS_TEXT[getLang()] || MS_TEXT.en)[show.idx];
 
   const dismiss = () => {
-    const seen = JSON.parse(localStorage.getItem("ai_fluent_milestones") || "[]");
-    localStorage.setItem("ai_fluent_milestones", JSON.stringify([...seen, show.at]));
+    const seen = JSON.parse(localStorage.getItem("lumicamp_milestones") || "[]");
+    localStorage.setItem("lumicamp_milestones", JSON.stringify([...seen, show.at]));
     setShow(null);
     if(onDismiss) onDismiss();
   };
@@ -585,7 +596,7 @@ const ShareCard = ({type="progress",data={},onClose}) => {
     ctx.font="500 22px 'Nunito',sans-serif";ctx.fillStyle="rgba(138,160,184,.5)";ctx.fillText("Your climb to AI fluency",cx,h-130);
 
     // CTA
-    ctx.font="bold 20px 'Nunito',sans-serif";ctx.fillStyle="rgba(212,165,90,.4)";ctx.fillText("Try it free → aifluent.app",cx,h-70);
+    ctx.font="bold 20px 'Nunito',sans-serif";ctx.fillStyle="rgba(212,165,90,.4)";ctx.fillText("Try it free → lumicamp.app",cx,h-70);
 
     setReady(true);
   },[type,data]);
@@ -593,7 +604,7 @@ const ShareCard = ({type="progress",data={},onClose}) => {
   const download=()=>{
     const canvas=canvasRef.current;if(!canvas)return;
     const link=document.createElement("a");
-    link.download=`ai-fluent-${type}-${Date.now()}.png`;
+    link.download=`lumicamp-${type}-${Date.now()}.png`;
     link.href=canvas.toDataURL("image/png");
     link.click();
   };
@@ -602,8 +613,8 @@ const ShareCard = ({type="progress",data={},onClose}) => {
     const canvas=canvasRef.current;if(!canvas)return;
     try{
       const blob=await new Promise(r=>canvas.toBlob(r,"image/png"));
-      if(navigator.share&&navigator.canShare?.({files:[new File([blob],"ai-fluent.png",{type:"image/png"})]})){
-        await navigator.share({title:"My Lumicamp Progress",text:type==="altitude"?`I earned ${data.altitude} Rating (${data.pct}%) on Lumicamp!`:`I'm Level ${data.level} on Lumicamp with ${data.lessons} lessons completed!`,files:[new File([blob],"ai-fluent.png",{type:"image/png"})]});
+      if(navigator.share&&navigator.canShare?.({files:[new File([blob],"lumicamp.png",{type:"image/png"})]})){
+        await navigator.share({title:"My Lumicamp Progress",text:type==="altitude"?`I earned ${data.altitude} Rating (${data.pct}%) on Lumicamp!`:`I'm Level ${data.level} on Lumicamp with ${data.lessons} lessons completed!`,files:[new File([blob],"lumicamp.png",{type:"image/png"})]});
         setShared(true);
       } else { download() }
     } catch(e){ download() }
@@ -627,7 +638,7 @@ const ShareCard = ({type="progress",data={},onClose}) => {
 // CSS
 const getCss = () => `
   @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Quicksand:wght@500;600;700&display=swap');
-  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}body{background:${C.bgDark};direction:${isRTL()?'rtl':'ltr'};overflow:hidden;transition:background .3s}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}body{background:${C.bgDark};direction:${isRTL()?'rtl':'ltr'};overflow:hidden;transition:background .3s;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
   ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:${C.mode==="dark"?"#2A4060":"#C0D0E0"};border-radius:2px}
   input::placeholder,textarea::placeholder{color:${C.textDim}}
   @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
@@ -641,7 +652,11 @@ const getCss = () => `
   @keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
   .fu{animation:fadeUp .4s ease both}.fi{animation:fadeIn .3s ease both}.pop{animation:pop .3s ease both}
   .s1{animation-delay:.05s}.s2{animation-delay:.1s}.s3{animation-delay:.15s}.s4{animation-delay:.2s}.s5{animation-delay:.25s}
-  button{transition:all .15s ease;cursor:pointer}button:active{transform:scale(.97)}
+  button{transition:all .15s ease;cursor:pointer}button:active{transform:scale(.97)}button:disabled{cursor:not-allowed}
+  @media(hover:hover){button:not(:disabled):hover{filter:brightness(1.07)}}
+  input,textarea{transition:border-color .15s ease,box-shadow .15s ease}
+  input:focus,textarea:focus{border-color:${C.gold} !important;box-shadow:0 0 0 3px rgba(212,165,90,.18)}
+  ::selection{background:rgba(212,165,90,.35)}
   @media(max-width:420px){html{font-size:14px}}
 `;
 
@@ -664,23 +679,150 @@ const Stars = () => <div style={{position:"absolute",inset:0,overflow:"hidden",p
 const Confetti = () => <div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:100}}>{Array.from({length:20},(_,i)=><div key={i} style={{position:"absolute",left:`${10+Math.random()*80}%`,top:"60%",width:8,height:8,borderRadius:Math.random()>.5?"50%":"2px",background:["#D4A55A","#4ABA78","#3AA8A0","#E88060","#4A90D9","#7A6BBF"][i%6],animation:`confetti ${1+Math.random()}s ease-out forwards`,animationDelay:`${Math.random()*0.5}s`}}/>)}</div>;
 
 // AUTH
-const AuthScreen = () => {
-  const [mode,setMode]=useState("signin");const [email,setEmail]=useState("");const [pass,setPass]=useState("");const [loading,setLoading]=useState(false);const [err,setErr]=useState("");
-  const go=async()=>{if(!email||!pass){setErr("Please fill in both fields");return}setLoading(true);setErr("");const{error}=mode==="signup"?await db.signUp(email,pass):await db.signIn(email,pass);setLoading(false);if(error){setErr(error.message);return}if(mode==="signup")setMode("check")};
-  if(mode==="check")return(<div style={{minHeight:"100vh",background:`linear-gradient(180deg,${C.skyTop},${C.skyMid})`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:40,position:"relative"}}><Stars/><Lumi size={72} mood="excited" level={1} animate/><h2 style={{color:C.goldLight,fontSize:22,fontFamily:C.fontDisplay,fontWeight:700,marginTop:14,textAlign:"center"}}>Check your email!</h2><p style={{color:C.textMuted,fontSize:14,fontFamily:C.font,textAlign:"center",lineHeight:1.7,maxWidth:300,marginTop:8}}>We sent a link to <strong style={{color:C.gold}}>{email}</strong></p><div style={{marginTop:24,width:"100%",maxWidth:280}}><Btn v="ghost" onClick={()=>setMode("signin")}>{T.backToSignIn}</Btn></div></div>);
-  return(<div style={{minHeight:"100vh",background:`linear-gradient(180deg,${C.skyTop} 0%,${C.skyMid} 50%,${C.mountain} 80%,${C.green} 100%)`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"40px 28px",position:"relative"}}>
-    <Stars/><div className="fu" style={{position:"relative",zIndex:1}}><Lumi size={80} mood="happy" level={1} animate/></div>
-    <h1 className="fu s1" style={{color:C.goldLight,fontSize:34,fontFamily:C.fontDisplay,fontWeight:700,marginTop:8}}>Lumicamp</h1>
-    <p className="fu s2" style={{color:C.textMuted,fontSize:14,fontFamily:C.font,marginBottom:28}}>Your climb to AI fluency starts here</p>
+const AuthScreen = ({onClose,onSignedIn,headline="Sign in with email",subhead="Enter your email to receive a 6-digit code."}) => {
+  const [email,setEmail]=useState("");
+  const [code,setCode]=useState("");
+  const [step,setStep]=useState("email");
+  const [loading,setLoading]=useState(false);
+  const [err,setErr]=useState("");
+  const [note,setNote]=useState("");
+  const mapOtpError=(msg)=>{
+    const m=(msg||"").toLowerCase();
+    if(m.includes("rate")||m.includes("too many"))return"Too many attempts. Please wait a moment and try again.";
+    if(m.includes("expired"))return"This code expired. Please request a new one.";
+    if(m.includes("invalid")||m.includes("token"))return"That code is incorrect. Check your email and try again.";
+    return msg||"Could not complete sign-in. Please try again.";
+  };
+  const sendCode=async()=>{
+    if(!email.trim()){setErr("Please enter your email.");return}
+    setLoading(true);setErr("");setNote("");
+    const {error}=await db.sendOtp(email.trim().toLowerCase());
+    setLoading(false);
+    if(error){setErr(mapOtpError(error.message));return}
+    setStep("code");
+    setNote(`Code sent to ${email.trim().toLowerCase()}`);
+  };
+  const verifyCode=async()=>{
+    if(code.trim().length!==6){setErr("Enter the 6-digit code from your email.");return}
+    setLoading(true);setErr("");
+    const {error}=await db.verifyOtp(email.trim().toLowerCase(),code.trim());
+    setLoading(false);
+    if(error){setErr(mapOtpError(error.message));return}
+    setCode("");
+    onSignedIn?.();
+    onClose?.();
+  };
+  return(<div style={{minHeight:onClose?"auto":"100vh",background:`linear-gradient(180deg,${C.skyTop} 0%,${C.skyMid} 50%,${C.mountain} 80%,${C.green} 100%)`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:onClose?"22px 20px":`40px 28px ${36+BOTTOM_SAFE}px`,position:"relative",borderRadius:onClose?18:0,border:onClose?`1px solid ${C.border}`:"none"}}>
+    <Stars/><div className="fu" style={{position:"relative",zIndex:1}}><Lumi size={72} mood="happy" level={1} animate/></div>
+    <p className="fu s1" style={{color:C.gold,fontSize:14,fontFamily:C.fontDisplay,fontWeight:700,letterSpacing:5,textTransform:"uppercase",marginTop:12,marginBottom:2,textAlign:"center"}}>Lumicamp</p>
+    <h1 className="fu s1" style={{color:C.goldLight,fontSize:28,fontFamily:C.fontDisplay,fontWeight:700,marginTop:8,textAlign:"center"}}>{headline}</h1>
+    <p className="fu s2" style={{color:C.textMuted,fontSize:14,fontFamily:C.font,marginBottom:20,textAlign:"center",maxWidth:320}}>{subhead}</p>
     <div style={{width:"100%",maxWidth:340,position:"relative",zIndex:1}}>
-      <div className="fu s3" style={{display:"flex",gap:4,marginBottom:18,background:"rgba(255,255,255,.04)",borderRadius:12,padding:3,border:`1px solid ${C.border}`}}>{["signin","signup"].map(m=><button key={m} onClick={()=>{setMode(m);setErr("")}} style={{flex:1,padding:"10px 0",borderRadius:10,border:"none",background:mode===m?"rgba(212,165,90,.12)":"transparent",color:mode===m?C.gold:C.textDim,fontSize:14,fontWeight:700,fontFamily:C.font}}>{m==="signin"?T.signIn:T.signUp}</button>)}</div>
-      <div className="fu s4" style={{display:"flex",flexDirection:"column",gap:10,marginBottom:14}}>
-        <input value={email} onChange={e=>setEmail(e.target.value)} placeholder={T.email} type="email" style={{width:"100%",background:"rgba(255,255,255,.05)",borderRadius:12,border:`1.5px solid ${C.border}`,padding:"13px 16px",color:C.text,fontSize:15,fontFamily:C.font,outline:"none"}}/>
-        <input value={pass} onChange={e=>setPass(e.target.value)} placeholder={T.password} type="password" onKeyDown={e=>e.key==="Enter"&&go()} style={{width:"100%",background:"rgba(255,255,255,.05)",borderRadius:12,border:`1.5px solid ${C.border}`,padding:"13px 16px",color:C.text,fontSize:15,fontFamily:C.font,outline:"none"}}/>
+      <div className="fu s3" style={{display:"flex",flexDirection:"column",gap:10,marginBottom:12}}>
+        <input value={email} onChange={e=>setEmail(e.target.value)} placeholder={T.email} type="email" disabled={step==="code"} style={{width:"100%",background:"rgba(255,255,255,.05)",borderRadius:12,border:`1.5px solid ${C.border}`,padding:"13px 16px",color:C.text,fontSize:15,fontFamily:C.font,outline:"none",opacity:step==="code"?0.65:1}}/>
+        {step==="code"&&<input value={code} onChange={e=>setCode(e.target.value.replace(/\D/g,"").slice(0,6))} placeholder="6-digit code" inputMode="numeric" onKeyDown={e=>e.key==="Enter"&&verifyCode()} style={{width:"100%",background:"rgba(255,255,255,.05)",borderRadius:12,border:`1.5px solid ${C.border}`,padding:"13px 16px",color:C.text,fontSize:17,letterSpacing:3,fontFamily:C.font,outline:"none",textAlign:"center"}}/>}
       </div>
+      {note&&<p className="fi" style={{color:C.green,fontSize:12,fontFamily:C.font,marginBottom:8,textAlign:"center"}}>{note}</p>}
       {err&&<p className="fi" style={{color:C.red,fontSize:13,fontFamily:C.font,marginBottom:12,textAlign:"center"}}>{err}</p>}
-      <Btn onClick={go} disabled={loading}>{loading?"...":mode==="signin"?T.startClimbing:T.createAccount}</Btn>
+      {step==="email"
+        ?<Btn onClick={sendCode} disabled={loading}>{loading?"...":"Send code"}</Btn>
+        :<div style={{display:"flex",flexDirection:"column",gap:8}}>
+          <Btn onClick={verifyCode} disabled={loading}>{loading?"...":"Verify code"}</Btn>
+          <Btn v="ghost" onClick={()=>{setStep("email");setCode("");setErr("");setNote("")}}>Use a different email</Btn>
+          <Btn v="ghost" onClick={sendCode} disabled={loading}>Resend code</Btn>
+        </div>}
+      {onClose&&<button onClick={onClose} style={{marginTop:10,width:"100%",background:"none",border:"none",color:C.textDim,fontSize:13,fontFamily:C.font}}>Close</button>}
     </div></div>);
+};
+
+const NamePrompt = ({open,onSave,loading}) => {
+  const [name,setName]=useState("");
+  const [err,setErr]=useState("");
+  if(!open)return null;
+  return(<div style={{position:"fixed",inset:0,zIndex:120,background:"rgba(0,0,0,.55)",display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
+    <div style={{width:"100%",maxWidth:420,background:C.bgCard,border:`1px solid ${C.border}`,borderRadius:18,padding:18}}>
+      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}><Lumi size={36} mood="happy" level={1}/><p style={{color:C.text,fontSize:16,fontWeight:700,fontFamily:C.font,margin:0}}>What name should appear on your certificate?</p></div>
+      <p style={{color:C.textDim,fontSize:12,fontFamily:C.font,margin:"0 0 10px"}}>You can change this later in Supabase if needed.</p>
+      <input value={name} onChange={e=>setName(e.target.value)} placeholder="Your display name" onKeyDown={e=>e.key==="Enter"&&name.trim()&&onSave(name.trim(),setErr)} style={{width:"100%",background:"rgba(255,255,255,.04)",borderRadius:12,border:`1.5px solid ${C.border}`,padding:"12px 14px",color:C.text,fontSize:15,fontFamily:C.font,outline:"none"}}/>
+      {err&&<p style={{color:C.red,fontSize:12,fontFamily:C.font,marginTop:8}}>{err}</p>}
+      <div style={{marginTop:12}}><Btn onClick={()=>name.trim()?onSave(name.trim(),setErr):setErr("Please enter a name.")} disabled={loading}>{loading?"Saving...":"Save name"}</Btn></div>
+    </div>
+  </div>);
+};
+
+const JoinOrgView = ({token,user,onClose,onNeedSignIn,onMembershipActivated}) => {
+  const [state,setState]=useState("idle");
+  const [err,setErr]=useState("");
+  const [orgName,setOrgName]=useState("your organization");
+  const runJoin=useCallback(async()=>{
+    if(!user?.id){setState("needsAuth");return}
+    setState("loading");setErr("");
+    const inviteRes=await db.getInviteByToken(token);
+    const invite=inviteRes.data;
+    if(inviteRes.error||!invite){setState("error");setErr("This invite link is invalid.");return}
+    if(invite.org_name)setOrgName(invite.org_name);
+    if(invite.accepted_at){setState("error");setErr("This invite was already used.");return}
+    if(invite.expires_at&&new Date(invite.expires_at).getTime()<Date.now()){setState("error");setErr("This invite has expired.");return}
+    const memberRes=await db.findOrgMember(invite.org_id,user.email||"");
+    if(memberRes.error||!memberRes.data){setState("error");setErr("This invite was sent to a different email address.");return}
+    const activateRes=await db.activateOrgMembership(memberRes.data.id,user.id);
+    if(activateRes.error){setState("error");setErr("Could not activate this membership right now.");return}
+    await db.markInviteAccepted(invite.id);
+    setState("success");
+    onMembershipActivated?.();
+  },[token,user,onMembershipActivated]);
+
+  useEffect(()=>{runJoin()},[runJoin]);
+
+  return(<div style={{height:"100vh",overflowY:"auto",background:`linear-gradient(180deg,${C.skyTop},${C.bgDark})`,padding:`${TOP_SAFE+14}px 20px ${BOTTOM_SAFE+24}px`,position:"relative"}}>
+    <Stars/>
+    <div style={{position:"relative",zIndex:1,maxWidth:560,margin:"0 auto"}}>
+      <button onClick={onClose} style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700,marginBottom:14}}>{T.map}</button>
+      <div style={{background:C.bgCard,border:`1px solid ${C.border}`,borderRadius:18,padding:20}}>
+        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}><Lumi size={44} mood="excited" level={2}/><h2 style={{color:C.text,fontSize:22,fontFamily:C.fontDisplay,fontWeight:700,margin:0}}>Organization invite</h2></div>
+        {state==="needsAuth"&&<>
+          <p style={{color:C.textMuted,fontSize:14,fontFamily:C.font,lineHeight:1.7,margin:"0 0 14px"}}>You've been invited to join an organization on Lumicamp. Sign in to continue.</p>
+          <Btn onClick={onNeedSignIn}>Sign in to continue</Btn>
+        </>}
+        {state==="loading"&&<p style={{color:C.textMuted,fontSize:14,fontFamily:C.font}}>Validating your invite...</p>}
+        {state==="error"&&<>
+          <p style={{color:C.red,fontSize:14,fontFamily:C.font,margin:"0 0 12px"}}>{err}</p>
+          <Btn v="ghost" onClick={runJoin}>Try again</Btn>
+        </>}
+        {state==="success"&&<>
+          <p style={{color:C.green,fontSize:15,fontFamily:C.font,lineHeight:1.7,margin:"0 0 12px"}}>Welcome to {orgName} - your progress now counts toward your team.</p>
+          <Btn onClick={onClose}>Continue into app</Btn>
+        </>}
+      </div>
+    </div>
+  </div>);
+};
+
+const CertVerifyView = ({code,onBack}) => {
+  const [loading,setLoading]=useState(true);
+  const [cert,setCert]=useState(null);
+  useEffect(()=>{
+    let mounted=true;
+    db.getCertificateByCode(code).then(({data})=>{if(mounted)setCert(data||null)}).finally(()=>{if(mounted)setLoading(false)});
+    return()=>{mounted=false};
+  },[code]);
+  return(<div style={{height:"100vh",overflowY:"auto",background:`linear-gradient(180deg,${C.skyTop},${C.bgDark})`,padding:`${TOP_SAFE+14}px 20px ${BOTTOM_SAFE+24}px`,position:"relative"}}>
+    <Stars/>
+    <div style={{position:"relative",zIndex:1,maxWidth:560,margin:"0 auto"}}>
+      <button onClick={onBack} style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700,marginBottom:14}}>{T.map}</button>
+      <div style={{background:C.bgCard,border:`1px solid ${C.border}`,borderRadius:20,padding:22,boxShadow:"0 10px 40px rgba(0,0,0,.2)"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}><h2 style={{color:C.goldLight,fontSize:24,fontFamily:C.fontDisplay,fontWeight:700,margin:0}}>Lumicamp</h2><span style={{color:C.green,fontSize:14,fontFamily:C.font,fontWeight:700}}>Verified ✓</span></div>
+        {loading&&<p style={{color:C.textMuted,fontSize:14,fontFamily:C.font}}>Checking certificate...</p>}
+        {!loading&&!cert&&<p style={{color:C.red,fontSize:14,fontFamily:C.font}}>No certificate found for this code.</p>}
+        {!loading&&cert&&<div style={{display:"grid",gap:8}}>
+          <p style={{color:C.text,fontSize:18,fontFamily:C.font,fontWeight:700,margin:0}}>{cert.display_name||"Learner"}</p>
+          <p style={{color:C.textMuted,fontSize:14,fontFamily:C.font,margin:0}}>{cert.cert_type||"AI Fluency - Core"}</p>
+          <p style={{color:C.textDim,fontSize:13,fontFamily:C.font,margin:0}}>Issued {cert.issued_at?new Date(cert.issued_at).toLocaleDateString():"-"}</p>
+          <p style={{color:C.textDim,fontSize:12,fontFamily:C.font,marginTop:4}}>Code: {code}</p>
+        </div>}
+      </div>
+    </div>
+  </div>);
 };
 
 // ONBOARDING
@@ -892,7 +1034,7 @@ const getAltitude=(pct)=>{
   return{label:a.base.l,icon:"△",color:"#C87858",bg:"rgba(200,120,88,.08)",border:"rgba(200,120,88,.18)",msg:a.base.m};
 };
 
-const LocView = ({user,locId,uid,progress,onBack,onComplete,profile}) => {
+const LocView = ({user,locId,uid,progress,onBack,onComplete,profile,onLessonComplete}) => {
   const loc=LOCS.find(l=>l.id===locId)||LOCS[0];
   const lessons=LESSONS[locId]||[];
   const [lessonIdx,setLessonIdx]=useState(null);
@@ -954,8 +1096,8 @@ const LocView = ({user,locId,uid,progress,onBack,onComplete,profile}) => {
   const displaySections=tSections||lesson?.sections||[];
   const displayPractice=tPractice; // null if not translated yet
   // Store scores per lesson: { "basics-0": 85, "writing-1": 70 }
-  const [lessonScores,setLessonScores]=useState(()=>{try{return JSON.parse(localStorage.getItem("ai_fluent_scores")||"{}")}catch{return{}}});
-  const saveScore=(pathId,li,pct)=>{const k=`${pathId}-${li}`;const ns={...lessonScores,[k]:Math.max(pct,lessonScores[k]||0)};setLessonScores(ns);localStorage.setItem("ai_fluent_scores",JSON.stringify(ns))};
+  const [lessonScores,setLessonScores]=useState(()=>{try{return JSON.parse(localStorage.getItem("lumicamp_scores")||"{}")}catch{return{}}});
+  const saveScore=(pathId,li,pct)=>{const k=`${pathId}-${li}`;const ns={...lessonScores,[k]:Math.max(pct,lessonScores[k]||0)};setLessonScores(ns);localStorage.setItem("lumicamp_scores",JSON.stringify(ns))};
   const getScore=(pathId,li)=>lessonScores[`${pathId}-${li}`]||null;
 
   useEffect(()=>{ref.current?.scrollTo(0,ref.current.scrollHeight)},[msgs,typing]);
@@ -1051,7 +1193,7 @@ const LocView = ({user,locId,uid,progress,onBack,onComplete,profile}) => {
             try{SFX.play("triumph")}catch(e){}
             saveScore(locId,lessonIdx,pct);
             onBack();
-            setTimeout(()=>{db.completeLesson(uid,locId,lessonIdx).catch(e=>console.warn(e));onComplete();},300);
+            setTimeout(()=>{onLessonComplete?.(locId,lessonIdx,pct);onComplete();},300);
           }}>
             {pct>=90?T.claimSummit:T.claimRidge}
           </Btn>
@@ -1095,7 +1237,7 @@ const LocView = ({user,locId,uid,progress,onBack,onComplete,profile}) => {
       <div style={{display:"flex",alignItems:"center",gap:10}}><Lumi size={32} mood="happy" level={level} animate/><div><p style={{color:C.goldLight,fontSize:14,fontWeight:700,fontFamily:C.font,margin:0}}>{T.questionsHelp}</p><p style={{color:C.textDim,fontSize:12,fontFamily:C.font,margin:"2px 0 0"}}>{T.guideHere}</p></div></div>
     </button>
     {practice.length>0?<Btn v="teal" onClick={()=>{setView("practice");resetPractice()}}>{T.startPractice}</Btn>
-    :<Btn onClick={()=>{onBack();setTimeout(()=>{db.completeLesson(uid,locId,lessonIdx).catch(e=>console.warn(e));onComplete();},300)}}>{T.completeLesson}</Btn>}
+    :<Btn onClick={()=>{onBack();setTimeout(()=>{onLessonComplete?.(locId,lessonIdx,100);onComplete();},300)}}>{T.completeLesson}</Btn>}
   </div>);
 
   // INTRO — LESSON SELECTOR
@@ -1288,10 +1430,10 @@ const ToolsView = ({uid,onBack}) => {
 };
 
 // PROFILE
-const ProfileView = ({profile,progress,onBack,onSignOut,onToggleTheme,onChangeLang}) => {
+const ProfileView = ({user,profile,progress,onBack,onSignOut,onToggleTheme,onChangeLang,onSignIn}) => {
   const level=Math.max(1,Math.floor(progress.length/2)+1);
   const donePaths=[...new Set(progress.map(p=>p.path_id))];
-  const scores=(() => {try{return JSON.parse(localStorage.getItem("ai_fluent_scores")||"{}")}catch{return{}}})();
+  const scores=(() => {try{return JSON.parse(localStorage.getItem("lumicamp_scores")||"{}")}catch{return{}}})();
   const summitCount=Object.values(scores).filter(s=>s>=90).length;
   const ridgeCount=Object.values(scores).filter(s=>s>=70&&s<90).length;
   const totalScored=Object.keys(scores).length;
@@ -1305,7 +1447,7 @@ const ProfileView = ({profile,progress,onBack,onSignOut,onToggleTheme,onChangeLa
     <div className="fu" style={{display:"flex",flexDirection:"column",alignItems:"center",marginBottom:20,position:"relative",zIndex:1}}>
       <Lumi size={80} mood="excited" level={level} animate/>
       <p style={{color:C.text,fontSize:22,fontFamily:C.fontDisplay,fontWeight:700,marginTop:8}}>{profile?.display_name||"Explorer"}</p>
-      <p style={{color:C.textDim,fontSize:12,fontFamily:C.font}}>Altitude {level} · {profile?.role||"Learner"}</p>
+      <p style={{color:C.textDim,fontSize:12,fontFamily:C.font}}>Altitude {level} · {profile?.role||"Learner"}{user?.email?` · ${user.email}`:""}</p>
     </div>
 
     {/* Stats grid */}
@@ -1374,12 +1516,13 @@ const ProfileView = ({profile,progress,onBack,onSignOut,onToggleTheme,onChangeLa
       <Btn v="gold" onClick={()=>setShowShare(true)}>{T.shareProgress}</Btn>
     </div>
     {showShare&&<ShareCard type="progress" data={{lessons:progress.length,paths:donePaths.length,streak:streakData.current||0,level}} onClose={()=>setShowShare(false)}/>}
+    {!user&&<div className="fu s5" style={{marginBottom:8,position:"relative",zIndex:1}}><Btn v="teal" onClick={onSignIn}>Sign in</Btn></div>}
 
     <div className="fu s5" style={{display:"flex",gap:8,position:"relative",zIndex:1}}>
       <button onClick={onToggleTheme} style={{flex:1,background:C.mode==="dark"?"rgba(255,255,255,.05)":"rgba(0,0,0,.04)",border:`1px solid ${C.border}`,borderRadius:14,padding:"13px 24px",fontSize:15,fontWeight:700,fontFamily:C.font,color:C.text,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
         {C.mode==="dark"?T.lightMode:T.darkMode}
       </button>
-      <button onClick={onSignOut} style={{flex:1,background:C.mode==="dark"?"rgba(255,255,255,.05)":"rgba(0,0,0,.04)",border:`1px solid ${C.border}`,borderRadius:14,padding:"13px 24px",fontSize:15,fontWeight:700,fontFamily:C.font,color:C.textMuted}}>{T.signOut}</button>
+      {user&&<button onClick={onSignOut} style={{flex:1,background:C.mode==="dark"?"rgba(255,255,255,.05)":"rgba(0,0,0,.04)",border:`1px solid ${C.border}`,borderRadius:14,padding:"13px 24px",fontSize:15,fontWeight:700,fontFamily:C.font,color:C.textMuted}}>{T.signOut}</button>}
     </div>
     <p className="fu s5" style={{textAlign:"center",color:C.textDim,fontSize:11,fontFamily:C.font,marginTop:16,position:"relative",zIndex:1}}>Lumicamp v5 · Powered by Claude</p>
   </div>);
@@ -1501,58 +1644,149 @@ const Tutorial = ({onComplete}) => {
 };
 
 // MAIN APP
-export default function AIFluent(){
-  const [loading,setLoading]=useState(true);const [user,setUser]=useState(null);const [profile,setProfile]=useState(null);const [progress,setProgress]=useState([]);
-  const [screen,setScreen]=useState("map");const [activeLoc,setActiveLoc]=useState(null);
-  const [showTutorial,setShowTutorial]=useState(()=>!localStorage.getItem("ai_fluent_tutorial_seen"));
+export default function Lumicamp(){
+  const [loading,setLoading]=useState(true);const [user,setUser]=useState(null);const [profile,setProfile]=useState(null);const [progress,setProgress]=useState(()=>getLocalProgress());
+  const [screen,setScreen]=useState("map");const [activeLoc,setActiveLoc]=useState(null);const [routeToken,setRouteToken]=useState("");
+  const [showTutorial,setShowTutorial]=useState(()=>!localStorage.getItem("lumicamp_tutorial_seen"));
+  const [showAuthPrompt,setShowAuthPrompt]=useState(false);
+  const [showNamePrompt,setShowNamePrompt]=useState(false);
+  const [savingName,setSavingName]=useState(false);
+  const [activeOrgId,setActiveOrgId]=useState(null);
   const [theme,setThemeState]=useState(()=>getTheme());
   const toggleTheme=()=>{const nt=theme==="dark"?"light":"dark";setTheme(nt);setThemeState(nt);C={...THEMES[nt]}};
   const [lang,setLangState]=useState(()=>getLang());
   const changeLang=(l)=>{setLang(l);setLangState(l);T={...UI[l]}};
 
+  const addOrUpdateLocalProgress=useCallback((nodeId,lessonId,score)=>{
+    setProgress(prev=>{
+      const existing=(prev||[]).filter(p=>!(p.path_id===nodeId&&p.lesson_index===lessonId));
+      const row={path_id:nodeId,lesson_index:lessonId,node_id:nodeId,lesson_id:lessonId,score:score??100,completed_at:new Date().toISOString()};
+      const next=[...existing,row];
+      setLocalProgress(next);
+      return next;
+    });
+  },[]);
+
+  const enqueueSync=useCallback((row)=>{
+    const q=getSyncQueue();
+    const next=[...q,row].slice(-MAX_SYNC_QUEUE);
+    setSyncQueue(next);
+  },[]);
+
+  const flushSyncQueue=useCallback(async()=>{
+    if(!user?.id)return;
+    const queue=getSyncQueue();
+    if(!queue.length)return;
+    const pending=[];
+    for(const item of queue){
+      const payload={...item,user_id:user.id,org_id:activeOrgId??item.org_id??null};
+      const {error}=await db.upsertUserProgress(payload);
+      if(error)pending.push(item);
+    }
+    setSyncQueue(pending);
+  },[user,activeOrgId]);
+
+  const syncProgressFireAndForget=useCallback((nodeId,lessonId,score)=>{
+    if(!user?.id)return;
+    const row={user_id:user.id,org_id:activeOrgId,node_id:nodeId,lesson_id:lessonId,score:score??100,completed_at:new Date().toISOString()};
+    db.upsertUserProgress(row).then(({error})=>{if(error)enqueueSync(row)}).catch(()=>enqueueSync(row));
+  },[user,activeOrgId,enqueueSync]);
+
+  const handleLessonComplete=useCallback((nodeId,lessonId,score)=>{
+    addOrUpdateLocalProgress(nodeId,lessonId,score);
+    syncProgressFireAndForget(nodeId,lessonId,score);
+  },[addOrUpdateLocalProgress,syncProgressFireAndForget]);
+
+  const requireDisplayName=useCallback((p)=>{
+    const hasName=!!p?.display_name&&String(p.display_name).trim().length>0;
+    setShowNamePrompt(!hasName&&!!user?.id);
+  },[user]);
+
+  const saveDisplayName=useCallback(async(name,setErr)=>{
+    if(!user?.id)return;
+    setSavingName(true);
+    const {error}=await db.saveDisplayName(user.id,name);
+    setSavingName(false);
+    if(error){setErr("Could not save your name. Please try again.");return}
+    const p=await db.getProfile(user.id);
+    setProfile(p||{});
+    setShowNamePrompt(false);
+  },[user]);
+
+  useEffect(()=>{
+    if(_isNative)return;
+    const path=window.location.pathname||"/";
+    if(path.startsWith("/join/")){
+      const token=decodeURIComponent(path.split("/")[2]||"").trim();
+      if(token){setRouteToken(token);setScreen("joinOrg")}
+      window.history.replaceState({},"","/");
+      return;
+    }
+    if(path.startsWith("/verify/")){
+      const code=decodeURIComponent(path.split("/")[2]||"").trim();
+      if(code){setRouteToken(code);setScreen("certVerify")}
+      window.history.replaceState({},"","/");
+    }
+  },[]);
+
   useEffect(()=>{
     // Failsafe: if loading takes more than 5 seconds, force it to stop
-    const timeout=setTimeout(()=>{setLoading(false);console.warn("Loading timeout — forced to sign-in screen")},5000);
+    const timeout=setTimeout(()=>{setLoading(false);console.warn("Loading timeout — forced to app screen")},5000);
     const init=async()=>{
       try{
         const s=await db.getSession();
         if(s?.user){
           setUser(s.user);
-          try{setProfile(await db.getProfile(s.user.id))}catch(e){console.warn("Profile load failed:",e);setProfile({})}
+          try{
+            const p=await db.getProfile(s.user.id);
+            setProfile(p||{});
+            requireDisplayName(p||{});
+          }catch(e){console.warn("Profile load failed:",e);setProfile({});setShowNamePrompt(true)}
           try{setProgress(await db.getProgress(s.user.id))}catch(e){console.warn("Progress load failed:",e);setProgress([])}
+          try{setActiveOrgId(await db.getActiveOrgByUser(s.user.id))}catch(e){setActiveOrgId(null)}
         }
       }catch(e){console.error("Init error:",e)}
       clearTimeout(timeout);
       setLoading(false);
     };
     init();
-    const{data}=db.onAuth(async(ev,s)=>{if(ev==="SIGNED_IN"&&s?.user){setUser(s.user);try{setProfile(await db.getProfile(s.user.id))}catch(e){setProfile({})}try{setProgress(await db.getProgress(s.user.id))}catch(e){setProgress([])}}else if(ev==="SIGNED_OUT"){setUser(null);setProfile(null);setProgress([])}});
+    const{data}=db.onAuth(async(ev,s)=>{if(ev==="SIGNED_IN"&&s?.user){setUser(s.user);try{const p=await db.getProfile(s.user.id);setProfile(p||{});requireDisplayName(p||{})}catch(e){setProfile({});setShowNamePrompt(true)}try{setProgress(await db.getProgress(s.user.id))}catch(e){setProgress(getLocalProgress())}try{setActiveOrgId(await db.getActiveOrgByUser(s.user.id))}catch(e){setActiveOrgId(null)}setShowAuthPrompt(false);flushSyncQueue()}else if(ev==="SIGNED_OUT"){setUser(null);setProfile(null);setActiveOrgId(null);setProgress(getLocalProgress())}});
     return()=>{clearTimeout(timeout);data?.subscription?.unsubscribe?.()};
-  },[]);
+  },[flushSyncQueue,requireDisplayName]);
+
+  useEffect(()=>{
+    const onFocus=()=>{flushSyncQueue()};
+    const onOnline=()=>{flushSyncQueue()};
+    window.addEventListener("focus",onFocus);
+    window.addEventListener("online",onOnline);
+    return()=>{window.removeEventListener("focus",onFocus);window.removeEventListener("online",onOnline)};
+  },[flushSyncQueue]);
 
   const refresh=async()=>{
-    if(!user)return;
-    setProfile(await db.getProfile(user.id));
-    setProgress(await db.getProgress(user.id));
+    if(user){
+      setProfile(await db.getProfile(user.id));
+      setProgress(await db.getProgress(user.id));
+    }
     // Record streak activity when user completes something
     Streak.recordActivity();
   };
-  const out=async()=>{await db.signOut();setUser(null);setProfile(null);setProgress([])};
+  const out=async()=>{await db.signOut();setUser(null);setProfile(null);setActiveOrgId(null);setProgress(getLocalProgress())};
   const goMap=()=>{setScreen("map");setActiveLoc(null)};
 
   // Record streak on initial load if user is active
   useEffect(()=>{if(user) Streak.check()},[user]);
 
   if(loading)return<><style>{getCss()}</style><div onClick={()=>setLoading(false)} style={{height:"100vh",background:`linear-gradient(180deg,${C.skyTop},${C.skyMid})`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",position:"relative",cursor:"pointer"}}><Stars/><Lumi size={56} mood="happy" level={1} animate/><p style={{color:C.textMuted,fontSize:14,fontFamily:"'Nunito',sans-serif",marginTop:14}}>{T.loading}</p></div></>;
-  if(!user)return<><style>{getCss()}</style><AuthScreen/></>;
-  if(profile&&!profile.onboarded)return<><style>{getCss()}</style><Onboarding uid={user.id} onDone={refresh}/></>;
-  if(showTutorial&&user)return<><style>{getCss()}</style><Tutorial onComplete={()=>{localStorage.setItem("ai_fluent_tutorial_seen","1");setShowTutorial(false)}}/></>;
-  if(screen==="location"&&activeLoc)return<><style>{getCss()}</style><LocView user={user} locId={activeLoc} uid={user.id} progress={progress} profile={profile} onBack={goMap} onComplete={refresh}/></>;
-  if(screen==="news")return<><style>{getCss()}</style><NewsView uid={user.id} onBack={goMap}/></>;
-  if(screen==="tools")return<><style>{getCss()}</style><ToolsView uid={user.id} onBack={goMap}/></>;
-  if(screen==="challenge")return<><style>{getCss()}</style><ChallengeView uid={user.id} onBack={goMap}/></>;
+  if(user&&profile&&!profile.onboarded)return<><style>{getCss()}</style><Onboarding uid={user.id} onDone={refresh}/></>;
+  if(showTutorial&&user)return<><style>{getCss()}</style><Tutorial onComplete={()=>{localStorage.setItem("lumicamp_tutorial_seen","1");setShowTutorial(false)}}/></>;
+  if(screen==="location"&&activeLoc)return<><style>{getCss()}</style><LocView user={user} locId={activeLoc} uid={user?.id} progress={progress} profile={profile} onBack={goMap} onComplete={refresh} onLessonComplete={handleLessonComplete}/></>;
+  if(screen==="news")return<><style>{getCss()}</style><NewsView uid={user?.id} onBack={goMap}/></>;
+  if(screen==="tools")return<><style>{getCss()}</style><ToolsView uid={user?.id} onBack={goMap}/></>;
+  if(screen==="challenge")return<><style>{getCss()}</style><ChallengeView uid={user?.id} onBack={goMap}/></>;
   if(screen==="achievements")return<><style>{getCss()}</style><AchievementsView profile={profile} progress={progress} onBack={goMap}/></>;
-  if(screen==="profile")return<><style>{getCss()}</style><ProfileView profile={profile} progress={progress} onBack={goMap} onSignOut={out} onToggleTheme={toggleTheme} onChangeLang={changeLang}/></>;
+  if(screen==="profile")return<><style>{getCss()}</style><ProfileView user={user} profile={profile} progress={progress} onBack={goMap} onSignOut={out} onToggleTheme={toggleTheme} onChangeLang={changeLang} onSignIn={()=>setShowAuthPrompt(true)}/></>;
+  if(screen==="joinOrg")return<><style>{getCss()}</style><JoinOrgView token={routeToken} user={user} onClose={goMap} onNeedSignIn={()=>setShowAuthPrompt(true)} onMembershipActivated={async()=>{if(user?.id){setActiveOrgId(await db.getActiveOrgByUser(user.id))}}}/>{showAuthPrompt&&<div style={{position:"fixed",inset:0,zIndex:110,background:"rgba(0,0,0,.55)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}}><AuthScreen onClose={()=>setShowAuthPrompt(false)} headline="Sign in to join your team" subhead="Use your invited email and enter the 6-digit code."/></div>}</>;
+  if(screen==="certVerify")return<><style>{getCss()}</style><CertVerifyView code={routeToken} onBack={goMap}/></>;
 
   return<><style>{getCss()}</style>
     <MilestoneCheck progress={progress}/>
@@ -1563,5 +1797,8 @@ export default function AIFluent(){
     onOpenChallenge={()=>setScreen("challenge")}
     onOpenAchievements={()=>setScreen("achievements")}
     onOpenProfile={()=>setScreen("profile")}
-  /></>;
+  />
+    {showAuthPrompt&&<div style={{position:"fixed",inset:0,zIndex:110,background:"rgba(0,0,0,.55)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}}><AuthScreen onClose={()=>setShowAuthPrompt(false)}/></div>}
+    <NamePrompt open={showNamePrompt} onSave={saveDisplayName} loading={savingName}/>
+  </>;
 }

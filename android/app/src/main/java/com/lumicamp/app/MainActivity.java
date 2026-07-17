@@ -1,4 +1,4 @@
-package com.aifluent.app;
+package com.lumicamp.app;
 
 import com.getcapacitor.BridgeActivity;
 

@@ -288,8 +288,8 @@ function submitEmail(){
   if(!email||!email.includes('@'))return;
 
   // Store in localStorage as a simple waitlist (replace with real backend later)
-  const waitlist=JSON.parse(localStorage.getItem('ai_fluent_waitlist')||'[]');
-  if(!waitlist.includes(email)){waitlist.push(email);localStorage.setItem('ai_fluent_waitlist',JSON.stringify(waitlist))}
+  const waitlist=JSON.parse(localStorage.getItem('lumicamp_waitlist')||'[]');
+  if(!waitlist.includes(email)){waitlist.push(email);localStorage.setItem('lumicamp_waitlist',JSON.stringify(waitlist))}
 
   // Show success
   document.getElementById('emailForm').style.display='none';

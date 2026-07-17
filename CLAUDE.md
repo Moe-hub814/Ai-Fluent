@@ -1,9 +1,9 @@
 <!-- GSD:project-start source:PROJECT.md -->
 ## Project
 
-**AI Fluent — Google Play Launch**
+**Lumicamp — Google Play Launch**
 
-AI Fluent is a mobile AI literacy learning app — "Duolingo for AI." Users climb a mountain-themed progression system with 7 location nodes, guided by a companion character named Lumi. The app is fully built and functional, with daily challenges, live AI news via Claude web search, 6 guided AI tools, practice mode with altitude ratings, streak tracking, and full i18n (English/Arabic/French). This project covers shipping the existing app to Google Play.
+Lumicamp is a mobile AI literacy learning app — "Duolingo for AI." Users climb a mountain-themed progression system with 7 location nodes, guided by a companion character named Lumi. The app is fully built and functional, with daily challenges, live AI news via Claude web search, 6 guided AI tools, practice mode with altitude ratings, streak tracking, and full i18n (English/Arabic/French). This project covers shipping the existing app to Google Play.
 
 **Core Value:** Users can learn AI concepts through daily structured lessons, practice on real AI tools, and track their progress — all on mobile, in their language.
 
@@ -95,7 +95,7 @@ AI Fluent is a mobile AI literacy learning app — "Duolingo for AI." Users clim
 - No structured logging or log levels
 - Minimal logging — mostly for debugging/troubleshooting
 ## Comments
-- Section headers for major code blocks (e.g., `// AI FLUENT — SUMMIT EDITION v2`)
+- Section headers for major code blocks (e.g., `// LUMICAMP — SUMMIT EDITION v2`)
 - Functional grouping comments (e.g., `// THEME SYSTEM`, `// AUTH`, `// WORLD MAP`)
 - Complex logic explanations
 - No JSDoc comments used
@@ -203,8 +203,8 @@ AI Fluent is a mobile AI literacy learning app — "Duolingo for AI." Users clim
 ## Entry Points
 - Location: `src/main.jsx`
 - Triggers: Page load
-- Responsibilities: Mount React app to DOM root, render `AIFluent` main component
-- Location: `src/App.jsx` (exported as `AIFluent`)
+- Responsibilities: Mount React app to DOM root, render `Lumicamp` main component
+- Location: `src/App.jsx` (exported as `Lumicamp`)
 - Triggers: React initialization
 - Responsibilities: Initialize auth, manage app-level state, route between screens, handle theme/language
 - Pattern: Conditional rendering based on `screen` state variable
@@ -230,7 +230,7 @@ AI Fluent is a mobile AI literacy learning app — "Duolingo for AI." Users clim
 - Supabase session-based auth with auto-refresh
 - Token persisted in browser sessionStorage (Supabase default)
 - `onAuth()` listener maintains sync across tabs
-- Language stored in localStorage as `ai_fluent_lang`
+- Language stored in localStorage as `lumicamp_lang`
 - Translations defined in constants (UI, LESSON_TITLES, LOC_NAMES, etc.)
 - `setLang()` updates global `_lang` variable and `T` translation object
 - HTML lang and dir attributes updated for RTL support

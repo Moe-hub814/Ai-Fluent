@@ -1,9 +1,9 @@
 apply plugin: 'com.android.application'
 android {
-    namespace = "com.aifluent.app"
+    namespace = "com.lumicamp.app"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.aifluent.app"
+        applicationId "com.lumicamp.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
