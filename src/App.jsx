@@ -679,7 +679,7 @@ const Stars = () => <div style={{position:"absolute",inset:0,overflow:"hidden",p
 const Confetti = () => <div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:100}}>{Array.from({length:20},(_,i)=><div key={i} style={{position:"absolute",left:`${10+Math.random()*80}%`,top:"60%",width:8,height:8,borderRadius:Math.random()>.5?"50%":"2px",background:["#D4A55A","#4ABA78","#3AA8A0","#E88060","#4A90D9","#7A6BBF"][i%6],animation:`confetti ${1+Math.random()}s ease-out forwards`,animationDelay:`${Math.random()*0.5}s`}}/>)}</div>;
 
 // AUTH
-const AuthScreen = ({onClose,onSignedIn,headline="Sign in with email",subhead="Enter your email to receive a 6-digit code."}) => {
+const AuthScreen = ({onClose,onSignedIn,headline="Sign in or create your free account",subhead="Enter your email and we'll send a 6-digit code. No password needed — new accounts are created automatically."}) => {
   const [email,setEmail]=useState("");
   const [code,setCode]=useState("");
   const [step,setStep]=useState("email");
@@ -700,7 +700,7 @@ const AuthScreen = ({onClose,onSignedIn,headline="Sign in with email",subhead="E
     setLoading(false);
     if(error){setErr(mapOtpError(error.message));return}
     setStep("code");
-    setNote(`Code sent to ${email.trim().toLowerCase()}`);
+    setNote(`Code sent to ${email.trim().toLowerCase()} — check spam if you don't see it. If your email shows a button instead of a code, tapping it signs you in too.`);
   };
   const verifyCode=async()=>{
     if(code.trim().length!==6){setErr("Enter the 6-digit code from your email.");return}
@@ -830,7 +830,19 @@ const Onboarding = ({uid,onDone}) => {
   const [step,setStep]=useState(0);const [ans,setAns]=useState({});const [building,setBuilding]=useState(false);
   const steps=[{q:"Tell us about yourself",sub:"This shapes your path",opts:["Business Owner","Student","Working Professional","Curious Learner","Creative / Artist","Retired & Exploring"],key:"role"},{q:"Your experience with AI?",sub:"Everyone starts somewhere",opts:["Completely new","Tried ChatGPT once","Use AI occasionally","Ready to go deeper"],key:"exp"},{q:"What are you climbing toward?",sub:"Select all that interest you",opts:["Better writing","Creating images","Business growth","Staying informed","Automating tasks","Just exploring"],key:"goals",multi:true}];
   const pick=(val)=>{const s=steps[step];if(s.multi){const c=ans[s.key]||[];setAns({...ans,[s.key]:c.includes(val)?c.filter(v=>v!==val):[...c,val]})}else{const na={...ans,[s.key]:val};setAns(na);if(step<2)setTimeout(()=>setStep(step+1),300);else finish(na)}};
-  const finish=async(fa)=>{setBuilding(true);const a=fa||ans;await db.updateProfile(uid,{role:a.role,experience_level:a.exp,goals:a.goals||[],onboarded:true});setTimeout(()=>onDone(),2000)};
+  const finish=async(fa)=>{
+    setBuilding(true);const a=fa||ans;
+    const payload={role:a.role,experience_level:a.exp,goals:a.goals||[],onboarded:true};
+    // Never let the user get stuck on "Charting your route": cap the save at 8s,
+    // swallow errors, and always fall back to a local onboarded flag.
+    try{
+      const timeout=new Promise(res=>setTimeout(()=>res({error:{message:"timeout"}}),8000));
+      const res=await Promise.race([db.updateProfile(uid,payload),timeout]);
+      if(res?.error)console.warn("Onboarding save issue:",res.error.message);
+    }catch(e){console.warn("Onboarding save failed:",e)}
+    try{localStorage.setItem(`lumicamp_onboarded_${uid}`,"1");localStorage.setItem(`lumicamp_onboarding_answers_${uid}`,JSON.stringify(payload))}catch{/* storage unavailable */}
+    setTimeout(()=>onDone(),1200);
+  };
   if(building)return(<div style={{height:"100vh",background:`linear-gradient(180deg,${C.skyTop},${C.skyMid})`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:40,position:"relative"}}><Stars/><Lumi size={72} mood="thinking" level={1} animate/><p className="fu" style={{color:C.goldLight,fontSize:18,fontFamily:C.fontDisplay,fontWeight:700,marginTop:14}}>Charting your route...</p></div>);
   const s=steps[step];
   return(<div style={{minHeight:"100vh",background:`linear-gradient(180deg,${C.skyTop},${C.skyMid} 70%,${C.mountain})`,display:"flex",flexDirection:"column",padding:"44px 24px 40px",position:"relative"}}><Stars/>
@@ -844,7 +856,7 @@ const Onboarding = ({uid,onDone}) => {
 };
 
 // WORLD MAP — Premium mountain climbing experience
-const WorldMap = ({user,profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfile,onOpenChallenge,onOpenAchievements,onToggleTheme,onChangeLang}) => {
+const WorldMap = ({user,profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfile,onOpenChallenge,onOpenAchievements,onToggleTheme,onChangeLang,onSignIn}) => {
   const level=Math.max(1,Math.floor(progress.length/2)+1);const done=[...new Set(progress.map(p=>p.path_id))];
   const status=(loc)=>{if(loc.id==="master")return done.length>=6?"current":"locked";const idx=LOCS.findIndex(l=>l.id===loc.id);if(done.includes(loc.id))return"done";if(idx===0)return"current";const prev=LOCS[idx-1];if(prev&&done.includes(prev.id))return"current";return"locked"};
   const pct=Math.round((done.length/6)*100);
@@ -931,9 +943,21 @@ const WorldMap = ({user,profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpen
         <button onClick={onOpenAchievements} style={{display:"flex",alignItems:"center",gap:3,background:dk?"rgba(58,168,160,.1)":"rgba(42,128,120,.08)",padding:"6px 10px",borderRadius:20,border:`1px solid ${dk?"rgba(58,168,160,.2)":"rgba(42,128,120,.15)"}`,fontSize:13}}>🏆<span style={{color:C.teal,fontSize:13,fontWeight:800,fontFamily:C.font}}>{ACHIEVEMENTS.filter(a=>a.condition(progress,profile)).length}</span></button>
         <ThemeToggle onToggle={onToggleTheme}/>
         <LangSelector onChangeLang={onChangeLang} compact/>
-        <button onClick={onOpenProfile} style={{width:32,height:32,borderRadius:10,background:dk?"rgba(255,255,255,.06)":"rgba(0,0,0,.05)",border:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14}}>👤</button>
+        {user
+          ?<button onClick={onOpenProfile} aria-label="Profile" style={{width:32,height:32,borderRadius:10,background:dk?"rgba(255,255,255,.06)":"rgba(0,0,0,.05)",border:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14}}>👤</button>
+          :<button onClick={onSignIn||onOpenProfile} style={{height:32,padding:"0 12px",borderRadius:10,background:C.gold,border:"none",color:"#1a1208",fontSize:12,fontWeight:800,fontFamily:C.font,whiteSpace:"nowrap"}}>{T.signIn}</button>}
       </div>
     </div>
+
+    {/* SIGNED-OUT CALL TO ACTION — makes "how do I sign up?" obvious */}
+    {!user&&<div className="fu" style={{position:"absolute",left:12,right:12,top:TOP_SAFE+62,zIndex:20,background:dk?"rgba(6,13,26,.9)":"rgba(255,255,255,.92)",border:`1px solid ${C.border}`,borderRadius:14,padding:"10px 12px",display:"flex",alignItems:"center",gap:10,boxShadow:"0 8px 24px rgba(0,0,0,.18)"}}>
+      <Lumi size={30} mood="happy" level={1}/>
+      <div style={{flex:1,minWidth:0}}>
+        <p style={{color:C.text,fontSize:13,fontWeight:700,fontFamily:C.font,margin:0}}>New here? Create your free account</p>
+        <p style={{color:C.textMuted,fontSize:11,fontFamily:C.font,margin:0}}>Just your email — we'll send a 6-digit code. Your progress will be saved.</p>
+      </div>
+      <button onClick={onSignIn||onOpenProfile} style={{background:C.gold,border:"none",borderRadius:10,padding:"8px 12px",color:"#1a1208",fontSize:12,fontWeight:800,fontFamily:C.font,whiteSpace:"nowrap"}}>Get started →</button>
+    </div>}
 
     {/* CLIMBING TRAIL */}
     <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={{position:"absolute",inset:0,width:"100%",height:"100%",zIndex:4,pointerEvents:"none"}}>
@@ -1777,18 +1801,30 @@ export default function Lumicamp(){
   useEffect(()=>{if(user) Streak.check()},[user]);
 
   if(loading)return<><style>{getCss()}</style><div onClick={()=>setLoading(false)} style={{height:"100vh",background:`linear-gradient(180deg,${C.skyTop},${C.skyMid})`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",position:"relative",cursor:"pointer"}}><Stars/><Lumi size={56} mood="happy" level={1} animate/><p style={{color:C.textMuted,fontSize:14,fontFamily:"'Nunito',sans-serif",marginTop:14}}>{T.loading}</p></div></>;
-  if(user&&profile&&!profile.onboarded)return<><style>{getCss()}</style><Onboarding uid={user.id} onDone={refresh}/></>;
+  // Onboarding: trust either the server flag or the local fallback (set when the
+  // profile save failed/timed out) so nobody can get stuck in onboarding.
+  const locallyOnboarded=(()=>{try{return !!user&&localStorage.getItem(`lumicamp_onboarded_${user.id}`)==="1"}catch{return false}})();
+  if(user&&profile&&!profile.onboarded&&!locallyOnboarded)return<><style>{getCss()}</style><Onboarding uid={user.id} onDone={refresh}/></>;
   if(showTutorial&&user)return<><style>{getCss()}</style><Tutorial onComplete={()=>{localStorage.setItem("lumicamp_tutorial_seen","1");setShowTutorial(false)}}/></>;
-  if(screen==="location"&&activeLoc)return<><style>{getCss()}</style><LocView user={user} locId={activeLoc} uid={user?.id} progress={progress} profile={profile} onBack={goMap} onComplete={refresh} onLessonComplete={handleLessonComplete}/></>;
-  if(screen==="news")return<><style>{getCss()}</style><NewsView uid={user?.id} onBack={goMap}/></>;
-  if(screen==="tools")return<><style>{getCss()}</style><ToolsView uid={user?.id} onBack={goMap}/></>;
-  if(screen==="challenge")return<><style>{getCss()}</style><ChallengeView uid={user?.id} onBack={goMap}/></>;
-  if(screen==="achievements")return<><style>{getCss()}</style><AchievementsView profile={profile} progress={progress} onBack={goMap}/></>;
-  if(screen==="profile")return<><style>{getCss()}</style><ProfileView user={user} profile={profile} progress={progress} onBack={goMap} onSignOut={out} onToggleTheme={toggleTheme} onChangeLang={changeLang} onSignIn={()=>setShowAuthPrompt(true)}/></>;
-  if(screen==="joinOrg")return<><style>{getCss()}</style><JoinOrgView token={routeToken} user={user} onClose={goMap} onNeedSignIn={()=>setShowAuthPrompt(true)} onMembershipActivated={async()=>{if(user?.id){setActiveOrgId(await db.getActiveOrgByUser(user.id))}}}/>{showAuthPrompt&&<div style={{position:"fixed",inset:0,zIndex:110,background:"rgba(0,0,0,.55)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}}><AuthScreen onClose={()=>setShowAuthPrompt(false)} headline="Sign in to join your team" subhead="Use your invited email and enter the 6-digit code."/></div>}</>;
-  if(screen==="certVerify")return<><style>{getCss()}</style><CertVerifyView code={routeToken} onBack={goMap}/></>;
 
-  return<><style>{getCss()}</style>
+  // Auth modal is rendered on EVERY screen (previously only on the map + joinOrg
+  // screens, so tapping "Sign in" from the profile page appeared to do nothing).
+  const authOverlay=showAuthPrompt&&<div style={{position:"fixed",inset:0,zIndex:110,background:"rgba(0,0,0,.55)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+    <AuthScreen onClose={()=>setShowAuthPrompt(false)}
+      headline={screen==="joinOrg"?"Sign in to join your team":"Sign in or create your free account"}
+      subhead={screen==="joinOrg"?"Use your invited email — we'll send a 6-digit code.":"Enter your email and we'll send a 6-digit code (or a sign-in link). No password needed."}/>
+  </div>;
+
+  let content;
+  if(screen==="location"&&activeLoc)content=<LocView user={user} locId={activeLoc} uid={user?.id} progress={progress} profile={profile} onBack={goMap} onComplete={refresh} onLessonComplete={handleLessonComplete}/>;
+  else if(screen==="news")content=<NewsView uid={user?.id} onBack={goMap}/>;
+  else if(screen==="tools")content=<ToolsView uid={user?.id} onBack={goMap}/>;
+  else if(screen==="challenge")content=<ChallengeView uid={user?.id} onBack={goMap}/>;
+  else if(screen==="achievements")content=<AchievementsView profile={profile} progress={progress} onBack={goMap}/>;
+  else if(screen==="profile")content=<ProfileView user={user} profile={profile} progress={progress} onBack={goMap} onSignOut={out} onToggleTheme={toggleTheme} onChangeLang={changeLang} onSignIn={()=>setShowAuthPrompt(true)}/>;
+  else if(screen==="joinOrg")content=<JoinOrgView token={routeToken} user={user} onClose={goMap} onNeedSignIn={()=>setShowAuthPrompt(true)} onMembershipActivated={async()=>{if(user?.id){setActiveOrgId(await db.getActiveOrgByUser(user.id))}}}/>;
+  else if(screen==="certVerify")content=<CertVerifyView code={routeToken} onBack={goMap}/>;
+  else content=<>
     <MilestoneCheck progress={progress}/>
     <WorldMap user={user} profile={profile} progress={progress} onToggleTheme={toggleTheme} onChangeLang={changeLang}
     onOpenLoc={(id)=>{setActiveLoc(id);setScreen("location")}}
@@ -1797,8 +1833,10 @@ export default function Lumicamp(){
     onOpenChallenge={()=>setScreen("challenge")}
     onOpenAchievements={()=>setScreen("achievements")}
     onOpenProfile={()=>setScreen("profile")}
+    onSignIn={()=>setShowAuthPrompt(true)}
   />
-    {showAuthPrompt&&<div style={{position:"fixed",inset:0,zIndex:110,background:"rgba(0,0,0,.55)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}}><AuthScreen onClose={()=>setShowAuthPrompt(false)}/></div>}
-    <NamePrompt open={showNamePrompt} onSave={saveDisplayName} loading={savingName}/>
+    <NamePrompt open={showNamePrompt&&!showAuthPrompt} onSave={saveDisplayName} loading={savingName}/>
   </>;
+
+  return<><style>{getCss()}</style>{content}{authOverlay}</>;
 }
