@@ -1,0 +1,21 @@
+<!-- Lumicamp — Supabase Auth email template. Paste into Dashboard → Authentication → Email Templates → "Magic Link" AND "Confirm signup".
+     Subject suggestion: "Your Lumicamp sign-in code: {{ .Token }}" -->
+<div style="background:#0b1527;padding:32px 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <div style="max-width:520px;margin:0 auto;background:#0f1c33;border:1px solid rgba(212,165,90,.25);border-radius:18px;padding:36px 28px;text-align:center;color:#e8e4da;">
+    <div style="width:64px;height:64px;border-radius:32px;background:linear-gradient(135deg,#f3d9a4,#d4a55a);margin:0 auto 18px;line-height:64px;font-size:30px;">✨</div>
+    <p style="margin:0 0 4px;color:#d4a55a;font-size:12px;letter-spacing:5px;text-transform:uppercase;font-weight:700;">Lumicamp</p>
+    <h1 style="margin:0 0 6px;color:#f3d9a4;font-size:26px;font-weight:800;">Your sign-in code</h1>
+    <p style="margin:0 0 22px;color:#b9b3a6;font-size:14px;">Hey there! 👋 Lumi here — your AI guide.</p>
+
+    <p style="margin:0 0 10px;color:#e8e4da;font-size:15px;">Enter this 6-digit code in the Lumicamp app:</p>
+    <div style="display:inline-block;background:rgba(212,165,90,.12);border:1.5px solid #d4a55a;border-radius:14px;padding:14px 26px;margin:0 0 20px;">
+      <span style="font-size:34px;letter-spacing:10px;font-weight:800;color:#f3d9a4;font-family:'SF Mono',Menlo,Consolas,monospace;">{{ .Token }}</span>
+    </div>
+    <p style="margin:0 0 24px;color:#8e887c;font-size:13px;">The code expires in 1 hour. It works for new and returning accounts.</p>
+
+    <p style="margin:0 0 12px;color:#b9b3a6;font-size:13px;">Prefer one tap? This button signs you in too:</p>
+    <a href="{{ .ConfirmationURL }}" style="display:inline-block;background:linear-gradient(135deg,#d4a55a,#b8893f);color:#1a1208;text-decoration:none;font-weight:800;font-size:15px;padding:14px 28px;border-radius:12px;">Open Lumicamp →</a>
+
+    <p style="margin:28px 0 0;color:#6f6a60;font-size:12px;line-height:1.6;">You'll explore 6 learning paths, earn Altitude Ratings, and build real AI skills — no tech background needed.<br>If you didn't request this email, you can safely ignore it.</p>
+  </div>
+</div>
