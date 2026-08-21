@@ -741,15 +741,14 @@ const AuthScreen = ({onClose,onSignedIn,headline="Sign in or create your free ac
 // Display-name cascade: profile row → JWT user_metadata (instant on load) →
 // a prettified email prefix → generic. Never renders a raw email address.
 const prettyFromEmail = (email) => (email||"").split("@")[0].replace(/[._-]+/g," ").trim().replace(/\b\w/g,c=>c.toUpperCase());
-const getDisplayName = (profile,user,fallback="there") => {
-  const fromProfile=String(profile?.display_name||"").trim();
-  if(fromProfile)return fromProfile;
-  const fromMeta=String(user?.user_metadata?.display_name||"").trim();
-  if(fromMeta)return fromMeta;
-  return prettyFromEmail(user?.email)||fallback;
-};
+// Placeholder values a DB default/trigger used to write into display_name
+// (the map was greeting people "Good afternoon, AI"). Treated as "no name".
+const PLACEHOLDER_NAMES = new Set(["ai","aifluent","ai fluent","lumicamp","learner","explorer","climber","user","null","undefined"]);
+const realName = (v) => {const t=String(v||"").trim();return t&&!PLACEHOLDER_NAMES.has(t.toLowerCase())?t:""};
+const getDisplayName = (profile,user,fallback="there") =>
+  realName(profile?.display_name) || realName(user?.user_metadata?.display_name) || prettyFromEmail(user?.email) || fallback;
 const getFirstName = (profile,user,fallback) => getDisplayName(profile,user,fallback).split(" ")[0]||fallback;
-const hasDisplayName = (profile,user) => !!(String(profile?.display_name||"").trim()||String(user?.user_metadata?.display_name||"").trim());
+const hasDisplayName = (profile,user) => !!(realName(profile?.display_name)||realName(user?.user_metadata?.display_name));
 
 // One-field step right after sign-in: Lumi asks, the guess is pre-filled, one tap
 // to continue. Only non-empty is required — no first/last split, no validation.
