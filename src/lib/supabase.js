@@ -42,15 +42,28 @@ export const db = {
     return byLegacyId.data || {};
   },
   async saveDisplayName(uid, displayName) {
-    const payload = { user_id: uid, display_name: displayName.trim() };
+    const clean = String(displayName || "").trim().slice(0, 40);
+    const payload = { user_id: uid, display_name: clean };
     const { error } = await supabase.from("profiles").upsert(payload, { onConflict: "user_id" });
-    return { error };
+    if (error) return { error };
+    // Also store it in user_metadata: it rides along in the JWT, so greetings
+    // render instantly on load without waiting on a profiles query.
+    try { await supabase.auth.updateUser({ data: { display_name: clean } }); } catch (e) { console.warn("metadata update failed:", e); }
+    return { error: null };
   },
   async updateProfile(uid, updates) {
-    const byUserId = await supabase.from("profiles").update(updates).eq("user_id", uid);
-    if (byUserId.error) {
-      await supabase.from("profiles").update(updates).eq("id", uid);
-    }
+    // Upsert so brand-new users (no profiles row yet) get one created instead of
+    // a silent 0-row UPDATE — that was leaving onboarded=false and trapping users
+    // on the "Charting your route" screen.
+    const up = await supabase
+      .from("profiles")
+      .upsert({ user_id: uid, ...updates }, { onConflict: "user_id" });
+    if (!up.error) return { error: null };
+    // Legacy schema fallback (profiles keyed by id)
+    const byLegacyId = await supabase.from("profiles").update(updates).eq("id", uid);
+    if (!byLegacyId.error) return { error: null };
+    console.warn("updateProfile failed:", up.error?.message, byLegacyId.error?.message);
+    return { error: up.error };
   },
   async getProgress(uid) {
     const { data } = await supabase.from("user_progress").select("*").eq("user_id", uid);

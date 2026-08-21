@@ -735,17 +735,36 @@ const AuthScreen = ({onClose,onSignedIn,headline="Sign in or create your free ac
     </div></div>);
 };
 
-const NamePrompt = ({open,onSave,loading}) => {
-  const [name,setName]=useState("");
+// Display-name cascade: profile row → JWT user_metadata (instant on load) →
+// a prettified email prefix → generic. Never renders a raw email address.
+const prettyFromEmail = (email) => (email||"").split("@")[0].replace(/[._-]+/g," ").trim().replace(/\b\w/g,c=>c.toUpperCase());
+const getDisplayName = (profile,user,fallback="there") => {
+  const fromProfile=String(profile?.display_name||"").trim();
+  if(fromProfile)return fromProfile;
+  const fromMeta=String(user?.user_metadata?.display_name||"").trim();
+  if(fromMeta)return fromMeta;
+  return prettyFromEmail(user?.email)||fallback;
+};
+const getFirstName = (profile,user,fallback) => getDisplayName(profile,user,fallback).split(" ")[0]||fallback;
+const hasDisplayName = (profile,user) => !!(String(profile?.display_name||"").trim()||String(user?.user_metadata?.display_name||"").trim());
+
+// One-field step right after sign-in: Lumi asks, the guess is pre-filled, one tap
+// to continue. Only non-empty is required — no first/last split, no validation.
+const NameStep = ({open,user,onSave,loading}) => {
+  const [name,setName]=useState(()=>prettyFromEmail(user?.email));
   const [err,setErr]=useState("");
+  useEffect(()=>{if(open)setName(prettyFromEmail(user?.email))},[open,user?.email]);
   if(!open)return null;
-  return(<div style={{position:"fixed",inset:0,zIndex:120,background:"rgba(0,0,0,.55)",display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
-    <div style={{width:"100%",maxWidth:420,background:C.bgCard,border:`1px solid ${C.border}`,borderRadius:18,padding:18}}>
-      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}><Lumi size={36} mood="happy" level={1}/><p style={{color:C.text,fontSize:16,fontWeight:700,fontFamily:C.font,margin:0}}>What name should appear on your certificate?</p></div>
-      <p style={{color:C.textDim,fontSize:12,fontFamily:C.font,margin:"0 0 10px"}}>You can change this later in Supabase if needed.</p>
-      <input value={name} onChange={e=>setName(e.target.value)} placeholder="Your display name" onKeyDown={e=>e.key==="Enter"&&name.trim()&&onSave(name.trim(),setErr)} style={{width:"100%",background:"rgba(255,255,255,.04)",borderRadius:12,border:`1.5px solid ${C.border}`,padding:"12px 14px",color:C.text,fontSize:15,fontFamily:C.font,outline:"none"}}/>
+  const clean=name.trim().slice(0,40);
+  const save=()=>{if(!clean||loading)return;onSave(clean,setErr)};
+  return(<div style={{position:"fixed",inset:0,zIndex:120,background:"rgba(0,0,0,.6)",display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
+    <div style={{width:"100%",maxWidth:420,background:C.bgCard,border:`1px solid ${C.border}`,borderRadius:18,padding:22,textAlign:"center"}}>
+      <Lumi size={64} mood="excited" level={1} animate/>
+      <h2 style={{color:C.text,fontSize:22,fontFamily:C.fontDisplay,fontWeight:700,margin:"12px 0 6px"}}>What should Lumi call you?</h2>
+      <p style={{color:C.textMuted,fontSize:13,fontFamily:C.font,margin:"0 0 14px",lineHeight:1.6}}>I took a guess from your email — tap Continue if it's right, or type anything you like.</p>
+      <input value={name} onChange={e=>setName(e.target.value)} maxLength={40} autoFocus placeholder="Your name" onKeyDown={e=>e.key==="Enter"&&save()} style={{width:"100%",background:"rgba(255,255,255,.04)",borderRadius:12,border:`1.5px solid ${C.border}`,padding:"12px 14px",color:C.text,fontSize:16,fontFamily:C.font,outline:"none",textAlign:"center"}}/>
       {err&&<p style={{color:C.red,fontSize:12,fontFamily:C.font,marginTop:8}}>{err}</p>}
-      <div style={{marginTop:12}}><Btn onClick={()=>name.trim()?onSave(name.trim(),setErr):setErr("Please enter a name.")} disabled={loading}>{loading?"Saving...":"Save name"}</Btn></div>
+      <div style={{marginTop:14}}><Btn onClick={save} disabled={loading||!clean}>{loading?"Saving…":"Continue →"}</Btn></div>
     </div>
   </div>);
 };
@@ -862,7 +881,7 @@ const WorldMap = ({user,profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpen
   const pct=Math.round((done.length/6)*100);
   const greet=()=>{const h=new Date().getHours();return h<12?"Good morning":h<17?"Good afternoon":"Good evening"};
   const streak=Streak.getData().current||profile?.current_streak||0;
-  const _rawName = profile?.display_name?.split(" ")[0] || ""; const name = (_rawName && _rawName.length > 1 && _rawName.toLowerCase() !== "ai") ? _rawName : (user?.email?.split("@")[0] || "Climber");
+  const name = getFirstName(profile,user,"Climber");
   const dk=C.mode==="dark";
 
   const nodes=[
@@ -1067,7 +1086,7 @@ const LocView = ({user,locId,uid,progress,onBack,onComplete,profile,onLessonComp
   const [inp,setInp]=useState("");const [sid,setSid]=useState(null);const ref=useRef(null);
   const level=Math.max(1,Math.floor(progress.length/2)+1);
   // Lumi personality context
-  const _rawUser = profile?.display_name?.split(" ")[0] || ""; const userName = (_rawUser && _rawUser.length > 1 && _rawUser.toLowerCase() !== "ai") ? _rawUser : (user?.email?.split("@")[0] || "friend");
+  const userName = getFirstName(profile,user,"friend");
   const userRole=profile?.role||"learner";
   const completedCount=progress.length;
   const streakDays=Streak.getData().current||0;
@@ -1470,7 +1489,7 @@ const ProfileView = ({user,profile,progress,onBack,onSignOut,onToggleTheme,onCha
     {/* Profile header */}
     <div className="fu" style={{display:"flex",flexDirection:"column",alignItems:"center",marginBottom:20,position:"relative",zIndex:1}}>
       <Lumi size={80} mood="excited" level={level} animate/>
-      <p style={{color:C.text,fontSize:22,fontFamily:C.fontDisplay,fontWeight:700,marginTop:8}}>{profile?.display_name||"Explorer"}</p>
+      <p style={{color:C.text,fontSize:22,fontFamily:C.fontDisplay,fontWeight:700,marginTop:8}}>{getDisplayName(profile,user,"Explorer")}</p>
       <p style={{color:C.textDim,fontSize:12,fontFamily:C.font}}>Altitude {level} · {profile?.role||"Learner"}{user?.email?` · ${user.email}`:""}</p>
     </div>
 
@@ -1721,10 +1740,9 @@ export default function Lumicamp(){
     syncProgressFireAndForget(nodeId,lessonId,score);
   },[addOrUpdateLocalProgress,syncProgressFireAndForget]);
 
-  const requireDisplayName=useCallback((p)=>{
-    const hasName=!!p?.display_name&&String(p.display_name).trim().length>0;
-    setShowNamePrompt(!hasName&&!!user?.id);
-  },[user]);
+  const requireDisplayName=useCallback((p,u)=>{
+    setShowNamePrompt(!!u?.id&&!hasDisplayName(p,u));
+  },[]);
 
   const saveDisplayName=useCallback(async(name,setErr)=>{
     if(!user?.id)return;
@@ -1734,6 +1752,7 @@ export default function Lumicamp(){
     if(error){setErr("Could not save your name. Please try again.");return}
     const p=await db.getProfile(user.id);
     setProfile(p||{});
+    try{const s=await db.getSession();if(s?.user)setUser(s.user)}catch{}
     setShowNamePrompt(false);
   },[user]);
 
@@ -1764,8 +1783,8 @@ export default function Lumicamp(){
           try{
             const p=await db.getProfile(s.user.id);
             setProfile(p||{});
-            requireDisplayName(p||{});
-          }catch(e){console.warn("Profile load failed:",e);setProfile({});setShowNamePrompt(true)}
+            requireDisplayName(p||{},s.user);
+          }catch(e){console.warn("Profile load failed:",e);setProfile({});requireDisplayName({},s.user)}
           try{setProgress(await db.getProgress(s.user.id))}catch(e){console.warn("Progress load failed:",e);setProgress([])}
           try{setActiveOrgId(await db.getActiveOrgByUser(s.user.id))}catch(e){setActiveOrgId(null)}
         }
@@ -1774,7 +1793,12 @@ export default function Lumicamp(){
       setLoading(false);
     };
     init();
-    const{data}=db.onAuth(async(ev,s)=>{if(ev==="SIGNED_IN"&&s?.user){setUser(s.user);try{const p=await db.getProfile(s.user.id);setProfile(p||{});requireDisplayName(p||{})}catch(e){setProfile({});setShowNamePrompt(true)}try{setProgress(await db.getProgress(s.user.id))}catch(e){setProgress(getLocalProgress())}try{setActiveOrgId(await db.getActiveOrgByUser(s.user.id))}catch(e){setActiveOrgId(null)}setShowAuthPrompt(false);flushSyncQueue()}else if(ev==="SIGNED_OUT"){setUser(null);setProfile(null);setActiveOrgId(null);setProgress(getLocalProgress())}});
+    const{data}=db.onAuth(async(ev,s)=>{
+      // Clear the sign-in modal the moment ANY session arrives (OTP, magic link,
+      // restored session, OAuth) — otherwise the stale flag re-opens it on the
+      // next screen now that the overlay renders everywhere.
+      if(s?.user)setShowAuthPrompt(false);
+      if(ev==="SIGNED_IN"&&s?.user){setUser(s.user);try{const p=await db.getProfile(s.user.id);setProfile(p||{});requireDisplayName(p||{},s.user)}catch(e){setProfile({});requireDisplayName({},s.user)}try{setProgress(await db.getProgress(s.user.id))}catch(e){setProgress(getLocalProgress())}try{setActiveOrgId(await db.getActiveOrgByUser(s.user.id))}catch(e){setActiveOrgId(null)}setShowAuthPrompt(false);flushSyncQueue()}else if(ev==="SIGNED_OUT"){setUser(null);setProfile(null);setActiveOrgId(null);setProgress(getLocalProgress())}});
     return()=>{clearTimeout(timeout);data?.subscription?.unsubscribe?.()};
   },[flushSyncQueue,requireDisplayName]);
 
@@ -1809,7 +1833,11 @@ export default function Lumicamp(){
 
   // Auth modal is rendered on EVERY screen (previously only on the map + joinOrg
   // screens, so tapping "Sign in" from the profile page appeared to do nothing).
+<<<<<<< Updated upstream
   const authOverlay=showAuthPrompt&&<div style={{position:"fixed",inset:0,zIndex:110,background:"rgba(0,0,0,.55)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+=======
+  const authOverlay=showAuthPrompt&&!user&&<div style={{position:"fixed",inset:0,zIndex:110,background:"rgba(0,0,0,.55)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+>>>>>>> Stashed changes
     <AuthScreen onClose={()=>setShowAuthPrompt(false)}
       headline={screen==="joinOrg"?"Sign in to join your team":"Sign in or create your free account"}
       subhead={screen==="joinOrg"?"Use your invited email — we'll send a 6-digit code.":"Enter your email and we'll send a 6-digit code (or a sign-in link). No password needed."}/>
@@ -1835,8 +1863,15 @@ export default function Lumicamp(){
     onOpenProfile={()=>setScreen("profile")}
     onSignIn={()=>setShowAuthPrompt(true)}
   />
+<<<<<<< Updated upstream
     <NamePrompt open={showNamePrompt&&!showAuthPrompt} onSave={saveDisplayName} loading={savingName}/>
   </>;
 
   return<><style>{getCss()}</style>{content}{authOverlay}</>;
+=======
+  </>;
+
+  const nameStep=<NameStep open={!!user&&showNamePrompt&&!showAuthPrompt} user={user} onSave={saveDisplayName} loading={savingName}/>;
+  return<><style>{getCss()}</style>{content}{nameStep}{authOverlay}</>;
+>>>>>>> Stashed changes
 }
