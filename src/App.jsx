@@ -673,7 +673,10 @@ const Btn = ({children,onClick,v="gold",disabled,style:sx={}}) => {
 };
 const Dots = () => {const[f,sF]=useState(0);useEffect(()=>{const i=setInterval(()=>sF(n=>(n+1)%4),400);return()=>clearInterval(i)},[]);return<div style={{display:"flex",gap:5,padding:"10px 0"}}>{[0,1,2].map(i=><div key={i} style={{width:6,height:6,borderRadius:"50%",background:C.gold,opacity:f>i?.8:.2,transition:"opacity .3s"}}/>)}</div>};
 const Bub = ({from,text,typing}) => <div className="fu" style={{display:"flex",justifyContent:from==="user"?"flex-end":"flex-start",gap:8,marginBottom:12}}>{from==="lumi"&&!typing&&<div style={{marginTop:4,flexShrink:0}}><Lumi size={26}/></div>}<div style={{maxWidth:"82%",padding:"11px 15px",borderRadius:from==="user"?"16px 16px 4px 16px":"16px 16px 16px 4px",background:from==="user"?"rgba(58,168,160,.12)":"rgba(212,165,90,.08)",border:`1px solid ${from==="user"?"rgba(58,168,160,.2)":C.borderGold}`}}>{typing?<Dots/>:<p style={{color:C.text,fontSize:14,lineHeight:1.7,fontFamily:C.font,margin:0}}>{from==="lumi"?<Md text={text}/>:text}</p>}</div></div>;
-const Stars = () => <div style={{position:"absolute",inset:0,overflow:"hidden",pointerEvents:"none"}}>{Array.from({length:50},(_,i)=><div key={i} style={{position:"absolute",left:`${Math.random()*100}%`,top:`${Math.random()*50}%`,width:Math.random()>.8?2.5:1.5,height:Math.random()>.8?2.5:1.5,background:"#fff",borderRadius:"50%",opacity:.1+Math.random()*.3,animation:`twinkle ${3+Math.random()*4}s ease-in-out infinite`,animationDelay:`${Math.random()*4}s`}}/>)}</div>;
+// Star positions are generated once at module load. Generating them inside the
+// render made the whole sky jump on every re-render ("the screen shakes").
+const STAR_FIELD = Array.from({length:50},()=>({left:`${Math.random()*100}%`,top:`${Math.random()*50}%`,size:Math.random()>.8?2.5:1.5,opacity:.1+Math.random()*.3,dur:`${3+Math.random()*4}s`,delay:`${Math.random()*4}s`}));
+const Stars = () => <div style={{position:"absolute",inset:0,overflow:"hidden",pointerEvents:"none"}}>{STAR_FIELD.map((st,i)=><div key={i} style={{position:"absolute",left:st.left,top:st.top,width:st.size,height:st.size,background:"#fff",borderRadius:"50%",opacity:st.opacity,animation:`twinkle ${st.dur} ease-in-out infinite`,animationDelay:st.delay}}/>)}</div>;
 
 // Confetti component
 const Confetti = () => <div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:100}}>{Array.from({length:20},(_,i)=><div key={i} style={{position:"absolute",left:`${10+Math.random()*80}%`,top:"60%",width:8,height:8,borderRadius:Math.random()>.5?"50%":"2px",background:["#D4A55A","#4ABA78","#3AA8A0","#E88060","#4A90D9","#7A6BBF"][i%6],animation:`confetti ${1+Math.random()}s ease-out forwards`,animationDelay:`${Math.random()*0.5}s`}}/>)}</div>;
@@ -1772,6 +1775,9 @@ export default function Lumicamp(){
     }
   },[]);
 
+  const flushRef=useRef(flushSyncQueue);
+  useEffect(()=>{flushRef.current=flushSyncQueue},[flushSyncQueue]);
+
   useEffect(()=>{
     // Failsafe: if loading takes more than 5 seconds, force it to stop
     const timeout=setTimeout(()=>{setLoading(false);console.warn("Loading timeout — forced to app screen")},5000);
@@ -1798,9 +1804,10 @@ export default function Lumicamp(){
       // restored session, OAuth) — otherwise the stale flag re-opens it on the
       // next screen now that the overlay renders everywhere.
       if(s?.user)setShowAuthPrompt(false);
-      if(ev==="SIGNED_IN"&&s?.user){setUser(s.user);try{const p=await db.getProfile(s.user.id);setProfile(p||{});requireDisplayName(p||{},s.user)}catch(e){setProfile({});requireDisplayName({},s.user)}try{setProgress(await db.getProgress(s.user.id))}catch(e){setProgress(getLocalProgress())}try{setActiveOrgId(await db.getActiveOrgByUser(s.user.id))}catch(e){setActiveOrgId(null)}setShowAuthPrompt(false);flushSyncQueue()}else if(ev==="SIGNED_OUT"){setUser(null);setProfile(null);setActiveOrgId(null);setProgress(getLocalProgress())}});
+      if(ev==="SIGNED_IN"&&s?.user){setUser(s.user);try{const p=await db.getProfile(s.user.id);setProfile(p||{});requireDisplayName(p||{},s.user)}catch(e){setProfile({});requireDisplayName({},s.user)}try{setProgress(await db.getProgress(s.user.id))}catch(e){setProgress(getLocalProgress())}try{setActiveOrgId(await db.getActiveOrgByUser(s.user.id))}catch(e){setActiveOrgId(null)}setShowAuthPrompt(false);flushRef.current()}else if(ev==="SIGNED_OUT"){setUser(null);setProfile(null);setActiveOrgId(null);setProgress(getLocalProgress())}});
     return()=>{clearTimeout(timeout);data?.subscription?.unsubscribe?.()};
-  },[flushSyncQueue,requireDisplayName]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[]);
 
   useEffect(()=>{
     const onFocus=()=>{flushSyncQueue()};
@@ -1833,11 +1840,7 @@ export default function Lumicamp(){
 
   // Auth modal is rendered on EVERY screen (previously only on the map + joinOrg
   // screens, so tapping "Sign in" from the profile page appeared to do nothing).
-<<<<<<< Updated upstream
-  const authOverlay=showAuthPrompt&&<div style={{position:"fixed",inset:0,zIndex:110,background:"rgba(0,0,0,.55)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
-=======
   const authOverlay=showAuthPrompt&&!user&&<div style={{position:"fixed",inset:0,zIndex:110,background:"rgba(0,0,0,.55)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
->>>>>>> Stashed changes
     <AuthScreen onClose={()=>setShowAuthPrompt(false)}
       headline={screen==="joinOrg"?"Sign in to join your team":"Sign in or create your free account"}
       subhead={screen==="joinOrg"?"Use your invited email — we'll send a 6-digit code.":"Enter your email and we'll send a 6-digit code (or a sign-in link). No password needed."}/>
@@ -1863,15 +1866,8 @@ export default function Lumicamp(){
     onOpenProfile={()=>setScreen("profile")}
     onSignIn={()=>setShowAuthPrompt(true)}
   />
-<<<<<<< Updated upstream
-    <NamePrompt open={showNamePrompt&&!showAuthPrompt} onSave={saveDisplayName} loading={savingName}/>
-  </>;
-
-  return<><style>{getCss()}</style>{content}{authOverlay}</>;
-=======
   </>;
 
   const nameStep=<NameStep open={!!user&&showNamePrompt&&!showAuthPrompt} user={user} onSave={saveDisplayName} loading={savingName}/>;
   return<><style>{getCss()}</style>{content}{nameStep}{authOverlay}</>;
->>>>>>> Stashed changes
 }
