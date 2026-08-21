@@ -743,8 +743,8 @@ const AuthScreen = ({onClose,onSignedIn,headline="Sign in or create your free ac
 const prettyFromEmail = (email) => (email||"").split("@")[0].replace(/[._-]+/g," ").trim().replace(/\b\w/g,c=>c.toUpperCase());
 // Placeholder values a DB default/trigger used to write into display_name
 // (the map was greeting people "Good afternoon, AI"). Treated as "no name".
-const PLACEHOLDER_NAMES = new Set(["ai","aifluent","ai fluent","lumicamp","learner","explorer","climber","user","null","undefined"]);
-const realName = (v) => {const t=String(v||"").trim();return t&&!PLACEHOLDER_NAMES.has(t.toLowerCase())?t:""};
+const PLACEHOLDER_NAMES = new Set(["ai","aifluent","ai fluent","ai explorer","ai learner","ai climber","lumicamp","learner","explorer","climber","user","null","undefined"]);
+const realName = (v) => {const t=String(v||"").trim();return t&&!PLACEHOLDER_NAMES.has(t.toLowerCase().replace(/\s+/g," "))?t:""};
 const getDisplayName = (profile,user,fallback="there") =>
   realName(profile?.display_name) || realName(user?.user_metadata?.display_name) || prettyFromEmail(user?.email) || fallback;
 const getFirstName = (profile,user,fallback) => getDisplayName(profile,user,fallback).split(" ")[0]||fallback;

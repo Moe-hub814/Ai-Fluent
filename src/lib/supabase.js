@@ -41,10 +41,20 @@ export const db = {
     const byLegacyId = await supabase.from("profiles").select("*").eq("id", uid).maybeSingle();
     return byLegacyId.data || {};
   },
+  // profiles is keyed by `id` (= auth user id) in the live schema. Older code
+  // assumed a `user_id` column that does not exist, so every upsert silently
+  // failed. Try `id` first and fall back to `user_id` for any future schema.
+  async _upsertProfile(uid, updates) {
+    const byId = await supabase.from("profiles").upsert({ id: uid, ...updates }, { onConflict: "id" });
+    if (!byId.error) return { error: null };
+    const byUserId = await supabase.from("profiles").upsert({ user_id: uid, ...updates }, { onConflict: "user_id" });
+    if (!byUserId.error) return { error: null };
+    console.warn("profile upsert failed:", byId.error?.message, byUserId.error?.message);
+    return { error: byId.error };
+  },
   async saveDisplayName(uid, displayName) {
     const clean = String(displayName || "").trim().slice(0, 40);
-    const payload = { user_id: uid, display_name: clean };
-    const { error } = await supabase.from("profiles").upsert(payload, { onConflict: "user_id" });
+    const { error } = await this._upsertProfile(uid, { display_name: clean });
     if (error) return { error };
     // Also store it in user_metadata: it rides along in the JWT, so greetings
     // render instantly on load without waiting on a profiles query.
@@ -52,18 +62,7 @@ export const db = {
     return { error: null };
   },
   async updateProfile(uid, updates) {
-    // Upsert so brand-new users (no profiles row yet) get one created instead of
-    // a silent 0-row UPDATE — that was leaving onboarded=false and trapping users
-    // on the "Charting your route" screen.
-    const up = await supabase
-      .from("profiles")
-      .upsert({ user_id: uid, ...updates }, { onConflict: "user_id" });
-    if (!up.error) return { error: null };
-    // Legacy schema fallback (profiles keyed by id)
-    const byLegacyId = await supabase.from("profiles").update(updates).eq("id", uid);
-    if (!byLegacyId.error) return { error: null };
-    console.warn("updateProfile failed:", up.error?.message, byLegacyId.error?.message);
-    return { error: up.error };
+    return this._upsertProfile(uid, updates);
   },
   async getProgress(uid) {
     const { data } = await supabase.from("user_progress").select("*").eq("user_id", uid);
