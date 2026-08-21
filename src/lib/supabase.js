@@ -41,16 +41,20 @@ export const db = {
     const byLegacyId = await supabase.from("profiles").select("*").eq("id", uid).maybeSingle();
     return byLegacyId.data || {};
   },
-  // profiles is keyed by `id` (= auth user id) in the live schema. Older code
-  // assumed a `user_id` column that does not exist, so every upsert silently
-  // failed. Try `id` first and fall back to `user_id` for any future schema.
+  // profiles is keyed by `id` (= auth user id) in the live schema, and RLS
+  // allows users to UPDATE their own row but not INSERT (an upsert counts as an
+  // insert and is rejected with 42501). The signup trigger already creates the
+  // row, so: UPDATE by id first; only if no row exists, try an insert.
   async _upsertProfile(uid, updates) {
-    const byId = await supabase.from("profiles").upsert({ id: uid, ...updates }, { onConflict: "id" });
-    if (!byId.error) return { error: null };
+    const upd = await supabase.from("profiles").update(updates).eq("id", uid).select("id");
+    if (!upd.error && upd.data && upd.data.length) return { error: null };
+    const ins = await supabase.from("profiles").insert({ id: uid, ...updates });
+    if (!ins.error) return { error: null };
+    // Legacy/alternate schema keyed by user_id
     const byUserId = await supabase.from("profiles").upsert({ user_id: uid, ...updates }, { onConflict: "user_id" });
     if (!byUserId.error) return { error: null };
-    console.warn("profile upsert failed:", byId.error?.message, byUserId.error?.message);
-    return { error: byId.error };
+    console.warn("profile write failed:", upd.error?.message, ins.error?.message, byUserId.error?.message);
+    return { error: ins.error || upd.error || byUserId.error };
   },
   async saveDisplayName(uid, displayName) {
     const clean = String(displayName || "").trim().slice(0, 40);
