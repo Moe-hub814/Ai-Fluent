@@ -60,6 +60,29 @@ const MAX_SYNC_QUEUE=200;
 
 const getLocalProgress=()=>{try{return JSON.parse(localStorage.getItem(LOCAL_PROGRESS_KEY)||"[]")}catch{return[]}};
 const setLocalProgress=(rows)=>{try{localStorage.setItem(LOCAL_PROGRESS_KEY,JSON.stringify(rows))}catch(e){console.warn("Local progress save failed",e)}};
+// Normalise a progress row from any source (DB, local cache, old sync queue) so
+// unlock checks (`path_id` + numeric `lesson_index`) always work.
+const normProgress=(p)=>({...p,path_id:p.path_id??p.node_id,lesson_index:Number(p.lesson_index??p.lesson_id)});
+// Union of the DB copy and what this device already knows. A completion that
+// exists locally but hasn't reached Supabase yet (offline, slow, failed write)
+// must never disappear from the UI — that is what locked lesson 2 for testers.
+// Later `completed_at` wins per (path, lesson); higher score is kept.
+const mergeProgress=(...lists)=>{
+  const byKey=new Map();
+  for(const list of lists){for(const raw of list||[]){
+    if(!raw)continue;const p=normProgress(raw);if(p.path_id==null||Number.isNaN(p.lesson_index))continue;
+    const k=`${p.path_id}:${p.lesson_index}`;const prev=byKey.get(k);
+    if(!prev){byKey.set(k,p);continue}
+    const newer=(p.completed_at||"")>=(prev.completed_at||"")?p:prev;
+    byKey.set(k,{...prev,...newer,score:Math.max(prev.score??0,p.score??0)});
+  }}
+  return[...byKey.values()];
+};
+// Pull from Supabase and merge with the local cache; on any failure keep local.
+const loadProgress=async(uid,current)=>{
+  let remote=[];try{remote=await db.getProgress(uid)}catch(e){console.warn("Progress load failed:",e)}
+  const merged=mergeProgress(getLocalProgress(),current,remote);setLocalProgress(merged);return merged;
+};
 const getSyncQueue=()=>{try{return JSON.parse(localStorage.getItem(SYNC_QUEUE_KEY)||"[]")}catch{return[]}};
 const setSyncQueue=(rows)=>{try{localStorage.setItem(SYNC_QUEUE_KEY,JSON.stringify(rows))}catch(e){console.warn("Sync queue save failed",e)}};
 
@@ -219,8 +242,8 @@ const DAILY_CHALLENGES = [
 // ACHIEVEMENTS
 const ACHIEVEMENTS = [
   {id:"first_lesson",name:"First Steps",desc:"Complete your first lesson",icon:"👣",condition:(p)=>p.length>=1},
-  {id:"streak_3",name:"Consistent Climber",desc:"Reach a 3-day streak",icon:"🔥",condition:(p,prof)=>(prof?.current_streak||0)>=3},
-  {id:"streak_7",name:"Week Warrior",desc:"Reach a 7-day streak",icon:"⚡",condition:(p,prof)=>(prof?.current_streak||0)>=7},
+  {id:"streak_3",name:"Consistent Climber",desc:"Reach a 3-day streak",icon:"🔥",condition:(p,prof)=>Math.max(prof?.current_streak||0,Streak.getData().current||0)>=3},
+  {id:"streak_7",name:"Week Warrior",desc:"Reach a 7-day streak",icon:"⚡",condition:(p,prof)=>Math.max(prof?.current_streak||0,Streak.getData().current||0)>=7},
   {id:"five_lessons",name:"Trailblazer",desc:"Complete 5 lessons",icon:"🥾",condition:(p)=>p.length>=5},
   {id:"first_chat",name:"Asked Lumi",desc:"Have your first tutor chat",icon:"💬",condition:(p,prof)=>(prof?.total_tutor_sessions||0)>=1},
   {id:"all_paths",name:"Explorer",desc:"Try lessons from 3 different paths",icon:"🗺️",condition:(p)=>[...new Set(p.map(x=>x.path_id))].length>=3},
@@ -434,6 +457,29 @@ const Streak = {
   },
 
   getData() { return this._get() },
+  // Server is the source of truth across devices (record_activity RPC writes
+  // profiles.current_streak / longest_streak / last_active_date). Adopt the
+  // server values when they are ahead of this device's local copy.
+  syncFromServer(profile) {
+    if (!profile) return this._get();
+    const d = this._get();
+    const sc = Number(profile.current_streak || 0), sb = Number(profile.longest_streak || 0);
+    const today = new Date().toISOString().slice(0, 10);
+    const nd = { ...d, best: Math.max(d.best || 0, sb, sc), freezes: d.freezes ?? 1, history: d.history || [] };
+    if (sc > (d.current || 0)) { nd.current = sc; nd.lastActive = profile.last_active_date || d.lastActive; }
+    if (profile.last_active_date === today && !nd.history.includes(today)) nd.history = [...nd.history, today].slice(-60);
+    if (profile.last_active_date === today) nd.todayDone = true;
+    this._set(nd);
+    return nd;
+  },
+  // Apply the RPC result ({streak, date}) so the UI matches the server immediately.
+  applyServer(res) {
+    if (!res || typeof res.streak !== "number") return this._get();
+    const d = this._get();
+    const nd = { ...d, current: Math.max(d.current || 0, res.streak), best: Math.max(d.best || 0, res.streak) };
+    this._set(nd);
+    return nd;
+  },
   addFreeze() { const d = this._get(); d.freezes = Math.min((d.freezes || 0) + 1, 3); this._set(d); return d },
 };
 
@@ -882,7 +928,7 @@ const WorldMap = ({user,profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpen
   const status=(loc)=>{if(loc.id==="master")return done.length>=6?"current":"locked";const idx=LOCS.findIndex(l=>l.id===loc.id);if(done.includes(loc.id))return"done";if(idx===0)return"current";const prev=LOCS[idx-1];if(prev&&done.includes(prev.id))return"current";return"locked"};
   const pct=Math.round((done.length/6)*100);
   const greet=()=>{const h=new Date().getHours();return h<12?"Good morning":h<17?"Good afternoon":"Good evening"};
-  const streak=Streak.getData().current||profile?.current_streak||0;
+  const streak=Math.max(Streak.getData().current||0,profile?.current_streak||0);
   const name = getFirstName(profile,user,"Climber");
   const dk=C.mode==="dark";
 
@@ -1079,7 +1125,7 @@ const getAltitude=(pct)=>{
   return{label:a.base.l,icon:"△",color:"#C87858",bg:"rgba(200,120,88,.08)",border:"rgba(200,120,88,.18)",msg:a.base.m};
 };
 
-const LocView = ({user,locId,uid,progress,onBack,onComplete,profile,onLessonComplete}) => {
+const LocView = ({user,locId,uid,progress,onBack,onComplete,profile,onLessonComplete,onActivity}) => {
   const loc=LOCS.find(l=>l.id===locId)||LOCS[0];
   const lessons=LESSONS[locId]||[];
   const [lessonIdx,setLessonIdx]=useState(null);
@@ -1143,7 +1189,9 @@ const LocView = ({user,locId,uid,progress,onBack,onComplete,profile,onLessonComp
   // Store scores per lesson: { "basics-0": 85, "writing-1": 70 }
   const [lessonScores,setLessonScores]=useState(()=>{try{return JSON.parse(localStorage.getItem("lumicamp_scores")||"{}")}catch{return{}}});
   const saveScore=(pathId,li,pct)=>{const k=`${pathId}-${li}`;const ns={...lessonScores,[k]:Math.max(pct,lessonScores[k]||0)};setLessonScores(ns);localStorage.setItem("lumicamp_scores",JSON.stringify(ns))};
-  const getScore=(pathId,li)=>lessonScores[`${pathId}-${li}`]||null;
+  // Best % for a lesson = max(local cache, score persisted in user_progress).
+  // The DB copy is what makes ratings survive a new device / cleared browser.
+  const getScore=(pathId,li)=>{const local=lessonScores[`${pathId}-${li}`]||0;const remote=(progress||[]).find(p=>p.path_id===pathId&&Number(p.lesson_index)===li)?.score||0;const v=Math.max(local,remote);return v||null};
 
   useEffect(()=>{ref.current?.scrollTo(0,ref.current.scrollHeight)},[msgs,typing]);
 
@@ -1152,7 +1200,9 @@ const LocView = ({user,locId,uid,progress,onBack,onComplete,profile,onLessonComp
   const isLessonDone=(idx)=>completedInPath.includes(idx);
   const isLessonUnlocked=(idx)=>idx===0||completedInPath.includes(idx-1);
 
-  const ask=async(q)=>{setMsgs(m=>[...m,{from:"user",text:q}]);setTyping(true);
+  const ask=async(q)=>{
+    if(uid&&!msgs.some(m=>m.from==="user")){db.bumpTutorSessions(uid).then(()=>onActivity?.()).catch(()=>{});Streak.recordActivity();db.recordActivity(uid,"chat").then(({data})=>Streak.applyServer(data))}
+    setMsgs(m=>[...m,{from:"user",text:q}]);setTyping(true);
     try{const r=await db.callClaude({feature:"tutor",system:lumiPersonality,messages:[...msgs.map(m=>({role:m.from==="user"?"user":"assistant",content:m.text})),{role:"user",content:q}],session_id:sid,context_type:"tutor",context_id:locId,context_title:lesson?.title});
       setSid(r.session_id||sid);setTyping(false);setMsgs(m=>[...m,{from:"lumi",text:r.text}]);
     }catch(e){setTyping(false);setMsgs(m=>[...m,{from:"lumi",text:"Hmm, I lost my connection for a moment. Could you try asking that again? 🌟"}])}};
@@ -1334,7 +1384,7 @@ const LocView = ({user,locId,uid,progress,onBack,onComplete,profile,onLessonComp
 };
 
 // LIVE NEWS - fetches real AI news via Claude web search
-const NewsView = ({uid,onBack}) => {
+const NewsView = ({uid,onBack,onActivity}) => {
   const [articles,setArticles]=useState([]);const [loading,setLoading]=useState(true);const [open,setOpen]=useState(null);
   const [chat,setChat]=useState(false);const [msgs,setMsgs]=useState([]);const [typing,setTyping]=useState(false);
   const [inp,setInp]=useState("");const [sid,setSid]=useState(null);const ref=useRef(null);
@@ -1363,7 +1413,9 @@ const NewsView = ({uid,onBack}) => {
 
   const art=open!==null?articles[open]:null;
 
-  const ask=async(q)=>{setMsgs(m=>[...m,{from:"user",text:q}]);setTyping(true);
+  const ask=async(q)=>{
+    if(uid&&!msgs.some(m=>m.from==="user")){db.bumpTutorSessions(uid).then(()=>onActivity?.()).catch(()=>{});Streak.recordActivity();db.recordActivity(uid,"chat").then(({data})=>Streak.applyServer(data))}
+    setMsgs(m=>[...m,{from:"user",text:q}]);setTyping(true);
     try{const r=await db.callClaude({feature:"news_chat",system:`You are Lumi, explaining this news story: "${art.title}". Summary: ${art.summary}. Explain simply. Under 150 words.`,messages:[...msgs.map(m=>({role:m.from==="user"?"user":"assistant",content:m.text})),{role:"user",content:q}],session_id:sid,context_type:"news",context_id:String(open),context_title:art.title});
       setSid(r.session_id||sid);setTyping(false);setMsgs(m=>[...m,{from:"lumi",text:r.text}]);
     }catch{setTyping(false);setMsgs(m=>[...m,{from:"lumi",text:"Connection issue — try again."}])}};
@@ -1403,10 +1455,12 @@ const NewsView = ({uid,onBack}) => {
 };
 
 // DAILY CHALLENGE
-const ChallengeView = ({uid,onBack}) => {
+const ChallengeView = ({uid,onBack,onActivity}) => {
   const today=new Date();const dayIdx=today.getDate()%DAILY_CHALLENGES.length;
   const challenge=DAILY_CHALLENGES[dayIdx];
-  const [response,setResponse]=useState("");const [feedback,setFeedback]=useState("");const [submitted,setSubmitted]=useState(false);const [grading,setGrading]=useState(false);const [showConfetti,setShowConfetti]=useState(false);
+  const dayKey=`lumicamp_challenge_${today.toISOString().slice(0,10)}`;
+  const saved=(()=>{try{return JSON.parse(localStorage.getItem(dayKey)||"null")}catch{return null}})();
+  const [response,setResponse]=useState(saved?.response||"");const [feedback,setFeedback]=useState(saved?.feedback||"");const [submitted,setSubmitted]=useState(!!saved);const [grading,setGrading]=useState(false);const [showConfetti,setShowConfetti]=useState(false);
 
   const submit=async()=>{
     setGrading(true);
@@ -1414,7 +1468,11 @@ const ChallengeView = ({uid,onBack}) => {
       setFeedback(r.text);setShowConfetti(true);
     }catch{setFeedback("Great effort! Keep practicing daily and you'll build strong AI skills.")}
     setGrading(false);setSubmitted(true);
+    // The challenge copy promises "keep your streak alive" — actually do it.
+    Streak.recordActivity();
+    if(uid)db.recordActivity(uid,"challenge").then(({data})=>{Streak.applyServer(data);onActivity?.()});
   };
+  useEffect(()=>{if(submitted&&feedback){try{localStorage.setItem(dayKey,JSON.stringify({response,feedback}))}catch{}}},[submitted,feedback]);
 
   return(<div style={{height:"100vh",overflowY:"auto",background:`linear-gradient(180deg,${C.bgDark},${C.bgCard})`,padding:"14px 20px 40px"}}>
     {showConfetti&&<Confetti/>}
@@ -1478,11 +1536,11 @@ const ToolsView = ({uid,onBack}) => {
 const ProfileView = ({user,profile,progress,onBack,onSignOut,onToggleTheme,onChangeLang,onSignIn}) => {
   const level=Math.max(1,Math.floor(progress.length/2)+1);
   const donePaths=[...new Set(progress.map(p=>p.path_id))];
-  const scores=(() => {try{return JSON.parse(localStorage.getItem("lumicamp_scores")||"{}")}catch{return{}}})();
+  const scores=(() => {const local=(()=>{try{return JSON.parse(localStorage.getItem("lumicamp_scores")||"{}")}catch{return{}}})();for(const p of progress||[]){if(p.score){const k=`${p.path_id}-${p.lesson_index}`;local[k]=Math.max(local[k]||0,p.score)}}return local})();
   const summitCount=Object.values(scores).filter(s=>s>=90).length;
   const ridgeCount=Object.values(scores).filter(s=>s>=70&&s<90).length;
   const totalScored=Object.keys(scores).length;
-  const streakData=Streak.getData();
+  const streakData={...Streak.getData(),current:Math.max(Streak.getData().current||0,profile?.current_streak||0),best:Math.max(Streak.getData().best||0,profile?.longest_streak||0)};
   const [showShare,setShowShare]=useState(false);
 
   return(<div style={{height:"100vh",overflowY:"auto",background:`linear-gradient(180deg,${C.skyTop},${C.bgDark})`,padding:"14px 20px 40px",position:"relative"}}><Stars/>
@@ -1690,7 +1748,7 @@ const Tutorial = ({onComplete}) => {
 
 // MAIN APP
 export default function Lumicamp(){
-  const [loading,setLoading]=useState(true);const [user,setUser]=useState(null);const [profile,setProfile]=useState(null);const [progress,setProgress]=useState(()=>getLocalProgress());
+  const [loading,setLoading]=useState(true);const [user,setUser]=useState(null);const [profile,setProfile]=useState(null);const [progress,setProgress]=useState(()=>mergeProgress(getLocalProgress()));
   const [screen,setScreen]=useState("map");const [activeLoc,setActiveLoc]=useState(null);const [routeToken,setRouteToken]=useState("");
   const [showTutorial,setShowTutorial]=useState(()=>!localStorage.getItem("lumicamp_tutorial_seen"));
   const [showAuthPrompt,setShowAuthPrompt]=useState(false);
@@ -1698,9 +1756,20 @@ export default function Lumicamp(){
   const [savingName,setSavingName]=useState(false);
   const [activeOrgId,setActiveOrgId]=useState(null);
   const [theme,setThemeState]=useState(()=>getTheme());
-  const toggleTheme=()=>{const nt=theme==="dark"?"light":"dark";setTheme(nt);setThemeState(nt);C={...THEMES[nt]}};
+  const toggleTheme=()=>{const nt=theme==="dark"?"light":"dark";setTheme(nt);setThemeState(nt);C={...THEMES[nt]};if(user?.id)db.savePrefs(user.id,{theme:nt})};
   const [lang,setLangState]=useState(()=>getLang());
-  const changeLang=(l)=>{setLang(l);setLangState(l);T={...UI[l]}};
+  const changeLang=(l)=>{setLang(l);setLangState(l);T={...UI[l]};if(user?.id)db.savePrefs(user.id,{language:l})};
+  // On a fresh device nothing is in localStorage yet — adopt the saved profile
+  // prefs. Never override a choice already made on this device.
+  const applyProfilePrefs=useCallback((p)=>{
+    if(!p)return;
+    try{
+      if(p.language&&UI[p.language]&&!localStorage.getItem("lumicamp_lang")){setLang(p.language);setLangState(p.language);T={...UI[p.language]}}
+      if(p.theme&&THEMES[p.theme]&&!localStorage.getItem("lumicamp_theme")){setTheme(p.theme);setThemeState(p.theme);C={...THEMES[p.theme]}}
+      if(p.tutorial_seen){localStorage.setItem("lumicamp_tutorial_seen","1");setShowTutorial(false)}
+    }catch{}
+    Streak.syncFromServer(p);
+  },[]);
 
   const addOrUpdateLocalProgress=useCallback((nodeId,lessonId,score)=>{
     setProgress(prev=>{
@@ -1726,7 +1795,10 @@ export default function Lumicamp(){
     for(const item of queue){
       const payload={...item,user_id:user.id,org_id:activeOrgId??item.org_id??null};
       const {error}=await db.upsertUserProgress(payload);
-      if(error)pending.push(item);
+      // Keep retrying transient failures (offline, 5xx); drop rows the DB will
+      // never accept (bad shape / unknown column) so the queue can't wedge.
+      const permanent=error&&(error.code==="42703"||error.code==="22P02"||error.code==="23502"||/missing user_id/.test(error.message||""));
+      if(error&&!permanent)pending.push(item);
     }
     setSyncQueue(pending);
   },[user,activeOrgId]);
@@ -1789,8 +1861,9 @@ export default function Lumicamp(){
             const p=await db.getProfile(s.user.id);
             setProfile(p||{});
             requireDisplayName(p||{},s.user);
+            applyProfilePrefs(p);
           }catch(e){console.warn("Profile load failed:",e);setProfile({});requireDisplayName({},s.user)}
-          try{setProgress(await db.getProgress(s.user.id))}catch(e){console.warn("Progress load failed:",e);setProgress([])}
+          setProgress(await loadProgress(s.user.id,getLocalProgress()));
           try{setActiveOrgId(await db.getActiveOrgByUser(s.user.id))}catch(e){setActiveOrgId(null)}
         }
       }catch(e){console.error("Init error:",e)}
@@ -1803,7 +1876,7 @@ export default function Lumicamp(){
       // restored session, OAuth) — otherwise the stale flag re-opens it on the
       // next screen now that the overlay renders everywhere.
       if(s?.user)setShowAuthPrompt(false);
-      if(ev==="SIGNED_IN"&&s?.user){setUser(s.user);try{const p=await db.getProfile(s.user.id);setProfile(p||{});requireDisplayName(p||{},s.user)}catch(e){setProfile({});requireDisplayName({},s.user)}try{setProgress(await db.getProgress(s.user.id))}catch(e){setProgress(getLocalProgress())}try{setActiveOrgId(await db.getActiveOrgByUser(s.user.id))}catch(e){setActiveOrgId(null)}setShowAuthPrompt(false);flushRef.current()}else if(ev==="SIGNED_OUT"){setUser(null);setProfile(null);setActiveOrgId(null);setProgress(getLocalProgress())}});
+      if(ev==="SIGNED_IN"&&s?.user){setUser(s.user);try{const p=await db.getProfile(s.user.id);setProfile(p||{});requireDisplayName(p||{},s.user);applyProfilePrefs(p)}catch(e){setProfile({});requireDisplayName({},s.user)}setProgress(await loadProgress(s.user.id,getLocalProgress()));try{setActiveOrgId(await db.getActiveOrgByUser(s.user.id))}catch(e){setActiveOrgId(null)}setShowAuthPrompt(false);flushRef.current()}else if(ev==="SIGNED_OUT"){setUser(null);setProfile(null);setActiveOrgId(null);setProgress(getLocalProgress())}});
     return()=>{clearTimeout(timeout);data?.subscription?.unsubscribe?.()};
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[]);
@@ -1818,8 +1891,11 @@ export default function Lumicamp(){
 
   const refresh=async()=>{
     if(user){
-      setProfile(await db.getProfile(user.id));
-      setProgress(await db.getProgress(user.id));
+      const p=await db.getProfile(user.id);setProfile(p);Streak.syncFromServer(p);
+      // Merge, don't replace: the just-claimed lesson lives in local state and
+      // may not have reached Supabase yet (fire-and-forget upsert).
+      setProgress(prev=>{const m=mergeProgress(getLocalProgress(),prev);setLocalProgress(m);return m});
+      loadProgress(user.id,getLocalProgress()).then(m=>setProgress(prev=>mergeProgress(prev,m)));
     }
     // Record streak activity when user completes something
     Streak.recordActivity();
@@ -1835,7 +1911,7 @@ export default function Lumicamp(){
   // profile save failed/timed out) so nobody can get stuck in onboarding.
   const locallyOnboarded=(()=>{try{return !!user&&localStorage.getItem(`lumicamp_onboarded_${user.id}`)==="1"}catch{return false}})();
   if(user&&profile&&!profile.onboarded&&!locallyOnboarded)return<><style>{getCss()}</style><Onboarding uid={user.id} onDone={refresh}/></>;
-  if(showTutorial&&user)return<><style>{getCss()}</style><Tutorial onComplete={()=>{localStorage.setItem("lumicamp_tutorial_seen","1");setShowTutorial(false)}}/></>;
+  if(showTutorial&&user)return<><style>{getCss()}</style><Tutorial onComplete={()=>{localStorage.setItem("lumicamp_tutorial_seen","1");setShowTutorial(false);if(user?.id)db.savePrefs(user.id,{tutorial_seen:true})}}/></>;
 
   // Auth modal is rendered on EVERY screen (previously only on the map + joinOrg
   // screens, so tapping "Sign in" from the profile page appeared to do nothing).
@@ -1846,10 +1922,10 @@ export default function Lumicamp(){
   </div>;
 
   let content;
-  if(screen==="location"&&activeLoc)content=<LocView user={user} locId={activeLoc} uid={user?.id} progress={progress} profile={profile} onBack={goMap} onComplete={refresh} onLessonComplete={handleLessonComplete}/>;
-  else if(screen==="news")content=<NewsView uid={user?.id} onBack={goMap}/>;
+  if(screen==="location"&&activeLoc)content=<LocView user={user} locId={activeLoc} uid={user?.id} progress={progress} profile={profile} onBack={goMap} onComplete={refresh} onLessonComplete={handleLessonComplete} onActivity={refresh}/>;
+  else if(screen==="news")content=<NewsView uid={user?.id} onBack={goMap} onActivity={refresh}/>;
   else if(screen==="tools")content=<ToolsView uid={user?.id} onBack={goMap}/>;
-  else if(screen==="challenge")content=<ChallengeView uid={user?.id} onBack={goMap}/>;
+  else if(screen==="challenge")content=<ChallengeView uid={user?.id} onBack={goMap} onActivity={refresh}/>;
   else if(screen==="achievements")content=<AchievementsView profile={profile} progress={progress} onBack={goMap}/>;
   else if(screen==="profile")content=<ProfileView user={user} profile={profile} progress={progress} onBack={goMap} onSignOut={out} onToggleTheme={toggleTheme} onChangeLang={changeLang} onSignIn={()=>setShowAuthPrompt(true)}/>;
   else if(screen==="joinOrg")content=<JoinOrgView token={routeToken} user={user} onClose={goMap} onNeedSignIn={()=>setShowAuthPrompt(true)} onMembershipActivated={async()=>{if(user?.id){setActiveOrgId(await db.getActiveOrgByUser(user.id))}}}/>;

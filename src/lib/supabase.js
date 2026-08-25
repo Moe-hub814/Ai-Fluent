@@ -69,11 +69,12 @@ export const db = {
     return this._upsertProfile(uid, updates);
   },
   async getProgress(uid) {
-    const { data } = await supabase.from("user_progress").select("*").eq("user_id", uid);
+    const { data, error } = await supabase.from("user_progress").select("*").eq("user_id", uid);
+    if (error) throw error; // let callers keep their local copy instead of wiping it
     return (data || []).map((row) => ({
       ...row,
       path_id: row.path_id ?? row.node_id,
-      lesson_index: row.lesson_index ?? row.lesson_id,
+      lesson_index: Number(row.lesson_index ?? row.lesson_id),
     }));
   },
   async completeLesson(uid, pathId, lessonIndex) {
@@ -131,20 +132,69 @@ export const db = {
       .maybeSingle();
     return { data, error };
   },
+  // Live schema of public.user_progress (verified 2026-08-25):
+  //   user_id, path_id (text), lesson_index (int), score, status, completed_at
+  // There is NO node_id / lesson_id / org_id column — writing those fails with
+  // 42703 and the lesson never persists. Accept both naming styles (older
+  // queued rows in localStorage still use node_id/lesson_id) and map them.
   async upsertUserProgress(row) {
-    return supabase
+    const path_id = row.path_id ?? row.node_id;
+    const lesson_index = Number(row.lesson_index ?? row.lesson_id);
+    if (!row.user_id || path_id == null || Number.isNaN(lesson_index)) {
+      return { error: { message: "upsertUserProgress: missing user_id/path_id/lesson_index" } };
+    }
+    const payload = {
+      user_id: row.user_id,
+      path_id,
+      lesson_index,
+      score: row.score ?? 100,
+      status: "completed",
+      completed_at: row.completed_at || new Date().toISOString(),
+    };
+    let { error } = await supabase
       .from("user_progress")
-      .upsert(
-        {
-          user_id: row.user_id,
-          org_id: row.org_id ?? null,
-          node_id: row.node_id,
-          lesson_id: row.lesson_id,
-          score: row.score,
-          completed_at: row.completed_at || new Date().toISOString(),
-        },
-        { onConflict: "user_id,node_id,lesson_id" }
-      );
+      .upsert(payload, { onConflict: "user_id,path_id,lesson_index" });
+    // Verified 2026-08-25: unique index on (user_id,path_id,lesson_index) exists
+    // and RLS allows insert/update (DELETE is blocked — never rely on it).
+    // If the constraint ever disappears (42P10), fall back to update → insert.
+    if (error && error.code === "42P10") {
+      const upd = await supabase.from("user_progress").update(payload)
+        .match({ user_id: payload.user_id, path_id, lesson_index }).select("id");
+      if (!upd.error && upd.data?.length) error = null;
+      else ({ error } = await supabase.from("user_progress").insert(payload));
+    }
+    if (error) { console.warn("Progress save failed:", error); return { error }; }
+    await this.recordActivity(row.user_id, "lesson");
+    return { error: null };
+  },
+  // Server-side streak: record_activity(p_user_id, p_type) → { streak, date }
+  // and updates profiles.current_streak / longest_streak / last_active_date.
+  async recordActivity(uid, type = "activity") {
+    if (!uid) return { data: null, error: { message: "no uid" } };
+    try {
+      const { data, error } = await supabase.rpc("record_activity", { p_user_id: uid, p_type: type });
+      if (error) console.warn("record_activity failed:", error);
+      return { data, error };
+    } catch (e) { console.warn("record_activity failed:", e); return { data: null, error: e }; }
+  },
+  // profiles.total_tutor_sessions — one bump per Lumi conversation.
+  async bumpTutorSessions(uid) {
+    if (!uid) return { error: { message: "no uid" } };
+    const { data } = await supabase.from("profiles").select("total_tutor_sessions").eq("id", uid).maybeSingle();
+    const next = (data?.total_tutor_sessions || 0) + 1;
+    return supabase.from("profiles").update({ total_tutor_sessions: next }).eq("id", uid);
+  },
+  // Cross-device preferences. `language` exists on the live table; `theme` and
+  // `tutorial_seen` come from the 20260825 migration — if it hasn't been run
+  // yet (42703 unknown column) retry with just the columns we know exist.
+  async savePrefs(uid, prefs) {
+    if (!uid) return { error: { message: "no uid" } };
+    const res = await supabase.from("profiles").update(prefs).eq("id", uid);
+    if (res.error?.code === "42703" && "language" in prefs && Object.keys(prefs).length > 1) {
+      return supabase.from("profiles").update({ language: prefs.language }).eq("id", uid);
+    }
+    if (res.error) console.warn("Prefs save failed:", res.error);
+    return res;
   },
   async callClaude(options) {
     // Direct fetch - no auth needed, edge function handles Claude directly
