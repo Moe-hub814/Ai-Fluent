@@ -228,6 +228,20 @@ const LESSONS = {
   ],
 };
 
+// A path counts as complete only when EVERY one of its lessons has been passed
+// (score >= 70 is enforced before a completion row is ever written). Having
+// finished just one lesson used to mark the whole path done and unlock the
+// next location on the map.
+const pathLessonCount=(pathId)=>(LESSONS[pathId]||[]).length;
+const isPathComplete=(progress,pathId)=>{
+  const n=pathLessonCount(pathId);if(!n)return false;
+  const done=new Set((progress||[]).filter(p=>p.path_id===pathId).map(p=>Number(p.lesson_index)));
+  for(let i=0;i<n;i++)if(!done.has(i))return false;
+  return true;
+};
+const completedPaths=(progress)=>Object.keys(LESSONS).filter(id=>isPathComplete(progress,id));
+
+
 // DAILY CHALLENGES
 const DAILY_CHALLENGES = [
   {id:"dc1",title:"Write a Better Prompt",desc:"Improve this vague prompt into a specific one",task:"The prompt 'Write me something about dogs' is too vague. Rewrite it to get a much better result from AI. Be specific about what kind of content, for what audience, and in what format.",category:"prompts"},
@@ -248,7 +262,7 @@ const ACHIEVEMENTS = [
   {id:"first_chat",name:"Asked Lumi",desc:"Have your first tutor chat",icon:"💬",condition:(p,prof)=>(prof?.total_tutor_sessions||0)>=1},
   {id:"all_paths",name:"Explorer",desc:"Try lessons from 3 different paths",icon:"🗺️",condition:(p)=>[...new Set(p.map(x=>x.path_id))].length>=3},
   {id:"ten_lessons",name:"Mountaineer",desc:"Complete 10 lessons",icon:"⛰️",condition:(p)=>p.length>=10},
-  {id:"summit",name:"Summit Reached",desc:"Complete all learning paths",icon:"🏆",condition:(p)=>[...new Set(p.map(x=>x.path_id))].length>=6},
+  {id:"summit",name:"Summit Reached",desc:"Complete all learning paths",icon:"🏆",condition:(p)=>completedPaths(p).length>=6},
 ];
 
 // Custom SVG Icons — Lumicamp branded
@@ -924,7 +938,7 @@ const Onboarding = ({uid,onDone}) => {
 
 // WORLD MAP — Premium mountain climbing experience
 const WorldMap = ({user,profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpenProfile,onOpenChallenge,onOpenAchievements,onToggleTheme,onChangeLang,onSignIn}) => {
-  const level=Math.max(1,Math.floor(progress.length/2)+1);const done=[...new Set(progress.map(p=>p.path_id))];
+  const level=Math.max(1,Math.floor(progress.length/2)+1);const done=completedPaths(progress);
   const status=(loc)=>{if(loc.id==="master")return done.length>=6?"current":"locked";const idx=LOCS.findIndex(l=>l.id===loc.id);if(done.includes(loc.id))return"done";if(idx===0)return"current";const prev=LOCS[idx-1];if(prev&&done.includes(prev.id))return"current";return"locked"};
   const pct=Math.round((done.length/6)*100);
   const greet=()=>{const h=new Date().getHours();return h<12?"Good morning":h<17?"Good afternoon":"Good evening"};
@@ -1535,7 +1549,7 @@ const ToolsView = ({uid,onBack}) => {
 // PROFILE
 const ProfileView = ({user,profile,progress,onBack,onSignOut,onToggleTheme,onChangeLang,onSignIn}) => {
   const level=Math.max(1,Math.floor(progress.length/2)+1);
-  const donePaths=[...new Set(progress.map(p=>p.path_id))];
+  const donePaths=completedPaths(progress);
   const scores=(() => {const local=(()=>{try{return JSON.parse(localStorage.getItem("lumicamp_scores")||"{}")}catch{return{}}})();for(const p of progress||[]){if(p.score){const k=`${p.path_id}-${p.lesson_index}`;local[k]=Math.max(local[k]||0,p.score)}}return local})();
   const summitCount=Object.values(scores).filter(s=>s>=90).length;
   const ridgeCount=Object.values(scores).filter(s=>s>=70&&s<90).length;
