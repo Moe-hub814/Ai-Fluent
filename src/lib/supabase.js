@@ -197,23 +197,57 @@ export const db = {
     return res;
   },
   async callClaude(options) {
-    // Direct fetch - no auth needed, edge function handles Claude directly
+    // The edge function verifies the user's Supabase JWT and applies per-user
+    // daily quotas. Signed-out visitors get a small trial quota per IP so the
+    // demo still works; anything beyond that asks them to create an account.
+    let token = "";
+    try { token = (await supabase.auth.getSession())?.data?.session?.access_token || ""; } catch { token = ""; }
+    const headers = { "Content-Type": "application/json", "apikey": SUPABASE_KEY };
+    if (token) headers.Authorization = `Bearer ${token}`;
     const res = await fetch(`${SUPABASE_URL}/functions/v1/claude-proxy`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": SUPABASE_KEY,
-      },
+      headers,
       body: JSON.stringify(options),
     });
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({ error: "Unknown error" }));
       console.error("Claude proxy error:", res.status, err);
-      throw new Error(err.detail || err.error || `HTTP ${res.status}`);
+      const e = new Error(err.detail || err.error || `HTTP ${res.status}`);
+      e.code = err.code || (res.status === 401 ? "auth_required" : res.status === 429 ? "quota" : "error");
+      e.status = res.status;
+      // Let the app open the sign-in sheet instead of every screen handling 401s.
+      if (e.code === "auth_required") { try { window.dispatchEvent(new CustomEvent("lumicamp:auth-required", { detail: e.message })); } catch {} }
+      throw e;
     }
 
     return res.json();
+  },
+  // ---- Round 5: remote lesson overrides, challenge log, account controls ----
+  async getLessonOverrides() {
+    const { data, error } = await supabase.from("lesson_overrides").select("path_id,lesson_index,lesson,updated_at");
+    if (error) { console.warn("lesson_overrides:", error.message); return []; }
+    return data || [];
+  },
+  async logChallenge(uid, { day, challenge_id, title, score }) {
+    if (!uid) return { error: null };
+    const res = await supabase.from("challenge_log").upsert({ user_id: uid, day, challenge_id, title, score }, { onConflict: "user_id,day" });
+    if (res.error) console.warn("challenge_log:", res.error.message);
+    return res;
+  },
+  async getChallengeLog(uid) {
+    if (!uid) return [];
+    const { data, error } = await supabase.from("challenge_log").select("day,challenge_id,title,score").eq("user_id", uid).order("day", { ascending: false }).limit(90);
+    if (error) { console.warn("challenge_log read:", error.message); return []; }
+    return data || [];
+  },
+  async resetMyProgress() {
+    return supabase.rpc("reset_my_progress");
+  },
+  async deleteMyAccount() {
+    const res = await supabase.rpc("delete_my_account");
+    if (!res.error) { try { await supabase.auth.signOut(); } catch {} }
+    return res;
   },
   onAuth(callback) {
     return supabase.auth.onAuthStateChange(callback);
