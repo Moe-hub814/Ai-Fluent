@@ -97,7 +97,18 @@ function parseArticles(text: string): unknown[] | null {
   if (!m) return null;
   try {
     const arr = JSON.parse(m[0]);
-    return Array.isArray(arr) && arr.length > 0 && arr.every((a: any) => a && typeof a.title === "string") ? arr : null;
+    if (!Array.isArray(arr) || arr.length === 0 || !arr.every((a: any) => a && typeof a.title === "string")) return null;
+    // Keep only safe, useful fields; drop links that aren't plain http(s).
+    return arr.slice(0, 6).map((a: any) => ({
+      title: String(a.title).slice(0, 200),
+      category: String(a.category || "News").slice(0, 20),
+      summary: String(a.summary || "").slice(0, 1200),
+      impact: String(a.impact || "").slice(0, 800),
+      timeAgo: String(a.timeAgo || "").slice(0, 30),
+      source: String(a.source || "").slice(0, 60),
+      published: /^\d{4}-\d{2}-\d{2}$/.test(String(a.published || "")) ? String(a.published) : null,
+      url: /^https?:\/\/[^\s"'<>]+$/i.test(String(a.url || "")) ? String(a.url).slice(0, 500) : null,
+    }));
   } catch {
     return null;
   }
@@ -295,7 +306,7 @@ serve(async (req) => {
     if (feature === "challenge_gen") {
       const g = Array.isArray(goals) ? goals.slice(0, 3).map(String).join(", ") : "general AI skills";
       const langName = cLang === "ar" ? "Arabic" : cLang === "fr" ? "French" : "English";
-      sys = `You write ONE short daily practice challenge for a beginner-friendly AI-skills app. Today is ${dayKey()}. The learner's goals: ${g}. Their level: ${userLevel || "beginner"}. The challenge must ask them to do something concrete with an AI chatbot about THEIR OWN life or work (not a generic question), take under 5 minutes, and be gradable from a written answer. Vary the angle day to day (prompting, checking facts, images, data, everyday tasks, safety, news). Return ONLY a JSON object: {"id":"gen-${dayKey()}","title":"...(max 6 words)","desc":"...(one line)","task":"...(2-4 sentences, second person, ends with what to write)","category":"prompts|basics|daily|images|writing|data|news|safety"}. Write all text in ${langName}. No markdown, no backticks.`;
+      sys = `You write ONE short daily practice challenge for a beginner-friendly AI-skills app. Today is ${dayKey()}. The learner's goals: ${g}. Their level: ${userLevel || "beginner"}. The challenge must ask them to do something concrete about THEIR OWN life or work (not a generic question), take under 5 minutes, and be gradable from a written answer. It must be completable entirely inside this app by chatting with Lumi (the in-app AI guide): phrase it as "ask Lumi…" or "write a prompt…". NEVER tell them to open another app or website, use ChatGPT/Gemini/another chatbot, take screenshots, or copy results from elsewhere. Vary the angle day to day (prompting, checking facts, images, data, everyday tasks, safety, news). Return ONLY a JSON object: {"id":"gen-${dayKey()}","title":"...(max 6 words)","desc":"...(one line)","task":"...(2-4 sentences, second person, ends with what to write)","category":"prompts|basics|daily|images|writing|data|news|safety"}. Write all text in ${langName}. No markdown, no backticks.`;
       msgs = [{ role: "user", content: `Generate today's challenge.` }];
     }
     const claudeBody: any = {

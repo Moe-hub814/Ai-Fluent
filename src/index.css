@@ -1,2 +1,10 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { background: #FFFCF5; }
+
+/* Desktop: Lumicamp is a phone-first app. On wide screens keep it a readable
+   column instead of stretching cards across a 1500px window (testers use
+   desktop Chrome). Fixed overlays (sign-in sheet, bottom bar) span the
+   viewport on purpose; the bar's content is centered in JS. */
+@media (min-width: 760px) {
+  #root { max-width: 720px; margin: 0 auto; box-shadow: 0 0 0 1px rgba(128,128,128,.12), 0 0 60px rgba(0,0,0,.18); min-height: 100vh; }
+}
