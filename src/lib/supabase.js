@@ -196,19 +196,56 @@ export const db = {
     if (res.error) console.warn("Prefs save failed:", res.error);
     return res;
   },
+  // Session access token with a hard upper bound on how long we wait for
+  // supabase-js. Falls back to the persisted session in localStorage (that is
+  // what getSession() would return anyway when the token is still valid).
+  async accessToken(timeoutMs = 2500) {
+    const fromStorage = () => {
+      try {
+        for (const k of Object.keys(localStorage)) {
+          if (!k.startsWith("sb-") || !k.endsWith("-auth-token")) continue;
+          const v = JSON.parse(localStorage.getItem(k) || "null");
+          const t = v?.access_token || v?.currentSession?.access_token;
+          const exp = v?.expires_at || v?.currentSession?.expires_at;
+          if (t && (!exp || exp * 1000 > Date.now() + 5000)) return t;
+        }
+      } catch {}
+      return "";
+    };
+    try {
+      const race = await Promise.race([
+        supabase.auth.getSession().then(r => r?.data?.session?.access_token || "").catch(() => ""),
+        new Promise(resolve => setTimeout(() => resolve(null), timeoutMs)),
+      ]);
+      if (race === null) { console.warn("getSession() timed out — using persisted token"); return fromStorage(); }
+      return race || fromStorage();
+    } catch { return fromStorage(); }
+  },
   async callClaude(options) {
     // The edge function verifies the user's Supabase JWT and applies per-user
     // daily quotas. Signed-out visitors get a small trial quota per IP so the
     // demo still works; anything beyond that asks them to create an account.
-    let token = "";
-    try { token = (await supabase.auth.getSession())?.data?.session?.access_token || ""; } catch { token = ""; }
+    // getSession() can block forever if the auth lock is wedged (see the
+    // onAuth comment in App.jsx). Never let a grading/chat request depend on it:
+    // wait at most 2.5 s, then fall back to the token supabase-js persisted.
+    const token = await db.accessToken();
     const headers = { "Content-Type": "application/json", "apikey": SUPABASE_KEY };
     if (token) headers.Authorization = `Bearer ${token}`;
-    const res = await fetch(`${SUPABASE_URL}/functions/v1/claude-proxy`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(options),
-    });
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), options.timeoutMs || 75000);
+    let res;
+    try {
+      res = await fetch(`${SUPABASE_URL}/functions/v1/claude-proxy`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(options),
+        signal: ctrl.signal,
+      });
+    } catch (err) {
+      const e = new Error(err?.name === "AbortError" ? "Lumi took too long to answer. Please try again." : "Couldn't reach Lumi. Check your connection and try again.");
+      e.code = "error"; e.status = 0;
+      throw e;
+    } finally { clearTimeout(timer); }
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({ error: "Unknown error" }));
@@ -248,6 +285,27 @@ export const db = {
     const res = await supabase.rpc("delete_my_account");
     if (!res.error) { try { await supabase.auth.signOut(); } catch {} }
     return res;
+  },
+  // ---- Lumicamp for Teams (migration 20260908_teams_dashboard.sql) ----
+  // Every call returns { data, error }; error.code === "42883" means the
+  // migration has not been run yet — the UI shows a friendly "not set up" state.
+  async createOrg(name) { return supabase.rpc("create_org", { p_name: name }); },
+  async myOrgs() {
+    const { data, error } = await supabase.rpc("my_orgs");
+    if (error) { if (error.code !== "42883") console.warn("my_orgs:", error.message); return { data: [], error }; }
+    return { data: data || [], error: null };
+  },
+  async orgDashboard(orgId, pathSizes) { return supabase.rpc("org_dashboard", { p_org: orgId, p_path_sizes: pathSizes }); },
+  async orgInviteLink(orgId) { return supabase.rpc("org_invite_link", { p_org: orgId }); },
+  async orgAddMembers(orgId, emails) { return supabase.rpc("org_add_members", { p_org: orgId, p_emails: emails }); },
+  async orgRemoveMember(memberId) { return supabase.rpc("org_remove_member", { p_member: memberId }); },
+  async updateOrg(orgId, fields) { return supabase.from("orgs").update({ ...fields, policy_updated_at: new Date().toISOString() }).eq("id", orgId); },
+  async joinOrg(token) { return supabase.rpc("join_org_by_invite", { p_token: token }); },
+  async issueMyCertificate(pathSizes) { return supabase.rpc("issue_my_certificate", { p_path_sizes: pathSizes }); },
+  async myCertificate() {
+    const { data, error } = await supabase.rpc("my_certificate");
+    if (error) return { data: null, error };
+    return { data: data && data.verify_code ? data : null, error: null };
   },
   onAuth(callback) {
     return supabase.auth.onAuthStateChange(callback);

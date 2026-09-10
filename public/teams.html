@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumicamp for Teams — AI skills for everyone on your team</title>
+<meta name="description" content="Lumicamp for Teams turns non-technical employees into confident, safe AI users: 10-minute daily lessons, a built-in AI tutor, certificates and a company AI-policy module — in English, Arabic and French. Free 30-day pilot.">
+<meta property="og:title" content="Lumicamp for Teams — AI skills for everyone on your team">
+<meta property="og:description" content="Phone-first AI literacy for the 80% of staff who aren't technical. Certificates, reporting and your own AI policy inside the training. Free 30-day pilot.">
+<meta property="og:image" content="https://lumicamp.app/icon-512.png">
+<meta property="og:url" content="https://lumicamp.app/teams">
+<meta name="theme-color" content="#0A1420">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--gold:#D4A55A;--gold-light:#FFE8C0;--gold-dark:#A07830;--green:#4ABA78;--teal:#3AA8A0;--dark:#0A1420;--card:#0F1E30;--text:#E8EEF4;--muted:#8AA0B8;--dim:#506878;--border:rgba(255,255,255,.08)}
+html{scroll-behavior:smooth}
+body{background:var(--dark);color:var(--text);font-family:'Nunito',sans-serif;overflow-x:hidden;line-height:1.6}
+a{color:var(--gold);text-decoration:none}
+.wrap{max-width:960px;margin:0 auto;padding:0 22px}
+header{display:flex;justify-content:space-between;align-items:center;padding:18px 0}
+.logo{font-family:'Quicksand',sans-serif;font-weight:700;font-size:20px;color:var(--gold-light)}
+.logo span{color:var(--muted);font-weight:600;font-size:14px;margin-left:8px}
+.nav a{color:var(--muted);font-size:14px;font-weight:700;margin-left:18px}
+.hero{padding:56px 0 40px;text-align:center}
+.pill{display:inline-block;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(212,165,90,.35);border-radius:999px;padding:6px 14px;margin-bottom:18px}
+h1{font-family:'Quicksand',sans-serif;font-size:clamp(34px,6vw,56px);line-height:1.12;font-weight:700;background:linear-gradient(135deg,#FFE8C0 0%,#D4A55A 55%,#FFE8C0 100%);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:16px}
+.sub{font-size:clamp(16px,2.3vw,19px);color:var(--muted);max-width:620px;margin:0 auto 28px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:14px 30px;border-radius:14px;font-size:16px;font-weight:800;font-family:'Nunito',sans-serif;border:none;cursor:pointer;transition:all .2s}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#fff;box-shadow:0 4px 20px rgba(212,165,90,.3)}
+.btn-gold:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(212,165,90,.45)}
+.btn-ghost{background:rgba(255,255,255,.05);color:var(--text);border:1px solid var(--border)}
+.cta-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.tiny{font-size:13px;color:var(--dim);margin-top:14px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin:36px 0 12px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:22px 20px}
+.stat b{display:block;font-family:'Quicksand',sans-serif;font-size:40px;color:var(--gold-light);line-height:1.1;margin-bottom:6px}
+.stat p{color:var(--muted);font-size:14px}
+.src{font-size:12px;color:var(--dim);text-align:center;margin-bottom:40px}
+section{padding:36px 0}
+h2{font-family:'Quicksand',sans-serif;font-size:clamp(26px,4vw,34px);color:var(--text);margin-bottom:8px}
+.lead{color:var(--muted);max-width:640px;margin-bottom:24px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:22px}
+.card .ic{width:44px;height:44px;border-radius:50%;background:rgba(212,165,90,.14);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:12px}
+.card h3{font-size:17px;margin-bottom:6px}
+.card p{color:var(--muted);font-size:14px}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;counter-reset:s}
+.step{position:relative;background:var(--card);border:1px solid var(--border);border-radius:18px;padding:22px 20px 20px}
+.step::before{counter-increment:s;content:counter(s);font-family:'Quicksand',sans-serif;font-weight:700;font-size:28px;color:var(--gold);display:block;margin-bottom:6px}
+.step h3{font-size:16px;margin-bottom:4px}.step p{color:var(--muted);font-size:14px}
+.pilot{background:linear-gradient(180deg,rgba(212,165,90,.10),rgba(212,165,90,.03));border:1px solid rgba(212,165,90,.3);border-radius:22px;padding:30px 24px}
+.pilot h2{margin-bottom:6px}
+form{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
+form .full{grid-column:1/-1}
+label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase}
+input,select,textarea{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:12px;padding:12px 14px;color:var(--text);font-family:'Nunito',sans-serif;font-size:15px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(212,165,90,.18)}
+select option{color:#222}
+textarea{min-height:90px;resize:vertical}
+.msg{grid-column:1/-1;font-size:14px;min-height:20px}
+.ok{color:var(--green)}.err{color:#E07A7A}
+.pricing{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.tier{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:22px}
+.tier.hi{border-color:var(--gold);box-shadow:0 8px 30px rgba(212,165,90,.12)}
+.tier .name{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.tier .price{font-family:'Quicksand',sans-serif;font-size:36px;color:var(--gold-light);margin:6px 0 0}
+.tier .per{color:var(--dim);font-size:13px;margin-bottom:12px}
+.tier ul{list-style:none}.tier li{color:var(--muted);font-size:14px;padding:4px 0 4px 20px;position:relative}
+.tier li::before{content:"✓";color:var(--green);position:absolute;left:0}
+.trust{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.faq details{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 18px;margin-bottom:10px}
+.faq summary{cursor:pointer;font-weight:700}
+.faq p{color:var(--muted);font-size:14px;margin-top:8px}
+footer{padding:36px 0 50px;color:var(--dim);font-size:13px;text-align:center;border-top:1px solid var(--border);margin-top:30px}
+footer a{margin:0 8px}
+@media (max-width:640px){form{grid-template-columns:1fr}.nav a:not(:last-child){display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">Lumicamp <span>for Teams</span></div>
+    <nav class="nav"><a href="#how">How it works</a><a href="#pricing">Pricing</a><a href="#security">Security</a><a href="/" >Free app</a><a href="#pilot" class="btn btn-gold" style="padding:10px 18px;font-size:14px">Start a pilot</a></nav>
+  </header>
+
+  <section class="hero">
+    <div class="pill">AI literacy for the whole workforce</div>
+    <h1>AI skills for everyone on your team.</h1>
+    <p class="sub">Short daily lessons, a built-in AI tutor and real practice that turn non-technical employees into confident, safe AI users — in English, Arabic and French. Certificates, reporting and your own AI policy, inside the training.</p>
+    <div class="cta-row"><a class="btn btn-gold" href="#pilot">Start a free 30-day pilot</a><a class="btn btn-ghost" href="/">Try the app yourself</a></div>
+    <p class="tiny">Free for individuals. Founding-customer pricing for the first ten companies.</p>
+
+    <div class="stats">
+      <div class="stat"><b>86%</b><p>of employees already use AI at work (93% of managers).</p></div>
+      <div class="stat"><b>16–23%</b><p>received any training before new AI tools were introduced.</p></div>
+      <div class="stat"><b>24% vs 77%</b><p>of staff say they were prepared to use AI — versus managers who believe they were.</p></div>
+    </div>
+    <p class="src">Source: Skillsoft, Workforce Readiness Report – AI Edition, July 2026. Since 2 Aug 2026, EU authorities can enforce the AI Act's Article 4 literacy obligation on any company deploying AI to staff.</p>
+  </section>
+
+  <section id="how">
+    <h2>A program people actually finish.</h2>
+    <p class="lead">Ten minutes a day, on any phone. Learners climb a mountain of six paths and 22 lessons, from “What is AI, really?” to using it every day at work.</p>
+    <div class="steps">
+      <div class="step"><h3>Learn</h3><p>A 5-minute lesson in plain language, in the learner's language.</p></div>
+      <div class="step"><h3>Practice</h3><p>A graded exercise with Lumi, the built-in AI tutor — instant feedback.</p></div>
+      <div class="step"><h3>Daily challenge</h3><p>A fresh, goal-aware task every day builds the habit and the streak.</p></div>
+      <div class="step"><h3>Certify</h3><p>Finish every path, earn a verified certificate of AI literacy.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>What your company gets on top of the app.</h2>
+    <div class="grid">
+      <div class="card"><div class="ic">👥</div><h3>Team workspace</h3><p>One invite link or pre-registered emails; seats managed by your admin.</p></div>
+      <div class="card"><div class="ic">📊</div><h3>Reporting</h3><p>Completion, scores, streaks and certificates per person — export to CSV for HR.</p></div>
+      <div class="card"><div class="ic">🎓</div><h3>Certificates</h3><p>A verifiable certificate of AI literacy when a learner completes the core paths.</p></div>
+      <div class="card"><div class="ic">📋</div><h3>Your AI policy, inside the training</h3><p>Approved tools, what never goes into an AI tool, who to ask — shown to every member in the app.</p></div>
+      <div class="card"><div class="ic">🌍</div><h3>Three languages, one program</h3><p>English, Arabic (RTL) and French with the same lessons, tutor and challenges.</p></div>
+      <div class="card"><div class="ic">🚀</div><h3>Kickoff kit</h3><p>Launch emails, posters, a manager cheat-sheet and a 30-minute virtual kickoff with the founder.</p></div>
+    </div>
+  </section>
+
+  <section id="pilot">
+    <div class="pilot">
+      <h2>AI-Ready in 30 Days — the founding pilot.</h2>
+      <p class="lead">Up to 50 learners, free for 30 days. We ask for a named champion, a kickoff email from a leader, two 20-minute feedback calls, and permission to use anonymised results. At day 30 you get one report: completion, score lift, active days, and confidence before/after.</p>
+      <form id="pilotForm" novalidate>
+        <div><label for="company">Company</label><input id="company" name="company" required maxlength="120" placeholder="Acme Hospitality Group"></div>
+        <div><label for="name">Your name</label><input id="name" name="name" maxlength="120" placeholder="Jordan Lee"></div>
+        <div><label for="email">Work email</label><input id="email" name="email" type="email" required placeholder="jordan@acme.com"></div>
+        <div><label for="size">Team size</label><select id="size" name="size"><option>10–50</option><option>50–150</option><option>150–500</option><option>500–2,000</option><option>2,000+</option></select></div>
+        <div class="full"><label for="message">What would make this pilot a win? (optional)</label><textarea id="message" name="message" maxlength="2000" placeholder="e.g. Our front-desk and scheduling teams keep asking how to use Copilot safely…"></textarea></div>
+        <div class="msg" id="msg"></div>
+        <div class="full"><button class="btn btn-gold" type="submit" id="submitBtn">Request my pilot →</button> <span class="tiny" style="margin-left:10px">or email <a href="mailto:hello@lumicamp.app">hello@lumicamp.app</a></span></div>
+      </form>
+    </div>
+  </section>
+
+  <section id="pricing">
+    <h2>Simple per-seat pricing.</h2>
+    <p class="lead">A fraction of the $800–$3,500 per employee that instructor-led AI training costs. The free Lumicamp app stays free for individuals.</p>
+    <div class="pricing">
+      <div class="tier"><div class="name">Team</div><div class="price">$8</div><div class="per">per user / month · minimum 10 seats</div><ul><li>Team workspace &amp; admin</li><li>Completion &amp; score reporting</li><li>Certificates</li><li>Kickoff kit</li></ul></div>
+      <div class="tier hi"><div class="name" style="color:var(--gold)">Business · most popular</div><div class="price">$5</div><div class="per">per user / month, billed annually · 100+ seats</div><ul><li>Everything in Team</li><li>Company AI-policy module</li><li>Department reporting &amp; CSV export</li><li>Quarterly content refresh briefing</li><li>Priority support</li></ul></div>
+      <div class="tier"><div class="name">Enterprise</div><div class="price">Custom</div><div class="per">from $15k / year</div><ul><li>Everything in Business</li><li>Article 4 literacy matrix &amp; documentation pack</li><li>SSO and LMS export</li><li>Custom lessons</li><li>Dedicated success manager</li></ul></div>
+    </div>
+    <p class="tiny" style="text-align:center">Founding customers lock the Business tier at $4 per user per month for 24 months.</p>
+  </section>
+
+  <section id="security">
+    <h2>Built the way a federal assessor would assess it.</h2>
+    <p class="lead">Lumicamp's founder spent 10+ years in federal cybersecurity and governance, risk and compliance across five agencies, and worked as a third-party assessor. The security posture is real, not a slide.</p>
+    <div class="trust">
+      <div class="card"><div class="ic">🔐</div><h3>Authenticated AI proxy</h3><p>Every AI call is verified against the user's session with per-user daily limits; no API keys in the app.</p></div>
+      <div class="card"><div class="ic">🗄️</div><h3>Row-level security</h3><p>Learners only read and write their own records; admin access is scoped to the organisation.</p></div>
+      <div class="card"><div class="ic">🛡️</div><h3>No training on your data</h3><p>Prompts and answers are never used to train models.</p></div>
+      <div class="card"><div class="ic">🗑️</div><h3>Self-service export &amp; deletion</h3><p>Learners export their data or delete their account in one tap.</p></div>
+    </div>
+    <p class="tiny" style="text-align:center">Security overview, DPA and sub-processor list available on request · <a href="/privacy-policy.html">Privacy policy</a></p>
+  </section>
+
+  <section class="faq">
+    <h2>Questions companies ask.</h2>
+    <details><summary>We already have LinkedIn Learning / Coursera. Why this?</summary><p>Keep it. A catalog is for people who already know what to look for. Lumicamp is the structured on-ramp for the 80% who don't, and it hands them back to your catalog with confidence.</p></details>
+    <details><summary>Does this make us compliant with the EU AI Act?</summary><p>No product can guarantee that. Lumicamp gives you role-appropriate training, evidence of completion, and a mapping to literacy competencies — the documentation a regulator asks for. Your counsel decides what else your program needs.</p></details>
+    <details><summary>Our people are too busy for training.</summary><p>That's why it's ten minutes a day on a phone, not a two-day workshop. In the pilot we measure active days per learner — if people don't use it, you don't pay.</p></details>
+    <details><summary>Do you support SSO or our LMS?</summary><p>On the roadmap and built to order for Enterprise contracts. For a pilot, invite links and a CSV export are enough — let's prove the learning outcome first.</p></details>
+  </section>
+
+  <footer>
+    <div>Lumicamp · <a href="/">Free app</a> · <a href="/privacy-policy.html">Privacy</a> · <a href="mailto:hello@lumicamp.app">hello@lumicamp.app</a></div>
+    <div style="margin-top:8px">Market figures are third-party survey results quoted for context.</div>
+  </footer>
+</div>
+
+<script>
+(function(){
+  var SUPABASE_URL="https://jedeqqkrmgsemnnmufjo.supabase.co";
+  var SUPABASE_KEY="sb_publishable_Bcpg3b7ytODIYoPa54AF1A_MmG5DT8q";
+  var f=document.getElementById("pilotForm"),msg=document.getElementById("msg"),btn=document.getElementById("submitBtn");
+  f.addEventListener("submit",async function(e){
+    e.preventDefault();
+    var company=f.company.value.trim(),email=f.email.value.trim();
+    if(company.length<2||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){msg.className="msg err";msg.textContent="Please add your company and a valid work email.";return}
+    btn.disabled=true;msg.className="msg";msg.textContent="Sending…";
+    try{
+      var r=await fetch(SUPABASE_URL+"/rest/v1/rpc/request_pilot",{method:"POST",headers:{"Content-Type":"application/json","apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY},body:JSON.stringify({p_company:company,p_name:f.name.value.trim(),p_email:email,p_size:f.size.value,p_message:f.message.value.trim(),p_source:"teams.html"})});
+      if(!r.ok){var t=await r.text();throw new Error(t.indexOf("rate_limited")>-1?"Too many requests from this email today — please email us instead.":"Could not send right now — please email hello@lumicamp.app.")}
+      msg.className="msg ok";msg.textContent="Got it — expect a reply within one business day with a proposed start date.";f.reset();
+    }catch(err){msg.className="msg err";msg.textContent=err.message||"Could not send right now.";btn.disabled=false}
+  });
+})();
+</script>
+</body>
+</html>

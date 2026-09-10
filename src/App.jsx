@@ -89,9 +89,9 @@ const setSyncQueue=(rows)=>{try{localStorage.setItem(SYNC_QUEUE_KEY,JSON.stringi
 // LANGUAGE SYSTEM
 const LANGS={en:{name:"English",flag:"🇺🇸",dir:"ltr"},ar:{name:"العربية",flag:"🇸🇦",dir:"rtl"},fr:{name:"Français",flag:"🇫🇷",dir:"ltr"}};
 const UI={
-  en:{greeting:h=>h<12?"Good morning":h<17?"Good afternoon":"Good evening",map:"← Map",back:"← Back",signIn:"Sign In",signUp:"Sign Up",email:"Email",password:"Password",startClimbing:"Start Climbing",createAccount:"Create Account",checkEmail:"Check your email!",weSentLink:"We sent a link to",loading:"Loading Lumicamp...",tapIfStuck:"Tap anywhere if stuck",startPractice:"Start Practice →",completeLesson:"Complete lesson →",nextQ:"Next Question →",seeResults:"See My Results →",retry:"Retry for a higher rating →",tryAgain:"Try Again",reviewFirst:"← Review the lesson first",need70:"You need 70% or higher to pass this lesson",points:"Points earned",shareRating:"📤 Share My Rating",shareProgress:"📤 Share My Progress",askLumi:"Ask Lumi",questionsHelp:"Questions? Ask Lumi",guideHere:"Your guide is here to help",peoplAsk:"People often ask...",lumiGuide:"Lumi — Guide",hint:"Hint",why:"Why?",check:"Check Answer",lumiFeedback:"Lumi's feedback",lumiReviewing:"Lumi is reviewing...",submit:"Submit for Review",dailyChallenge:"Daily Challenge",keepStreak:"Keep your streak",aiNews:"AI News",live:"Live",newsDesc:"Today's AI stories, simplified by Lumi",newsSearch:"Lumi is searching for today's AI news...",aiTools:"AI Tools",toolsDesc:"Guided step-by-step workflows",profile:"Profile",dayStreak:"Day Streak",lessonsDone:"Lessons Done",lumiChats:"Lumi Chats",achievements:"Achievements",altRatings:"Altitude Ratings Earned",summit:"Summit",ridge:"Ridge",graded:"Graded",learningPaths:"Learning Paths",calendar:"Activity Calendar",bestStreak:"Best streak",freezes:"remaining",lightMode:"☀️ Light Mode",darkMode:"🌙 Dark Mode",signOut:"Sign Out",language:"Language",lessons:"lessons",sections:"sections",practice:"practice",completed:"Completed",submitChallenge:"Submit Challenge ⚡",challengeComplete:"🔥 Challenge complete!",challengeDesc:"Complete today's challenge to keep your streak alive",simpleVersion:"The simple version",whyMatters:"Why it matters to you",askAboutThis:"Ask Lumi about this",explainPlain:"Get it explained in plain language",claimSummit:"🏔️ Claim Summit Rating!",claimRidge:"⛰️ Claim Ridge Rating!",completeBtn:"✦ Complete Lesson",next:"Next",skip:"Skip",startJourney:"Start My Journey →",altitude:"Altitude",toSummit:"to summit",tapExplore:"Tap to explore",tools6:"6 tools",typeAnswer:"Type your answer...",practiceOf:"of",backToLesson:"← Back to lesson",lesson:"Lesson",nextUp:"Next up",continueLesson:"Continue",lessonDone:"Lesson complete!",pathDone:"You've completed every lesson here",nextStop:"Next stop on the trail",backToMap:"Back to the map →",lessonsLeft:"lessons left",oneLessonLeft:"1 lesson left",inProgress:"In progress",challengeDone:"Done for today ✓",comeBackTomorrow:"New challenge tomorrow",updatedNews:"Updating…",cachedNews:"Showing the latest stories we found — refreshing in the background",newsFrom:"From",refreshNews:"Refresh",yourOwnExample:"Now it's your turn",hintTitle:"Stuck? Think about…",exampleTitle:"Example",tooSimilar:"That looks a lot like the question itself. Try writing it in your own words, with your own details.",summitTitle:"You made it to The Summit!",summitSub:"Every lesson on the mountain is complete. That puts you ahead of most people on the planet when it comes to using AI.",summitStats:"Your climb",summitNext:"Where to next?",summitDaily:"Daily Challenge",summitDailyDesc:"A fresh exercise every day keeps your skills sharp",summitTools:"AI Tools",summitToolsDesc:"Put what you learned to work on real tasks",summitNews:"AI News",summitNewsDesc:"Stay current — AI changes every week",summitImprove:"Improve a rating",summitImproveDesc:"Re-take lessons below Summit rating",summitShare:"Share your summit",summitCert:"Certificate coming soon",contentUpdated:"Content reviewed",lockedReason:"Finish the previous stop to unlock",copy:"Copy",copied:"Copied ✓",share:"Share",recentResults:"Recent results",savedNote:"Saved on this device",openResult:"Open",clearRecent:"Clear",yourAnswers:"Your answers",newResult:"New",toolsBack:"← Tools",recommended:"Recommended for you",challengeHistory:"Your challenge history",climbingToward:"Climbing toward",dataAccount:"Data & account",exportData:"Export my data",resetProgress:"Reset my progress",deleteAccount:"Delete my account",resetConfirm:"This erases every lesson, score and streak on your account. Type RESET to confirm.",deleteConfirm:"This permanently deletes your account and all your data. Type DELETE to confirm.",exported:"Exported ✓ (copied to clipboard)",textSize:"Text size",textNormal:"Normal",textLarge:"Large",reduceMotion:"Reduce motion",whatIsLumicamp:"Lumicamp teaches you to actually use AI — short lessons, real practice, in plain language. Free.",skipAhead:"Already comfortable with AI?",skipAheadDesc:"You can skim the lessons — the practice at the end still unlocks the next stop."},
-  ar:{greeting:h=>h<12?"صباح الخير":h<17?"مساء الخير":"مساء الخير",map:"الخريطة →",back:"رجوع →",signIn:"تسجيل الدخول",signUp:"إنشاء حساب",email:"البريد الإلكتروني",password:"كلمة المرور",startClimbing:"ابدأ التسلق",createAccount:"إنشاء حساب",checkEmail:"!تحقق من بريدك",weSentLink:"أرسلنا رابطاً إلى",loading:"...جاري تحميل Lumicamp",tapIfStuck:"اضغط في أي مكان إذا توقف",startPractice:"← ابدأ التمرين",completeLesson:"← أكمل الدرس",nextQ:"← السؤال التالي",seeResults:"← عرض نتائجي",retry:"← أعد المحاولة لتقييم أعلى",tryAgain:"حاول مرة أخرى",reviewFirst:"راجع الدرس أولاً →",need70:"تحتاج 70% أو أعلى لاجتياز هذا الدرس",points:"النقاط المكتسبة",shareRating:"📤 شارك تقييمي",shareProgress:"📤 شارك تقدمي",askLumi:"اسأل لومي",questionsHelp:"أسئلة؟ اسأل لومي",guideHere:"مرشدك هنا للمساعدة",peoplAsk:"...الناس يسألون عادة",lumiGuide:"لومي — المرشد",hint:"تلميح",why:"لماذا؟",check:"تحقق من الإجابة",lumiFeedback:"ملاحظات لومي",lumiReviewing:"...لومي يراجع",submit:"أرسل للمراجعة",dailyChallenge:"التحدي اليومي",keepStreak:"حافظ على سلسلتك",aiNews:"أخبار الذكاء",live:"مباشر",newsDesc:"أخبار الذكاء اليوم مبسطة بواسطة لومي",newsSearch:"...لومي يبحث عن أخبار اليوم",aiTools:"أدوات الذكاء",toolsDesc:"سير عمل موجه خطوة بخطوة",profile:"الملف الشخصي",dayStreak:"أيام متتالية",lessonsDone:"دروس مكتملة",lumiChats:"محادثات لومي",achievements:"الإنجازات",altRatings:"تقييمات الارتفاع المكتسبة",summit:"القمة",ridge:"التلال",graded:"مُقيَّم",learningPaths:"مسارات التعلم",calendar:"تقويم النشاط",bestStreak:"أفضل سلسلة",freezes:"متبقية",lightMode:"☀️ وضع فاتح",darkMode:"🌙 وضع داكن",signOut:"تسجيل الخروج",language:"اللغة",lessons:"دروس",sections:"أقسام",practice:"تمارين",completed:"مكتمل",submitChallenge:"أرسل التحدي ⚡",challengeComplete:"!🔥 التحدي مكتمل",challengeDesc:"أكمل تحدي اليوم للحفاظ على سلسلتك",simpleVersion:"النسخة المبسطة",whyMatters:"لماذا يهمك هذا",askAboutThis:"اسأل لومي عن هذا",explainPlain:"احصل على شرح بلغة بسيطة",claimSummit:"🏔️ !احصل على تقييم القمة",claimRidge:"⛰️ !احصل على تقييم التلال",completeBtn:"✦ أكمل الدرس",next:"التالي",skip:"تخطي",startJourney:"← ابدأ رحلتي",altitude:"الارتفاع",toSummit:"إلى القمة",tapExplore:"اضغط للاستكشاف",tools6:"6 أدوات",typeAnswer:"...اكتب إجابتك",practiceOf:"من",backToLesson:"العودة للدرس →",lesson:"درس",nextUp:"التالي",continueLesson:"متابعة",lessonDone:"!اكتمل الدرس",pathDone:"لقد أكملت كل الدروس هنا",nextStop:"المحطة التالية على المسار",backToMap:"← العودة إلى الخريطة",lessonsLeft:"دروس متبقية",oneLessonLeft:"درس واحد متبقٍ",inProgress:"قيد التقدم",challengeDone:"✓ تم اليوم",comeBackTomorrow:"تحدٍ جديد غدًا",updatedNews:"…جارٍ التحديث",cachedNews:"نعرض أحدث الأخبار التي وجدناها — يتم التحديث في الخلفية",newsFrom:"من",refreshNews:"تحديث",yourOwnExample:"الآن دورك",hintTitle:"…محتار؟ فكّر في",exampleTitle:"مثال",tooSimilar:"يبدو هذا مشابهًا جدًا للسؤال نفسه. حاول كتابته بكلماتك وتفاصيلك الخاصة.",summitTitle:"!لقد وصلت إلى القمة",summitSub:"اكتملت كل دروس الجبل. هذا يضعك في مقدمة معظم الناس في استخدام الذكاء الاصطناعي.",summitStats:"رحلتك",summitNext:"إلى أين بعد ذلك؟",summitDaily:"التحدي اليومي",summitDailyDesc:"تمرين جديد كل يوم يبقي مهاراتك حادة",summitTools:"أدوات الذكاء الاصطناعي",summitToolsDesc:"طبّق ما تعلمته على مهام حقيقية",summitNews:"أخبار الذكاء الاصطناعي",summitNewsDesc:"ابقَ على اطلاع — الذكاء الاصطناعي يتغير كل أسبوع",summitImprove:"حسّن تقييمًا",summitImproveDesc:"أعد الدروس التي لم تصل فيها إلى تقييم القمة",summitShare:"شارك قمتك",summitCert:"الشهادة قريبًا",contentUpdated:"تمت مراجعة المحتوى",lockedReason:"أكمل المحطة السابقة لفتح هذه",copy:"نسخ",copied:"✓ تم النسخ",share:"مشاركة",recentResults:"النتائج الأخيرة",savedNote:"محفوظ على هذا الجهاز",openResult:"فتح",clearRecent:"مسح",yourAnswers:"إجاباتك",newResult:"جديد",toolsBack:"الأدوات →",recommended:"موصى به لك",challengeHistory:"سجل تحدياتك",climbingToward:"تتسلق نحو",dataAccount:"البيانات والحساب",exportData:"تصدير بياناتي",resetProgress:"إعادة ضبط تقدمي",deleteAccount:"حذف حسابي",resetConfirm:"سيمسح هذا كل الدروس والدرجات والسلاسل في حسابك. اكتب RESET للتأكيد.",deleteConfirm:"سيحذف هذا حسابك وكل بياناتك نهائيًا. اكتب DELETE للتأكيد.",exported:"(تم التصدير ✓ (نُسخ إلى الحافظة",textSize:"حجم النص",textNormal:"عادي",textLarge:"كبير",reduceMotion:"تقليل الحركة",whatIsLumicamp:"لوميكامب يعلّمك استخدام الذكاء الاصطناعي فعليًا — دروس قصيرة وتمارين حقيقية بلغة بسيطة. مجانًا.",skipAhead:"مرتاح مع الذكاء الاصطناعي بالفعل؟",skipAheadDesc:"يمكنك تصفح الدروس سريعًا — التمرين في النهاية لا يزال يفتح المحطة التالية."},
-  fr:{greeting:h=>h<12?"Bonjour":h<17?"Bon après-midi":"Bonsoir",map:"← Carte",back:"← Retour",signIn:"Se connecter",signUp:"S'inscrire",email:"E-mail",password:"Mot de passe",startClimbing:"Commencer",createAccount:"Créer un compte",checkEmail:"Vérifiez votre e-mail !",weSentLink:"Nous avons envoyé un lien à",loading:"Chargement de Lumicamp...",tapIfStuck:"Appuyez si bloqué",startPractice:"Commencer →",completeLesson:"Terminer →",nextQ:"Suivante →",seeResults:"Voir mes résultats →",retry:"Réessayer →",tryAgain:"Réessayer",reviewFirst:"← Revoir la leçon",need70:"70% minimum pour réussir",points:"Points gagnés",shareRating:"📤 Partager ma note",shareProgress:"📤 Partager mes progrès",askLumi:"Demander à Lumi",questionsHelp:"Questions ? Demandez à Lumi",guideHere:"Votre guide est là",peoplAsk:"Questions fréquentes...",lumiGuide:"Lumi — Guide",hint:"Indice",why:"Pourquoi ?",check:"Vérifier",lumiFeedback:"Avis de Lumi",lumiReviewing:"Lumi examine...",submit:"Soumettre",dailyChallenge:"Défi du jour",keepStreak:"Gardez votre série",aiNews:"Actu IA",live:"Direct",newsDesc:"Actus IA simplifiées par Lumi",newsSearch:"Lumi cherche les actus...",aiTools:"Outils IA",toolsDesc:"Workflows guidés",profile:"Profil",dayStreak:"Jours consécutifs",lessonsDone:"Leçons faites",lumiChats:"Discussions",achievements:"Réussites",altRatings:"Notes d'altitude",summit:"Sommet",ridge:"Crête",graded:"Noté",learningPaths:"Parcours",calendar:"Calendrier d'activité",bestStreak:"Meilleure série",freezes:"restantes",lightMode:"☀️ Mode clair",darkMode:"🌙 Mode sombre",signOut:"Se déconnecter",language:"Langue",lessons:"leçons",sections:"sections",practice:"exercices",completed:"Terminé",submitChallenge:"Soumettre ⚡",challengeComplete:"🔥 Défi terminé !",challengeDesc:"Complétez le défi pour garder votre série",simpleVersion:"Version simple",whyMatters:"Pourquoi c'est important",askAboutThis:"Demander à Lumi",explainPlain:"Explication simple",claimSummit:"🏔️ Note Sommet !",claimRidge:"⛰️ Note Crête !",completeBtn:"✦ Terminer",next:"Suivant",skip:"Passer",startJourney:"Commencer →",altitude:"Altitude",toSummit:"vers le sommet",tapExplore:"Appuyez pour explorer",tools6:"6 outils",typeAnswer:"Tapez votre réponse...",practiceOf:"sur",backToLesson:"← Retour à la leçon",lesson:"Leçon",nextUp:"À suivre",continueLesson:"Continuer",lessonDone:"Leçon terminée !",pathDone:"Vous avez terminé toutes les leçons ici",nextStop:"Prochaine étape du sentier",backToMap:"Retour à la carte →",lessonsLeft:"leçons restantes",oneLessonLeft:"1 leçon restante",inProgress:"En cours",challengeDone:"Fait pour aujourd'hui ✓",comeBackTomorrow:"Nouveau défi demain",updatedNews:"Mise à jour…",cachedNews:"Voici les dernières actualités trouvées — actualisation en arrière-plan",newsFrom:"De",refreshNews:"Actualiser",yourOwnExample:"À vous de jouer",hintTitle:"Bloqué ? Pensez à…",exampleTitle:"Exemple",tooSimilar:"Cela ressemble beaucoup à la question elle-même. Essayez avec vos propres mots et vos propres détails.",summitTitle:"Vous avez atteint le Sommet !",summitSub:"Toutes les leçons de la montagne sont terminées. Vous êtes désormais en avance sur la plupart des gens pour utiliser l'IA.",summitStats:"Votre ascension",summitNext:"Et maintenant ?",summitDaily:"Défi quotidien",summitDailyDesc:"Un nouvel exercice chaque jour pour rester affûté",summitTools:"Outils IA",summitToolsDesc:"Appliquez ce que vous avez appris à de vraies tâches",summitNews:"Actu IA",summitNewsDesc:"Restez à jour — l'IA change chaque semaine",summitImprove:"Améliorer une note",summitImproveDesc:"Refaites les leçons sous la note Sommet",summitShare:"Partager votre sommet",summitCert:"Certificat bientôt disponible",contentUpdated:"Contenu révisé",lockedReason:"Terminez l'étape précédente pour débloquer",copy:"Copier",copied:"Copié ✓",share:"Partager",recentResults:"Résultats récents",savedNote:"Enregistré sur cet appareil",openResult:"Ouvrir",clearRecent:"Effacer",yourAnswers:"Vos réponses",newResult:"Nouveau",toolsBack:"← Outils",recommended:"Recommandé pour vous",challengeHistory:"Votre historique de défis",climbingToward:"Objectif",dataAccount:"Données et compte",exportData:"Exporter mes données",resetProgress:"Réinitialiser ma progression",deleteAccount:"Supprimer mon compte",resetConfirm:"Cela efface toutes les leçons, notes et séries de votre compte. Tapez RESET pour confirmer.",deleteConfirm:"Cela supprime définitivement votre compte et toutes vos données. Tapez DELETE pour confirmer.",exported:"Exporté ✓ (copié dans le presse-papiers)",textSize:"Taille du texte",textNormal:"Normale",textLarge:"Grande",reduceMotion:"Réduire les animations",whatIsLumicamp:"Lumicamp vous apprend à vraiment utiliser l'IA — leçons courtes, pratique réelle, langage simple. Gratuit.",skipAhead:"Déjà à l'aise avec l'IA ?",skipAheadDesc:"Vous pouvez survoler les leçons — l'exercice final débloque quand même l'étape suivante."},
+  en:{greeting:h=>h<12?"Good morning":h<17?"Good afternoon":"Good evening",map:"← Map",back:"← Back",signIn:"Sign In",signUp:"Sign Up",email:"Email",password:"Password",startClimbing:"Start Climbing",createAccount:"Create Account",checkEmail:"Check your email!",weSentLink:"We sent a link to",loading:"Loading Lumicamp...",tapIfStuck:"Tap anywhere if stuck",startPractice:"Start Practice →",completeLesson:"Complete lesson →",nextQ:"Next Question →",seeResults:"See My Results →",retry:"Retry for a higher rating →",tryAgain:"Try Again",reviewFirst:"← Review the lesson first",need70:"You need 70% or higher to pass this lesson",points:"Points earned",shareRating:"📤 Share My Rating",shareProgress:"📤 Share My Progress",askLumi:"Ask Lumi",questionsHelp:"Questions? Ask Lumi",guideHere:"Your guide is here to help",peoplAsk:"People often ask...",lumiGuide:"Lumi — Guide",hint:"Hint",why:"Why?",check:"Check Answer",lumiFeedback:"Lumi's feedback",lumiReviewing:"Lumi is reviewing...",submit:"Submit for Review",dailyChallenge:"Daily Challenge",keepStreak:"Keep your streak",aiNews:"AI News",live:"Live",newsDesc:"Today's AI stories, simplified by Lumi",newsSearch:"Lumi is searching for today's AI news...",aiTools:"AI Tools",toolsDesc:"Guided step-by-step workflows",profile:"Profile",dayStreak:"Day Streak",lessonsDone:"Lessons Done",lumiChats:"Lumi Chats",achievements:"Achievements",altRatings:"Altitude Ratings Earned",summit:"Summit",ridge:"Ridge",graded:"Graded",learningPaths:"Learning Paths",calendar:"Activity Calendar",bestStreak:"Best streak",freezes:"remaining",lightMode:"☀️ Light Mode",darkMode:"🌙 Dark Mode",signOut:"Sign Out",language:"Language",lessons:"lessons",sections:"sections",practice:"practice",completed:"Completed",submitChallenge:"Submit Challenge ⚡",challengeComplete:"🔥 Challenge complete!",challengeDesc:"Complete today's challenge to keep your streak alive",simpleVersion:"The simple version",whyMatters:"Why it matters to you",askAboutThis:"Ask Lumi about this",explainPlain:"Get it explained in plain language",claimSummit:"🏔️ Claim Summit Rating!",claimRidge:"⛰️ Claim Ridge Rating!",completeBtn:"✦ Complete Lesson",next:"Next",skip:"Skip",startJourney:"Start My Journey →",altitude:"Altitude",toSummit:"to summit",tapExplore:"Tap to explore",tools6:"6 tools",typeAnswer:"Type your answer...",practiceOf:"of",backToLesson:"← Back to lesson",lesson:"Lesson",nextUp:"Next up",continueLesson:"Continue",lessonDone:"Lesson complete!",pathDone:"You've completed every lesson here",nextStop:"Next stop on the trail",backToMap:"Back to the map →",lessonsLeft:"lessons left",oneLessonLeft:"1 lesson left",inProgress:"In progress",challengeDone:"Done for today ✓",comeBackTomorrow:"New challenge tomorrow",updatedNews:"Updating…",cachedNews:"Showing the latest stories we found — refreshing in the background",newsFrom:"From",refreshNews:"Refresh",yourOwnExample:"Now it's your turn",hintTitle:"Stuck? Think about…",exampleTitle:"Example",tooSimilar:"That looks a lot like the question itself. Try writing it in your own words, with your own details.",summitTitle:"You made it to The Summit!",summitSub:"Every lesson on the mountain is complete. That puts you ahead of most people on the planet when it comes to using AI.",summitStats:"Your climb",summitNext:"Where to next?",summitDaily:"Daily Challenge",summitDailyDesc:"A fresh exercise every day keeps your skills sharp",summitTools:"AI Tools",summitToolsDesc:"Put what you learned to work on real tasks",summitNews:"AI News",summitNewsDesc:"Stay current — AI changes every week",summitImprove:"Improve a rating",summitImproveDesc:"Re-take lessons below Summit rating",summitShare:"Share your summit",summitCert:"Certificate coming soon",contentUpdated:"Content reviewed",lockedReason:"Finish the previous stop to unlock",copy:"Copy",copied:"Copied ✓",share:"Share",recentResults:"Recent results",savedNote:"Saved on this device",openResult:"Open",clearRecent:"Clear",yourAnswers:"Your answers",newResult:"New",toolsBack:"← Tools",recommended:"Recommended for you",challengeHistory:"Your challenge history",climbingToward:"Climbing toward",dataAccount:"Data & account",exportData:"Export my data",resetProgress:"Reset my progress",deleteAccount:"Delete my account",resetConfirm:"This erases every lesson, score and streak on your account. Type RESET to confirm.",deleteConfirm:"This permanently deletes your account and all your data. Type DELETE to confirm.",exported:"Exported ✓ (copied to clipboard)",textSize:"Text size",textNormal:"Normal",textLarge:"Large",reduceMotion:"Reduce motion",whatIsLumicamp:"Lumicamp teaches you to actually use AI — short lessons, real practice, in plain language. Free.",team:"Team",teamDesc:"Set up Lumicamp for your company, or see your team's AI policy",teamOpen:"Open team",getCert:"🎓 Get my certificate",certReady:"Your certificate",verifyAt:"Verify at",certNeedAll:"Complete every lesson on the mountain to earn your certificate",certSignIn:"Sign in to earn a certificate when you finish",yourPolicy:"Your company's AI policy",teamProgress:"Your progress counts toward your team",skipAhead:"Already comfortable with AI?",skipAheadDesc:"You can skim the lessons — the practice at the end still unlocks the next stop."},
+  ar:{greeting:h=>h<12?"صباح الخير":h<17?"مساء الخير":"مساء الخير",map:"الخريطة →",back:"رجوع →",signIn:"تسجيل الدخول",signUp:"إنشاء حساب",email:"البريد الإلكتروني",password:"كلمة المرور",startClimbing:"ابدأ التسلق",createAccount:"إنشاء حساب",checkEmail:"!تحقق من بريدك",weSentLink:"أرسلنا رابطاً إلى",loading:"...جاري تحميل Lumicamp",tapIfStuck:"اضغط في أي مكان إذا توقف",startPractice:"← ابدأ التمرين",completeLesson:"← أكمل الدرس",nextQ:"← السؤال التالي",seeResults:"← عرض نتائجي",retry:"← أعد المحاولة لتقييم أعلى",tryAgain:"حاول مرة أخرى",reviewFirst:"راجع الدرس أولاً →",need70:"تحتاج 70% أو أعلى لاجتياز هذا الدرس",points:"النقاط المكتسبة",shareRating:"📤 شارك تقييمي",shareProgress:"📤 شارك تقدمي",askLumi:"اسأل لومي",questionsHelp:"أسئلة؟ اسأل لومي",guideHere:"مرشدك هنا للمساعدة",peoplAsk:"...الناس يسألون عادة",lumiGuide:"لومي — المرشد",hint:"تلميح",why:"لماذا؟",check:"تحقق من الإجابة",lumiFeedback:"ملاحظات لومي",lumiReviewing:"...لومي يراجع",submit:"أرسل للمراجعة",dailyChallenge:"التحدي اليومي",keepStreak:"حافظ على سلسلتك",aiNews:"أخبار الذكاء",live:"مباشر",newsDesc:"أخبار الذكاء اليوم مبسطة بواسطة لومي",newsSearch:"...لومي يبحث عن أخبار اليوم",aiTools:"أدوات الذكاء",toolsDesc:"سير عمل موجه خطوة بخطوة",profile:"الملف الشخصي",dayStreak:"أيام متتالية",lessonsDone:"دروس مكتملة",lumiChats:"محادثات لومي",achievements:"الإنجازات",altRatings:"تقييمات الارتفاع المكتسبة",summit:"القمة",ridge:"التلال",graded:"مُقيَّم",learningPaths:"مسارات التعلم",calendar:"تقويم النشاط",bestStreak:"أفضل سلسلة",freezes:"متبقية",lightMode:"☀️ وضع فاتح",darkMode:"🌙 وضع داكن",signOut:"تسجيل الخروج",language:"اللغة",lessons:"دروس",sections:"أقسام",practice:"تمارين",completed:"مكتمل",submitChallenge:"أرسل التحدي ⚡",challengeComplete:"!🔥 التحدي مكتمل",challengeDesc:"أكمل تحدي اليوم للحفاظ على سلسلتك",simpleVersion:"النسخة المبسطة",whyMatters:"لماذا يهمك هذا",askAboutThis:"اسأل لومي عن هذا",explainPlain:"احصل على شرح بلغة بسيطة",claimSummit:"🏔️ !احصل على تقييم القمة",claimRidge:"⛰️ !احصل على تقييم التلال",completeBtn:"✦ أكمل الدرس",next:"التالي",skip:"تخطي",startJourney:"← ابدأ رحلتي",altitude:"الارتفاع",toSummit:"إلى القمة",tapExplore:"اضغط للاستكشاف",tools6:"6 أدوات",typeAnswer:"...اكتب إجابتك",practiceOf:"من",backToLesson:"العودة للدرس →",lesson:"درس",nextUp:"التالي",continueLesson:"متابعة",lessonDone:"!اكتمل الدرس",pathDone:"لقد أكملت كل الدروس هنا",nextStop:"المحطة التالية على المسار",backToMap:"← العودة إلى الخريطة",lessonsLeft:"دروس متبقية",oneLessonLeft:"درس واحد متبقٍ",inProgress:"قيد التقدم",challengeDone:"✓ تم اليوم",comeBackTomorrow:"تحدٍ جديد غدًا",updatedNews:"…جارٍ التحديث",cachedNews:"نعرض أحدث الأخبار التي وجدناها — يتم التحديث في الخلفية",newsFrom:"من",refreshNews:"تحديث",yourOwnExample:"الآن دورك",hintTitle:"…محتار؟ فكّر في",exampleTitle:"مثال",tooSimilar:"يبدو هذا مشابهًا جدًا للسؤال نفسه. حاول كتابته بكلماتك وتفاصيلك الخاصة.",summitTitle:"!لقد وصلت إلى القمة",summitSub:"اكتملت كل دروس الجبل. هذا يضعك في مقدمة معظم الناس في استخدام الذكاء الاصطناعي.",summitStats:"رحلتك",summitNext:"إلى أين بعد ذلك؟",summitDaily:"التحدي اليومي",summitDailyDesc:"تمرين جديد كل يوم يبقي مهاراتك حادة",summitTools:"أدوات الذكاء الاصطناعي",summitToolsDesc:"طبّق ما تعلمته على مهام حقيقية",summitNews:"أخبار الذكاء الاصطناعي",summitNewsDesc:"ابقَ على اطلاع — الذكاء الاصطناعي يتغير كل أسبوع",summitImprove:"حسّن تقييمًا",summitImproveDesc:"أعد الدروس التي لم تصل فيها إلى تقييم القمة",summitShare:"شارك قمتك",summitCert:"الشهادة قريبًا",contentUpdated:"تمت مراجعة المحتوى",lockedReason:"أكمل المحطة السابقة لفتح هذه",copy:"نسخ",copied:"✓ تم النسخ",share:"مشاركة",recentResults:"النتائج الأخيرة",savedNote:"محفوظ على هذا الجهاز",openResult:"فتح",clearRecent:"مسح",yourAnswers:"إجاباتك",newResult:"جديد",toolsBack:"الأدوات →",recommended:"موصى به لك",challengeHistory:"سجل تحدياتك",climbingToward:"تتسلق نحو",dataAccount:"البيانات والحساب",exportData:"تصدير بياناتي",resetProgress:"إعادة ضبط تقدمي",deleteAccount:"حذف حسابي",resetConfirm:"سيمسح هذا كل الدروس والدرجات والسلاسل في حسابك. اكتب RESET للتأكيد.",deleteConfirm:"سيحذف هذا حسابك وكل بياناتك نهائيًا. اكتب DELETE للتأكيد.",exported:"(تم التصدير ✓ (نُسخ إلى الحافظة",textSize:"حجم النص",textNormal:"عادي",textLarge:"كبير",reduceMotion:"تقليل الحركة",whatIsLumicamp:"لوميكامب يعلّمك استخدام الذكاء الاصطناعي فعليًا — دروس قصيرة وتمارين حقيقية بلغة بسيطة. مجانًا.",team:"الفريق",teamDesc:"أعدّ لوميكامب لشركتك، أو اطّلع على سياسة الذكاء الاصطناعي لفريقك",teamOpen:"فتح الفريق",getCert:"🎓 احصل على شهادتي",certReady:"شهادتك",verifyAt:"تحقق على",certNeedAll:"أكمل كل دروس الجبل للحصول على شهادتك",certSignIn:"سجّل الدخول للحصول على شهادة عند الانتهاء",yourPolicy:"سياسة الذكاء الاصطناعي في شركتك",teamProgress:"تقدمك يُحتسب لفريقك",skipAhead:"مرتاح مع الذكاء الاصطناعي بالفعل؟",skipAheadDesc:"يمكنك تصفح الدروس سريعًا — التمرين في النهاية لا يزال يفتح المحطة التالية."},
+  fr:{greeting:h=>h<12?"Bonjour":h<17?"Bon après-midi":"Bonsoir",map:"← Carte",back:"← Retour",signIn:"Se connecter",signUp:"S'inscrire",email:"E-mail",password:"Mot de passe",startClimbing:"Commencer",createAccount:"Créer un compte",checkEmail:"Vérifiez votre e-mail !",weSentLink:"Nous avons envoyé un lien à",loading:"Chargement de Lumicamp...",tapIfStuck:"Appuyez si bloqué",startPractice:"Commencer →",completeLesson:"Terminer →",nextQ:"Suivante →",seeResults:"Voir mes résultats →",retry:"Réessayer →",tryAgain:"Réessayer",reviewFirst:"← Revoir la leçon",need70:"70% minimum pour réussir",points:"Points gagnés",shareRating:"📤 Partager ma note",shareProgress:"📤 Partager mes progrès",askLumi:"Demander à Lumi",questionsHelp:"Questions ? Demandez à Lumi",guideHere:"Votre guide est là",peoplAsk:"Questions fréquentes...",lumiGuide:"Lumi — Guide",hint:"Indice",why:"Pourquoi ?",check:"Vérifier",lumiFeedback:"Avis de Lumi",lumiReviewing:"Lumi examine...",submit:"Soumettre",dailyChallenge:"Défi du jour",keepStreak:"Gardez votre série",aiNews:"Actu IA",live:"Direct",newsDesc:"Actus IA simplifiées par Lumi",newsSearch:"Lumi cherche les actus...",aiTools:"Outils IA",toolsDesc:"Workflows guidés",profile:"Profil",dayStreak:"Jours consécutifs",lessonsDone:"Leçons faites",lumiChats:"Discussions",achievements:"Réussites",altRatings:"Notes d'altitude",summit:"Sommet",ridge:"Crête",graded:"Noté",learningPaths:"Parcours",calendar:"Calendrier d'activité",bestStreak:"Meilleure série",freezes:"restantes",lightMode:"☀️ Mode clair",darkMode:"🌙 Mode sombre",signOut:"Se déconnecter",language:"Langue",lessons:"leçons",sections:"sections",practice:"exercices",completed:"Terminé",submitChallenge:"Soumettre ⚡",challengeComplete:"🔥 Défi terminé !",challengeDesc:"Complétez le défi pour garder votre série",simpleVersion:"Version simple",whyMatters:"Pourquoi c'est important",askAboutThis:"Demander à Lumi",explainPlain:"Explication simple",claimSummit:"🏔️ Note Sommet !",claimRidge:"⛰️ Note Crête !",completeBtn:"✦ Terminer",next:"Suivant",skip:"Passer",startJourney:"Commencer →",altitude:"Altitude",toSummit:"vers le sommet",tapExplore:"Appuyez pour explorer",tools6:"6 outils",typeAnswer:"Tapez votre réponse...",practiceOf:"sur",backToLesson:"← Retour à la leçon",lesson:"Leçon",nextUp:"À suivre",continueLesson:"Continuer",lessonDone:"Leçon terminée !",pathDone:"Vous avez terminé toutes les leçons ici",nextStop:"Prochaine étape du sentier",backToMap:"Retour à la carte →",lessonsLeft:"leçons restantes",oneLessonLeft:"1 leçon restante",inProgress:"En cours",challengeDone:"Fait pour aujourd'hui ✓",comeBackTomorrow:"Nouveau défi demain",updatedNews:"Mise à jour…",cachedNews:"Voici les dernières actualités trouvées — actualisation en arrière-plan",newsFrom:"De",refreshNews:"Actualiser",yourOwnExample:"À vous de jouer",hintTitle:"Bloqué ? Pensez à…",exampleTitle:"Exemple",tooSimilar:"Cela ressemble beaucoup à la question elle-même. Essayez avec vos propres mots et vos propres détails.",summitTitle:"Vous avez atteint le Sommet !",summitSub:"Toutes les leçons de la montagne sont terminées. Vous êtes désormais en avance sur la plupart des gens pour utiliser l'IA.",summitStats:"Votre ascension",summitNext:"Et maintenant ?",summitDaily:"Défi quotidien",summitDailyDesc:"Un nouvel exercice chaque jour pour rester affûté",summitTools:"Outils IA",summitToolsDesc:"Appliquez ce que vous avez appris à de vraies tâches",summitNews:"Actu IA",summitNewsDesc:"Restez à jour — l'IA change chaque semaine",summitImprove:"Améliorer une note",summitImproveDesc:"Refaites les leçons sous la note Sommet",summitShare:"Partager votre sommet",summitCert:"Certificat bientôt disponible",contentUpdated:"Contenu révisé",lockedReason:"Terminez l'étape précédente pour débloquer",copy:"Copier",copied:"Copié ✓",share:"Partager",recentResults:"Résultats récents",savedNote:"Enregistré sur cet appareil",openResult:"Ouvrir",clearRecent:"Effacer",yourAnswers:"Vos réponses",newResult:"Nouveau",toolsBack:"← Outils",recommended:"Recommandé pour vous",challengeHistory:"Votre historique de défis",climbingToward:"Objectif",dataAccount:"Données et compte",exportData:"Exporter mes données",resetProgress:"Réinitialiser ma progression",deleteAccount:"Supprimer mon compte",resetConfirm:"Cela efface toutes les leçons, notes et séries de votre compte. Tapez RESET pour confirmer.",deleteConfirm:"Cela supprime définitivement votre compte et toutes vos données. Tapez DELETE pour confirmer.",exported:"Exporté ✓ (copié dans le presse-papiers)",textSize:"Taille du texte",textNormal:"Normale",textLarge:"Grande",reduceMotion:"Réduire les animations",whatIsLumicamp:"Lumicamp vous apprend à vraiment utiliser l'IA — leçons courtes, pratique réelle, langage simple. Gratuit.",team:"Équipe",teamDesc:"Configurez Lumicamp pour votre entreprise, ou consultez la politique IA de votre équipe",teamOpen:"Ouvrir l'équipe",getCert:"🎓 Obtenir mon certificat",certReady:"Votre certificat",verifyAt:"Vérifier sur",certNeedAll:"Terminez toutes les leçons de la montagne pour obtenir votre certificat",certSignIn:"Connectez-vous pour obtenir un certificat à la fin",yourPolicy:"La politique IA de votre entreprise",teamProgress:"Vos progrès comptent pour votre équipe",skipAhead:"Déjà à l'aise avec l'IA ?",skipAheadDesc:"Vous pouvez survoler les leçons — l'exercice final débloque quand même l'étape suivante."},
 };
 let _lang=localStorage.getItem("lumicamp_lang")||"en";
 let T={...UI[_lang]};
@@ -922,6 +922,16 @@ const JoinOrgView = ({token,user,onClose,onNeedSignIn,onMembershipActivated}) =>
   const runJoin=useCallback(async()=>{
     if(!user?.id){setState("needsAuth");return}
     setState("loading");setErr("");
+    // Preferred path: one RPC validates the link, seat cap and email, then
+    // creates or activates the membership (migration 20260908).
+    const rpc=await db.joinOrg(token);
+    if(!rpc.error){if(rpc.data?.org_name)setOrgName(rpc.data.org_name);setState("success");onMembershipActivated?.();return}
+    if(rpc.error.code!=="42883"){
+      const m=rpc.error.message||"";
+      const msgs={invalid_invite:"This invite link is invalid.",expired_invite:"This invite has expired.",used_invite:"This invite was already used.",wrong_email:"This invite was sent to a different email address.",not_invited:"Ask your team admin to add your email first.",seats_full:"This team has no seats left — ask your admin."};
+      const key=Object.keys(msgs).find(k=>m.includes(k));
+      setState("error");setErr(key?msgs[key]:"Could not join this team right now.");return;
+    }
     const inviteRes=await db.getInviteByToken(token);
     const invite=inviteRes.data;
     if(inviteRes.error||!invite){setState("error");setErr("This invite link is invalid.");return}
@@ -986,6 +996,195 @@ const CertVerifyView = ({code,onBack}) => {
           <p style={{color:C.textDim,fontSize:12,fontFamily:C.font,marginTop:4}}>Code: {code}</p>
         </div>}
       </div>
+    </div>
+  </div>);
+};
+
+// LUMICAMP FOR TEAMS
+const pathSizes=()=>Object.fromEntries(Object.entries(LESSONS).map(([k,v])=>[k,v.length]));
+const APP_ORIGIN="https://lumicamp.app";
+const downloadText=async(name,text,mime="text/csv")=>{
+  await copyText(text);
+  if(_isNative){try{if(navigator.share)await navigator.share({title:name,text})}catch{/* share sheet dismissed */}return"copied"}
+  try{const blob=new Blob([text],{type:mime+";charset=utf-8"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);return"downloaded"}catch{return"copied"}
+};
+const csvEscape=(v)=>{const t=v==null?"":String(v);return /[",\n]/.test(t)?'"'+t.replace(/"/g,'""')+'"':t};
+
+const CertButton = ({user,compact}) => {
+  const [cert,setCert]=useState(null);const [busy,setBusy]=useState(false);const [msg,setMsg]=useState("");const [copied,setCopied]=useState(false);
+  useEffect(()=>{if(!user?.id)return;let m=true;db.myCertificate().then(({data})=>{if(m&&data)setCert(data)});return()=>{m=false}},[user]);
+  const issue=async()=>{
+    setBusy(true);setMsg("");
+    const {data,error}=await db.issueMyCertificate(pathSizes());
+    setBusy(false);
+    if(error){const e=error.message||"";setMsg(e.includes("not_complete")?T.certNeedAll:e.includes("42883")?"Certificates aren't enabled on this server yet.":"Could not issue the certificate right now.");return}
+    setCert(data);
+  };
+  if(!user)return<p style={{color:C.textDim,fontSize:11,fontFamily:C.font,textAlign:"center",margin:0}}>🎓 {T.certSignIn}</p>;
+  if(cert){
+    const link=`${APP_ORIGIN}/verify/${cert.verify_code}`;
+    return<div style={{background:C.mode==="dark"?"rgba(212,165,90,.08)":"rgba(212,165,90,.12)",border:`1px solid ${C.gold}66`,borderRadius:14,padding:14}}>
+      <p style={{color:C.goldLight,fontSize:13,fontWeight:700,fontFamily:C.font,margin:"0 0 4px"}}>🎓 {T.certReady}</p>
+      <p style={{color:C.text,fontSize:15,fontWeight:700,fontFamily:C.font,margin:0}}>{cert.display_name}</p>
+      <p style={{color:C.textMuted,fontSize:12,fontFamily:C.font,margin:"2px 0 8px"}}>{cert.cert_type||"AI Literacy — Core"} · {cert.issued_at?new Date(cert.issued_at).toLocaleDateString():""}</p>
+      <p style={{color:C.textDim,fontSize:12,fontFamily:C.font,margin:"0 0 8px",wordBreak:"break-all"}}>{T.verifyAt} {link}</p>
+      {!compact&&<Btn v="ghost" onClick={async()=>{if(await copyText(link)){setCopied(true);setTimeout(()=>setCopied(false),1500)}}}>{copied?T.copied:"🔗 "+T.copy}</Btn>}
+    </div>;
+  }
+  return<div>
+    <Btn v="ghost" disabled={busy} onClick={issue}>{busy?"…":T.getCert}</Btn>
+    {msg&&<p style={{color:C.textMuted,fontSize:12,fontFamily:C.font,textAlign:"center",margin:"8px 0 0"}}>{msg}</p>}
+  </div>;
+};
+
+const TeamView = ({user,profile,progress,onBack,onSignIn,onOrgChanged}) => {
+  const [orgs,setOrgs]=useState(null);const [setupMissing,setSetupMissing]=useState(false);
+  const [sel,setSel]=useState(null);const [dash,setDash]=useState(null);const [loading,setLoading]=useState(true);
+  const [name,setName]=useState("");const [busy,setBusy]=useState(false);const [msg,setMsg]=useState("");
+  const [invite,setInvite]=useState("");const [emails,setEmails]=useState("");const [policy,setPolicy]=useState({title:"",body:""});
+  const [copied,setCopied]=useState(false);const [exportMsg,setExportMsg]=useState("");const [editPolicy,setEditPolicy]=useState(false);
+  const sizes=pathSizes();const totalLessons=Object.values(sizes).reduce((a,b)=>a+b,0);const totalPaths=Object.keys(sizes).length;
+  const loadOrgs=useCallback(async()=>{
+    if(!user?.id){setLoading(false);return}
+    setLoading(true);
+    const {data,error}=await db.myOrgs();
+    if(error?.code==="42883")setSetupMissing(true);
+    setOrgs(data||[]);
+    const first=(data||[]).find(o=>o.role==="admin")||(data||[])[0]||null;
+    setSel(first);setLoading(false);
+  },[user]);
+  useEffect(()=>{loadOrgs()},[loadOrgs]);
+  const loadDash=useCallback(async()=>{
+    if(!sel||sel.role!=="admin")return;
+    const {data,error}=await db.orgDashboard(sel.org_id,sizes);
+    if(error){setMsg("Could not load the dashboard: "+(error.message||""));return}
+    setDash(data);setPolicy({title:data?.org?.policy_title||"",body:data?.org?.policy_body||""});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[sel]);
+  useEffect(()=>{loadDash()},[loadDash]);
+
+  const create=async()=>{
+    setBusy(true);setMsg("");
+    const {error}=await db.createOrg(name.trim());
+    setBusy(false);
+    if(error){setMsg(error.code==="42883"?"Teams isn't enabled on this server yet.":"Could not create the team: "+(error.message||""));return}
+    setName("");await loadOrgs();onOrgChanged?.();
+  };
+  const getInvite=async()=>{const {data,error}=await db.orgInviteLink(sel.org_id);if(error){setMsg("Could not create an invite link.");return}setInvite(`${APP_ORIGIN}/join/${data}`)};
+  const addMembers=async()=>{
+    const list=emails.split(/[\s,;]+/).map(e=>e.trim()).filter(Boolean);
+    if(!list.length)return;
+    setBusy(true);const {data,error}=await db.orgAddMembers(sel.org_id,list);setBusy(false);
+    if(error){setMsg(error.message?.includes("not_admin")?"Only team admins can add members.":"Could not add members.");return}
+    setEmails("");setMsg(`${data||0} added`);loadDash();
+  };
+  const remove=async(m)=>{
+    if(!window.confirm(`Remove ${m.email} from ${sel.name}?`))return;
+    const {error}=await db.orgRemoveMember(m.member_id);
+    if(error){setMsg(error.message?.includes("last_admin")?"A team needs at least one admin.":"Could not remove this member.");return}
+    loadDash();
+  };
+  const savePolicy=async()=>{
+    setBusy(true);const {error}=await db.updateOrg(sel.org_id,{policy_title:policy.title.trim().slice(0,120)||null,policy_body:policy.body.trim().slice(0,4000)||null});setBusy(false);
+    if(error){setMsg("Could not save the policy.");return}
+    setEditPolicy(false);setMsg("Policy saved ✓");loadDash();
+  };
+  const exportCsv=async()=>{
+    const rows=[["Name","Email","Role","Status","Joined","Lessons done",`Of ${totalLessons}`,"Completion %","Paths complete",`Of ${totalPaths}`,"Avg score","Challenges","Current streak","Longest streak","Last active","Language","Certificate","Certificate issued"]];
+    (dash?.members||[]).forEach(m=>rows.push([m.display_name,m.email,m.role,m.status,m.joined_at?m.joined_at.slice(0,10):"",m.lessons_done,totalLessons,totalLessons?Math.round(100*m.lessons_done/totalLessons):0,m.paths_complete,totalPaths,m.avg_score??"",m.challenges_done,m.current_streak??"",m.longest_streak??"",m.last_active_date||"",m.language||"",m.cert_code||"",m.cert_issued_at?m.cert_issued_at.slice(0,10):""]));
+    const csv=rows.map(r=>r.map(csvEscape).join(",")).join("\n");
+    const how=await downloadText(`lumicamp-${(sel.name||"team").replace(/[^a-z0-9]+/gi,"-").toLowerCase()}-${new Date().toISOString().slice(0,10)}.csv`,csv);
+    setExportMsg(how==="downloaded"?"Downloaded ✓":"Copied to clipboard ✓");setTimeout(()=>setExportMsg(""),2500);
+  };
+
+  const card={background:C.bgCard,border:`1px solid ${C.border}`,borderRadius:16,padding:16,marginBottom:14,position:"relative",zIndex:1};
+  const input={width:"100%",background:"rgba(255,255,255,.04)",borderRadius:12,border:`1px solid ${C.border}`,padding:"11px 14px",color:C.text,fontSize:14,fontFamily:C.font,outline:"none",boxSizing:"border-box"};
+  const label={color:C.textMuted,fontSize:12,fontFamily:C.font,margin:"0 0 6px"};
+  const Tile=({n,l})=><div style={{flex:1,minWidth:0,background:C.mode==="dark"?"rgba(255,255,255,.04)":"rgba(0,0,0,.03)",borderRadius:12,padding:"10px 8px",textAlign:"center"}}><p style={{color:C.goldLight,fontSize:20,fontWeight:800,fontFamily:C.fontDisplay,margin:0}}>{n}</p><p style={{color:C.textDim,fontSize:10,fontFamily:C.font,margin:"2px 0 0"}}>{l}</p></div>;
+
+  const members=dash?.members||[];const active=members.filter(m=>m.status==="active");
+  const avgCompletion=active.length&&totalLessons?Math.round(100*active.reduce((a,m)=>a+m.lessons_done,0)/(active.length*totalLessons)):0;
+  const scored=active.filter(m=>m.avg_score!=null);const avgScore=scored.length?Math.round(scored.reduce((a,m)=>a+Number(m.avg_score),0)/scored.length):null;
+  const certs=members.filter(m=>m.cert_code).length;
+
+  return(<div style={{height:"100vh",overflowY:"auto",background:`linear-gradient(180deg,${C.skyTop},${C.bgDark})`,padding:`${TOP_SAFE+14}px 20px ${BOTTOM_SAFE+24}px`,position:"relative"}}>
+    <Stars/>
+    <div style={{position:"relative",zIndex:1,maxWidth:640,margin:"0 auto"}}>
+      <button onClick={onBack} aria-label="Back" style={{background:"none",border:"none",color:C.gold,fontSize:14,fontFamily:C.font,fontWeight:700,marginBottom:14}}>{T.back}</button>
+      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:14}}><Lumi size={44} mood="excited" level={2}/><div><h2 style={{color:C.text,fontSize:22,fontFamily:C.fontDisplay,fontWeight:700,margin:0}}>👥 {T.team}</h2>{sel&&<p style={{color:C.textMuted,fontSize:13,fontFamily:C.font,margin:"2px 0 0"}}>{sel.name}{sel.role==="admin"?" · admin":""}</p>}</div></div>
+
+      {!user&&<div style={card}><p style={{color:C.textMuted,fontSize:14,fontFamily:C.font,lineHeight:1.7,margin:"0 0 12px"}}>{T.teamDesc}</p><Btn onClick={onSignIn}>{T.signIn}</Btn></div>}
+      {user&&loading&&<p style={{color:C.textMuted,fontSize:14,fontFamily:C.font}}>{T.loading}</p>}
+      {user&&!loading&&setupMissing&&<div style={card}><p style={{color:C.textMuted,fontSize:14,fontFamily:C.font,lineHeight:1.7,margin:0}}>Teams isn't enabled on this server yet. (Owner: run the 20260908 migration.)</p></div>}
+
+      {/* Switch between teams */}
+      {user&&!loading&&orgs&&orgs.length>1&&<div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:12,position:"relative",zIndex:1}}>{orgs.map(o=><button key={o.org_id} onClick={()=>{setSel(o);setDash(null);setInvite("")}} style={{background:sel?.org_id===o.org_id?"rgba(212,165,90,.15)":"transparent",border:`1.5px solid ${sel?.org_id===o.org_id?C.gold:C.border}`,borderRadius:12,padding:"8px 12px",color:C.text,fontSize:13,fontWeight:700,fontFamily:C.font}}>{o.name}</button>)}</div>}
+
+      {/* Create a team */}
+      {user&&!loading&&!setupMissing&&orgs&&orgs.length===0&&<div className="fu" style={card}>
+        <p style={{color:C.text,fontSize:15,fontWeight:700,fontFamily:C.font,margin:"0 0 6px"}}>Set up Lumicamp for your company</p>
+        <p style={{color:C.textMuted,fontSize:13,fontFamily:C.font,lineHeight:1.7,margin:"0 0 12px"}}>Create a team, share one invite link, and see every member's completion, scores and certificates. Free for up to 50 seats.</p>
+        <input value={name} onChange={e=>setName(e.target.value)} placeholder="Company or team name" aria-label="Team name" style={{...input,marginBottom:10}}/>
+        <Btn disabled={busy||name.trim().length<2} onClick={create}>{busy?"…":"Create team"}</Btn>
+        <p style={{color:C.textDim,fontSize:12,fontFamily:C.font,lineHeight:1.6,margin:"10px 0 0"}}>Joined a company through an invite link? Ask your admin for the link — it looks like lumicamp.app/join/…</p>
+      </div>}
+
+      {/* Member view */}
+      {user&&!loading&&sel&&sel.role!=="admin"&&<>
+        <div className="fu" style={card}>
+          <p style={{color:C.green,fontSize:14,fontWeight:700,fontFamily:C.font,margin:"0 0 10px"}}>✓ {T.teamProgress}</p>
+          <div style={{display:"flex",gap:8}}><Tile n={progress.length} l={`${T.lessonsDone} / ${totalLessons}`}/><Tile n={completedPaths(progress).length} l={`${T.learningPaths} / ${totalPaths}`}/><Tile n={Math.max(Streak.getData().current||0,profile?.current_streak||0)} l={T.dayStreak}/></div>
+        </div>
+        {(sel.policy_body||sel.policy_title)&&<div className="fu s1" style={card}>
+          <p style={{color:C.goldLight,fontSize:14,fontWeight:700,fontFamily:C.font,margin:"0 0 6px"}}>📋 {sel.policy_title||T.yourPolicy}</p>
+          <p style={{color:C.text,fontSize:14,fontFamily:C.font,lineHeight:1.75,margin:0,whiteSpace:"pre-wrap"}}>{sel.policy_body}</p>
+        </div>}
+        <div className="fu s2" style={card}><CertButton user={user}/></div>
+      </>}
+
+      {/* Admin dashboard */}
+      {user&&!loading&&sel&&sel.role==="admin"&&<>
+        {msg&&<p style={{color:C.textMuted,fontSize:12,fontFamily:C.font,margin:"0 0 10px"}}>{msg}</p>}
+        <div className="fu" style={card}>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(72px,1fr))",gap:8,marginBottom:12}}><Tile n={`${active.length}/${dash?.org?.seat_limit??"–"}`} l="Seats used"/><Tile n={`${avgCompletion}%`} l="Avg completion"/><Tile n={avgScore==null?"–":`${avgScore}%`} l="Avg score"/><Tile n={certs} l="Certificates"/></div>
+          <p style={label}>Invite link — anyone with it joins your team (90 days, seat-capped)</p>
+          {invite?<div style={{display:"flex",gap:8,alignItems:"center"}}><input readOnly value={invite} aria-label="Invite link" style={{...input,flex:1}} onFocus={e=>e.target.select()}/><button onClick={async()=>{if(await copyText(invite)){setCopied(true);setTimeout(()=>setCopied(false),1500)}}} style={{background:`linear-gradient(135deg,${C.gold},${C.goldDark})`,border:"none",borderRadius:12,padding:"11px 14px",color:"#fff",fontSize:13,fontWeight:700,fontFamily:C.font,whiteSpace:"nowrap"}}>{copied?T.copied:T.copy}</button></div>
+          :<Btn v="ghost" onClick={getInvite}>🔗 Get invite link</Btn>}
+          <p style={{...label,marginTop:12}}>Or pre-register emails (one per line) — they show as “invited” until they join</p>
+          <textarea value={emails} onChange={e=>setEmails(e.target.value)} rows={3} placeholder={"amina@company.com\njose@company.com"} aria-label="Emails to add" style={{...input,resize:"vertical",marginBottom:8}}/>
+          <Btn v="ghost" disabled={busy||!emails.trim()} onClick={addMembers}>{busy?"…":"Add members"}</Btn>
+        </div>
+
+        <div className="fu s1" style={card}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}><p style={{color:C.text,fontSize:14,fontWeight:700,fontFamily:C.font,margin:0}}>Members ({members.length})</p><button onClick={exportCsv} disabled={!members.length} style={{background:"transparent",border:`1px solid ${C.border}`,borderRadius:10,padding:"7px 10px",color:C.gold,fontSize:12,fontWeight:700,fontFamily:C.font}}>{exportMsg||"⬇ Export CSV"}</button></div>
+          {!dash&&<p style={{color:C.textMuted,fontSize:13,fontFamily:C.font}}>{T.loading}</p>}
+          {dash&&!members.length&&<p style={{color:C.textMuted,fontSize:13,fontFamily:C.font,margin:0}}>No members yet — share the invite link above.</p>}
+          {members.map(m=>{const pct=totalLessons?Math.round(100*m.lessons_done/totalLessons):0;const isMe=m.email&&user.email&&m.email.toLowerCase()===user.email.toLowerCase();
+            return<div key={m.member_id} style={{borderTop:`1px solid ${C.border}`,padding:"10px 0"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
+                <div style={{minWidth:0,flex:1}}><p style={{color:C.text,fontSize:14,fontWeight:700,fontFamily:C.font,margin:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{m.display_name}{m.role==="admin"?" ★":""}</p><p style={{color:C.textDim,fontSize:11,fontFamily:C.font,margin:"1px 0 0",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{m.email}</p></div>
+                <span style={{fontSize:11,fontWeight:700,fontFamily:C.font,padding:"3px 8px",borderRadius:8,color:m.status==="active"?C.green:C.textMuted,background:m.status==="active"?"rgba(74,187,120,.12)":"rgba(255,255,255,.05)"}}>{m.status}</span>
+                {!isMe&&<button onClick={()=>remove(m)} aria-label={`Remove ${m.email}`} style={{background:"none",border:"none",color:C.textDim,fontSize:16,padding:"0 2px"}}>✕</button>}
+              </div>
+              {m.status==="active"&&<>
+                <div style={{height:6,background:C.mode==="dark"?"rgba(255,255,255,.06)":"rgba(0,0,0,.06)",borderRadius:3,margin:"8px 0 6px",overflow:"hidden"}}><div style={{width:`${pct}%`,height:"100%",background:`linear-gradient(90deg,${C.gold},${C.goldLight})`,borderRadius:3}}/></div>
+                <p style={{color:C.textMuted,fontSize:11,fontFamily:C.font,margin:0,lineHeight:1.6}}>{m.lessons_done}/{totalLessons} lessons ({pct}%) · {m.paths_complete}/{totalPaths} paths · score {m.avg_score??"–"}{m.avg_score!=null?"%":""} · 🔥 {m.current_streak??0} · {m.challenges_done} challenges · last active {m.last_active_date||"–"}{m.cert_code?` · 🎓 ${m.cert_code}`:""}</p>
+              </>}
+            </div>})}
+        </div>
+
+        <div className="fu s2" style={card}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}><p style={{color:C.text,fontSize:14,fontWeight:700,fontFamily:C.font,margin:0}}>📋 Company AI policy</p>{!editPolicy&&<button onClick={()=>setEditPolicy(true)} style={{background:"transparent",border:`1px solid ${C.border}`,borderRadius:10,padding:"7px 10px",color:C.gold,fontSize:12,fontWeight:700,fontFamily:C.font}}>Edit</button>}</div>
+          <p style={{color:C.textDim,fontSize:12,fontFamily:C.font,lineHeight:1.6,margin:"0 0 10px"}}>Shown to every member inside the app — approved tools, what never goes into an AI tool, who to ask. Keep it short.</p>
+          {editPolicy?<>
+            <input value={policy.title} onChange={e=>setPolicy({...policy,title:e.target.value})} placeholder="Title, e.g. How we use AI at Acme" aria-label="Policy title" style={{...input,marginBottom:8}}/>
+            <textarea value={policy.body} onChange={e=>setPolicy({...policy,body:e.target.value})} rows={7} placeholder={"1. Approved tools: …\n2. Never paste customer data, passwords or contracts into an AI tool.\n3. Always check AI output before sending it.\n4. Questions: ask …"} aria-label="Policy text" style={{...input,resize:"vertical",marginBottom:8}}/>
+            <div style={{display:"flex",gap:8}}><div style={{flex:1}}><Btn v="ghost" onClick={()=>setEditPolicy(false)}>Cancel</Btn></div><div style={{flex:1}}><Btn disabled={busy} onClick={savePolicy}>{busy?"…":"Save policy"}</Btn></div></div>
+          </>:(policy.body||policy.title)?<div><p style={{color:C.goldLight,fontSize:13,fontWeight:700,fontFamily:C.font,margin:"0 0 4px"}}>{policy.title}</p><p style={{color:C.text,fontSize:13,fontFamily:C.font,lineHeight:1.7,margin:0,whiteSpace:"pre-wrap"}}>{policy.body}</p></div>
+          :<p style={{color:C.textMuted,fontSize:13,fontFamily:C.font,margin:0}}>No policy yet.</p>}
+        </div>
+        <div className="fu s3" style={card}><CertButton user={user}/></div>
+      </>}
     </div>
   </div>);
 };
@@ -1619,7 +1818,7 @@ const SummitView = ({user,profile,progress,onBack,onOpenChallenge,onOpenTools,on
 
       <div className="fu s4" style={{display:"flex",flexDirection:"column",gap:8}}>
         <Btn v="gold" onClick={()=>setShowShare(true)}>📤 {T.summitShare}</Btn>
-        <p style={{color:C.textDim,fontSize:11,fontFamily:C.font,textAlign:"center",margin:0}}>🎓 {T.summitCert}</p>
+        <CertButton user={user}/>
       </div>
       {showShare&&<ShareCard type="progress" data={{lessons:progress.length,paths:donePaths.length,streak,level}} onClose={()=>setShowShare(false)}/>}
     </div>
@@ -1882,7 +2081,7 @@ const setA11y=(patch)=>{const n={...getA11y(),...patch};try{localStorage.setItem
 const applyA11y=(a=getA11y())=>{try{document.documentElement.dataset.textLarge=a.textLarge?"1":"";document.documentElement.dataset.reduceMotion=a.reduceMotion?"1":""}catch{}};
 applyA11y();
 
-const ProfileView = ({user,profile,progress,onBack,onSignOut,onToggleTheme,onChangeLang,onSignIn,onAccountGone}) => {
+const ProfileView = ({user,profile,progress,onBack,onSignOut,onToggleTheme,onChangeLang,onSignIn,onAccountGone,onOpenTeam}) => {
   const [a11y,setA11yState]=useState(()=>getA11y());
   const [confirm,setConfirm]=useState(null); // "reset" | "delete"
   const [confirmText,setConfirmText]=useState("");
@@ -2003,6 +2202,13 @@ const ProfileView = ({user,profile,progress,onBack,onSignOut,onToggleTheme,onCha
         {[["textNormal",false],["textLarge",true]].map(([k,v])=><button key={k} aria-pressed={a11y.textLarge===v} onClick={()=>setA11yState(setA11y({textLarge:v}))} style={{flex:1,background:a11y.textLarge===v?"rgba(212,165,90,.15)":"transparent",border:`1.5px solid ${a11y.textLarge===v?C.gold:C.border}`,borderRadius:12,padding:"10px",color:C.text,fontSize:v?16:14,fontWeight:700,fontFamily:C.font}}>Aa {T[k]}</button>)}
       </div>
       <button aria-pressed={a11y.reduceMotion} onClick={()=>setA11yState(setA11y({reduceMotion:!a11y.reduceMotion}))} style={{width:"100%",background:a11y.reduceMotion?"rgba(212,165,90,.15)":"transparent",border:`1.5px solid ${a11y.reduceMotion?C.gold:C.border}`,borderRadius:12,padding:"10px",color:C.text,fontSize:14,fontWeight:700,fontFamily:C.font,textAlign:"left",display:"flex",justifyContent:"space-between"}}><span>{T.reduceMotion}</span><span>{a11y.reduceMotion?"✓":"○"}</span></button>
+    </div>
+
+    {/* Team */}
+    <div className="fu s4" style={{background:C.bgCard,border:`1px solid ${C.border}`,borderRadius:16,padding:16,marginBottom:16,position:"relative",zIndex:1}}>
+      <p style={{color:C.text,fontSize:14,fontWeight:700,fontFamily:C.font,margin:"0 0 4px"}}>👥 {T.team}</p>
+      <p style={{color:C.textMuted,fontSize:12,fontFamily:C.font,lineHeight:1.6,margin:"0 0 10px"}}>{T.teamDesc}</p>
+      <Btn v="ghost" onClick={onOpenTeam}>{T.teamOpen} →</Btn>
     </div>
 
     {/* Data & account */}
@@ -2245,6 +2451,7 @@ export default function Lumicamp(){
       window.history.replaceState({},"","/");
       return;
     }
+    if(path==="/teams"||path==="/teams/"){window.location.replace("/teams.html");return}
     if(path.startsWith("/verify/")){
       const code=decodeURIComponent(path.split("/")[2]||"").trim();
       if(code){setRouteToken(code);setScreen("certVerify")}
@@ -2258,11 +2465,13 @@ export default function Lumicamp(){
   useEffect(()=>{
     // Failsafe: if loading takes more than 5 seconds, force it to stop
     const timeout=setTimeout(()=>{setLoading(false);console.warn("Loading timeout — forced to app screen")},5000);
+    const loadedUidRef={current:null};
     const init=async()=>{
       refreshLessonOverrides(); // non-blocking; applies for the next screen
       try{
         const s=await db.getSession();
         if(s?.user){
+          loadedUidRef.current=s.user.id;
           setUser(s.user);
           try{
             const p=await db.getProfile(s.user.id);
@@ -2278,12 +2487,27 @@ export default function Lumicamp(){
       setLoading(false);
     };
     init();
-    const{data}=db.onAuth(async(ev,s)=>{
-      // Clear the sign-in modal the moment ANY session arrives (OTP, magic link,
-      // restored session, OAuth) — otherwise the stale flag re-opens it on the
-      // next screen now that the overlay renders everywhere.
+    // IMPORTANT: this callback must NOT await anything that touches Supabase.
+    // supabase-js fires it while holding its auth lock (every tab refocus runs
+    // _recoverAndRefresh → SIGNED_IN inside the lock). A DB call in here needs
+    // getSession() → the same lock → circular wait, never released. After that,
+    // every getSession() in the app hangs — which is why Allie saw "Lumi is
+    // reviewing…" forever after resetting and switching tabs. So: return
+    // synchronously and do the real work on the next tick, once the lock is free.
+    const{data}=db.onAuth((ev,s)=>{
       if(s?.user)setShowAuthPrompt(false);
-      if(ev==="SIGNED_IN"&&s?.user){setUser(s.user);try{const p=await db.getProfile(s.user.id);setProfile(p||{});requireDisplayName(p||{},s.user);applyProfilePrefs(p)}catch(e){setProfile({});requireDisplayName({},s.user)}setProgress(await loadProgress(s.user.id,getLocalProgress()));try{setActiveOrgId(await db.getActiveOrgByUser(s.user.id))}catch(e){setActiveOrgId(null)}setShowAuthPrompt(false);flushRef.current()}else if(ev==="SIGNED_OUT"){setUser(null);setProfile(null);setActiveOrgId(null);setProgress(getLocalProgress())}});
+      if(ev==="SIGNED_IN"&&s?.user){
+        const u=s.user;setUser(u);
+        const first=loadedUidRef.current!==u.id;loadedUidRef.current=u.id;
+        setTimeout(async()=>{
+          if(!first){flushRef.current();return} // refocus of the same user: nothing to reload
+          try{const p=await db.getProfile(u.id);setProfile(p||{});requireDisplayName(p||{},u);applyProfilePrefs(p)}catch(e){setProfile({});requireDisplayName({},u)}
+          try{setProgress(await loadProgress(u.id,getLocalProgress()))}catch(e){console.warn("progress load failed:",e)}
+          try{setActiveOrgId(await db.getActiveOrgByUser(u.id))}catch(e){setActiveOrgId(null)}
+          setShowAuthPrompt(false);flushRef.current();
+        },0);
+      }else if(ev==="SIGNED_OUT"){loadedUidRef.current=null;setUser(null);setProfile(null);setActiveOrgId(null);setProgress(getLocalProgress())}
+    });
     return()=>{clearTimeout(timeout);data?.subscription?.unsubscribe?.()};
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[]);
@@ -2360,9 +2584,10 @@ export default function Lumicamp(){
   else if(screen==="tools")content=<ToolsView uid={user?.id} profile={profile} user={user} onBack={goMap}/>;
   else if(screen==="challenge")content=<ChallengeView uid={user?.id} profile={profile} user={user} onBack={goMap} onActivity={refresh}/>;
   else if(screen==="achievements")content=<AchievementsView profile={profile} progress={progress} onBack={goMap}/>;
-  else if(screen==="profile")content=<ProfileView user={user} profile={profile} progress={progress} onBack={goMap} onSignOut={out} onToggleTheme={toggleTheme} onChangeLang={changeLang} onSignIn={()=>setShowAuthPrompt(true)} onAccountGone={async(kind)=>{if(kind==="deleted"){setUser(null);setProfile(null);setActiveOrgId(null);setProgress([]);goMap()}else{setProgress([]);setLocalProgress([]);try{const p=await db.getProfile(user.id);setProfile(p||{});Streak.syncFromServer(p)}catch{}goMap()}}}/>;
+  else if(screen==="profile")content=<ProfileView user={user} profile={profile} progress={progress} onBack={goMap} onSignOut={out} onToggleTheme={toggleTheme} onChangeLang={changeLang} onSignIn={()=>setShowAuthPrompt(true)} onOpenTeam={()=>setScreen("team")} onAccountGone={async(kind)=>{if(kind==="deleted"){setUser(null);setProfile(null);setActiveOrgId(null);setProgress([]);goMap()}else{setProgress([]);setLocalProgress([]);try{const p=await db.getProfile(user.id);setProfile(p||{});Streak.syncFromServer(p)}catch{}goMap()}}}/>;
   else if(screen==="joinOrg")content=<JoinOrgView token={routeToken} user={user} onClose={goMap} onNeedSignIn={()=>setShowAuthPrompt(true)} onMembershipActivated={async()=>{if(user?.id){setActiveOrgId(await db.getActiveOrgByUser(user.id))}}}/>;
   else if(screen==="certVerify")content=<CertVerifyView code={routeToken} onBack={goMap}/>;
+  else if(screen==="team")content=<TeamView user={user} profile={profile} progress={progress} onBack={()=>setScreen("profile")} onSignIn={()=>setShowAuthPrompt(true)} onOrgChanged={async()=>{if(user?.id){try{setActiveOrgId(await db.getActiveOrgByUser(user.id))}catch{}}}}/>;
   else content=<>
     <MilestoneCheck progress={progress}/>
     <WorldMap user={user} profile={profile} progress={progress} onToggleTheme={toggleTheme} onChangeLang={changeLang}
