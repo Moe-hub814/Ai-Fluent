@@ -1246,7 +1246,7 @@ const WorldMap = ({user,profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpen
   const trailPending=dk?"rgba(212,165,90,.2)":"rgba(160,120,50,.25)";
   const trailKnot=dk?"rgba(212,165,90,.25)":"rgba(160,120,50,.3)";
 
-  return(<div style={{height:"100vh",position:"relative",overflow:"hidden",background:dk
+  return(<div className="lc-map" style={{height:"100vh",position:"relative",overflow:"hidden",background:dk
     ?"linear-gradient(180deg, #060D1A 0%, #0B1A2E 12%, #102840 30%, #1A4060 48%, #1A4838 65%, #1E5040 78%, #2A6A48 90%, #1E4A35 100%)"
     :"linear-gradient(180deg, #D8E8F8 0%, #C0D8F0 12%, #A8C8E0 30%, #90B8D0 48%, #88B8A0 65%, #6AA878 78%, #5A9868 90%, #4A8858 100%)"}}>
 
@@ -1406,11 +1406,42 @@ const WorldMap = ({user,profile,progress,onOpenLoc,onOpenNews,onOpenTools,onOpen
     })}
 
     {/* Chat with Lumi — the open sandbox */}
-    {onOpenChat&&<button onClick={onOpenChat} aria-label={T.chatWithLumi} style={{position:"fixed",right:"max(16px, calc(50% - 344px))",bottom:(88+BOTTOM_SAFE)+"px",zIndex:21,display:"flex",alignItems:"center",gap:8,padding:"8px 14px 8px 8px",borderRadius:999,background:dk?"rgba(12,24,40,.92)":"rgba(255,255,255,.95)",border:`1px solid ${C.borderGold}`,boxShadow:"0 8px 24px rgba(0,0,0,.28)",backdropFilter:"blur(12px)"}}><Lumi size={30}/><span style={{color:C.goldLight,fontSize:13,fontWeight:800,fontFamily:C.font}}>{T.chatWithLumi}</span></button>}
+    {onOpenChat&&<button className="lc-mobile-only" onClick={onOpenChat} aria-label={T.chatWithLumi} style={{position:"fixed",right:16,bottom:(88+BOTTOM_SAFE)+"px",zIndex:21,display:"flex",alignItems:"center",gap:8,padding:"8px 14px 8px 8px",borderRadius:999,background:dk?"rgba(12,24,40,.92)":"rgba(255,255,255,.95)",border:`1px solid ${C.borderGold}`,boxShadow:"0 8px 24px rgba(0,0,0,.28)",backdropFilter:"blur(12px)"}}><Lumi size={30}/><span style={{color:C.goldLight,fontSize:13,fontWeight:800,fontFamily:C.font}}>{T.chatWithLumi}</span></button>}
+
+    {/* Desktop: the ground band under the mountain becomes a dashboard row */}
+    {(()=>{
+      const cur=LOCS.find(l=>status(l)==="current"&&l.id!=="master");
+      const fin=cur?locDone(cur.id):0;const total=cur?pathLessonCount(cur.id):0;
+      const nextIdx=cur?Array.from({length:total},(_,i)=>i).find(i=>!progress.some(p=>p.path_id===cur.id&&Number(p.lesson_index)===i)):null;
+      const nextLesson=cur&&nextIdx!=null?LESSONS[cur.id]?.[nextIdx]:null;
+      const card=(bg,border)=>({background:bg,border:`1px solid ${border}`,borderRadius:16,padding:"14px 16px",display:"flex",alignItems:"center",gap:12,textAlign:"left",cursor:"pointer",backdropFilter:"blur(10px)"});
+      return(<div className="lc-desktop-only" style={{position:"absolute",left:0,right:0,bottom:0,zIndex:15,padding:"0 32px 28px"}}>
+        <div style={{maxWidth:1040,margin:"0 auto",display:"grid",gridTemplateColumns:"1.4fr 1fr 1fr 1fr",gap:12}}>
+          <button onClick={()=>cur&&onOpenLoc(cur.id)} style={card(dk?"rgba(6,13,26,.72)":"rgba(255,255,255,.8)",C.borderGold)}>
+            <span style={{fontSize:28,lineHeight:1}}>{cur?.icon||"🏔️"}</span>
+            <div style={{minWidth:0}}>
+              <p style={{color:C.goldLight,fontSize:11,fontWeight:800,fontFamily:C.font,margin:0,textTransform:"uppercase",letterSpacing:.8}}>{fin>0?T.continueLesson:T.nextUp}</p>
+              <p style={{color:C.text,fontSize:15,fontWeight:700,fontFamily:C.font,margin:"2px 0 0",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{cur?locName(cur.id):T.summit}{nextLesson?` · ${T.lesson} ${nextIdx+1}`:""}</p>
+              <p style={{color:C.textDim,fontSize:12,fontFamily:C.font,margin:"2px 0 0",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{nextLesson?lessonTitle(nextLesson.title):cur?`${fin}/${total}`:""}</p>
+            </div>
+          </button>
+          <button onClick={onOpenChallenge} style={card(dk?"rgba(6,13,26,.72)":"rgba(255,255,255,.8)",challengeDoneToday?"rgba(74,186,120,.35)":"rgba(232,128,96,.3)")}>
+            {challengeDoneToday?<span style={{fontSize:22,lineHeight:1}}>✅</span>:<Icon type="challenge" size={24} color={dk?"#F0A878":"#C08058"}/>}
+            <div><p style={{color:challengeDoneToday?C.green:(dk?"#F0A878":"#A06840"),fontSize:13,fontWeight:700,fontFamily:C.font,margin:0}}>{T.dailyChallenge}</p><p style={{color:C.textDim,fontSize:11,fontFamily:C.font,margin:"2px 0 0"}}>{challengeDoneToday?T.challengeDone:T.keepStreak}</p></div>
+          </button>
+          <button onClick={onOpenNews} style={card(dk?"rgba(6,13,26,.72)":"rgba(255,255,255,.8)","rgba(212,165,90,.3)")}>
+            <Icon type="news" size={24} color={dk?"#E8C878":"#A08838"}/><div><p style={{color:dk?"#E8C878":"#806820",fontSize:13,fontWeight:700,fontFamily:C.font,margin:0}}>{T.aiNews}</p><p style={{color:C.textDim,fontSize:11,fontFamily:C.font,margin:"2px 0 0"}}>{T.newsDesc}</p></div>
+          </button>
+          <button onClick={onOpenTools} style={card(dk?"rgba(6,13,26,.72)":"rgba(255,255,255,.8)","rgba(58,168,160,.3)")}>
+            <Icon type="tools" size={24} color={dk?"#68D8C8":"#388880"}/><div><p style={{color:dk?"#68D8C8":"#2A7068",fontSize:13,fontWeight:700,fontFamily:C.font,margin:0}}>{T.aiTools}</p><p style={{color:C.textDim,fontSize:11,fontFamily:C.font,margin:"2px 0 0"}}>{T.toolsDesc}</p></div>
+          </button>
+        </div>
+      </div>);
+    })()}
 
     {/* Bottom action bar */}
-    <div style={{position:"fixed",bottom:0,left:0,right:0,zIndex:20,paddingBottom:(10+BOTTOM_SAFE)+"px",paddingTop:8,paddingLeft:8,paddingRight:8,background:dk?"rgba(6,13,26,.92)":"rgba(255,255,255,.92)",backdropFilter:"blur(16px)",borderTop:`1px solid ${dk?"rgba(255,255,255,.06)":"rgba(0,0,0,.08)"}`,boxShadow:dk?"none":"0 -2px 20px rgba(0,0,0,.06)"}}>
-      <div style={{display:"flex",gap:8,maxWidth:720,margin:"0 auto"}}>
+    <div className="lc-mobile-only" style={{position:"fixed",bottom:0,left:0,right:0,zIndex:20,paddingBottom:(10+BOTTOM_SAFE)+"px",paddingTop:8,paddingLeft:8,paddingRight:8,background:dk?"rgba(6,13,26,.92)":"rgba(255,255,255,.92)",backdropFilter:"blur(16px)",borderTop:`1px solid ${dk?"rgba(255,255,255,.06)":"rgba(0,0,0,.08)"}`,boxShadow:dk?"none":"0 -2px 20px rgba(0,0,0,.06)"}}>
+      <div style={{display:"flex",gap:8}}>
         <button onClick={onOpenChallenge} style={{flex:1,background:challengeDoneToday?(dk?"rgba(74,186,120,.08)":"rgba(74,186,120,.08)"):(dk?"rgba(232,128,96,.08)":"rgba(232,128,96,.06)"),border:`1px solid ${challengeDoneToday?"rgba(74,186,120,.25)":(dk?"rgba(232,128,96,.15)":"rgba(232,128,96,.12)")}`,borderRadius:12,padding:"12px 10px",display:"flex",alignItems:"center",gap:8,textAlign:"left"}}>
           {challengeDoneToday?<span style={{fontSize:20,lineHeight:1}}>✅</span>:<Icon type="challenge" size={22} color={dk?"#F0A878":"#C08058"}/>}<div><p style={{color:challengeDoneToday?(dk?"#A0F0C0":"#2A6A38"):(dk?"#F0A878":"#A06840"),fontSize:12,fontWeight:700,fontFamily:C.font,margin:0}}>{T.dailyChallenge}</p><p style={{color:challengeDoneToday?C.green:C.textDim,fontSize:11,fontFamily:C.font,margin:0}}>{challengeDoneToday?T.challengeDone:T.keepStreak}</p></div>
         </button>
@@ -2145,6 +2176,48 @@ const setA11y=(patch)=>{const n={...getA11y(),...patch};try{localStorage.setItem
 const applyA11y=(a=getA11y())=>{try{document.documentElement.dataset.textLarge=a.textLarge?"1":"";document.documentElement.dataset.reduceMotion=a.reduceMotion?"1":""}catch{}};
 applyA11y();
 
+// ─── Desktop shell ─────────────────────────────────────────────────────────
+// Lumicamp is phone-first, but company pilots run on laptops. At ≥1024 px the
+// map's bottom bar and floating Lumi pill are replaced by a persistent sidebar,
+// the map fills the main area, and reading screens sit in a ~960 px column
+// (see index.css `.lc-shell`). Same screens, same state — only the frame changes.
+const DESKTOP_BP=1024;
+const useIsDesktop=()=>{
+  const [d,setD]=useState(()=>typeof window!=="undefined"&&window.innerWidth>=DESKTOP_BP&&!_isNative);
+  useEffect(()=>{const on=()=>setD(window.innerWidth>=DESKTOP_BP&&!_isNative);window.addEventListener("resize",on);return()=>window.removeEventListener("resize",on)},[]);
+  return d;
+};
+const DesktopNav = ({screen,user,profile,progress,nav,onToggleTheme,onSignIn}) => {
+  const dk=C.mode==="dark";
+  const name=profile?.display_name||user?.email?.split("@")[0]||"";
+  const done=(progress||[]).length;const totalLessons=Object.keys(LESSONS).reduce((a,k)=>a+pathLessonCount(k),0)||1;
+  const pct=Math.min(100,Math.round(done/totalLessons*100));const level=Math.max(1,Math.floor(done/2)+1);
+  const streak=Math.max(Streak.getData()?.current||0,profile?.current_streak||0);
+  const items=[
+    {id:"map",label:T.map.replace(/[←→]\s*/,"").trim()||"Map",icon:<span style={{fontSize:18,lineHeight:1}}>🗺️</span>,go:nav.map},
+    {id:"challenge",label:T.dailyChallenge,icon:<Icon type="challenge" size={20} color={dk?"#F0A878":"#C08058"}/>,go:nav.challenge},
+    {id:"news",label:T.aiNews,icon:<Icon type="news" size={20} color={dk?"#E8C878":"#A08838"}/>,go:nav.news},
+    {id:"tools",label:T.aiTools,icon:<Icon type="tools" size={20} color={dk?"#68D8C8":"#388880"}/>,go:nav.tools},
+    {id:"chat",label:T.chatWithLumi,icon:<Lumi size={22}/>,go:nav.chat},
+  ];
+  const active=(id)=>screen===id||(id==="map"&&(screen==="location"||screen==="achievements"));
+  const Item=({it})=><button onClick={it.go} aria-current={active(it.id)?"page":undefined} style={{display:"flex",alignItems:"center",gap:12,width:"100%",padding:"11px 14px",borderRadius:12,border:"1px solid "+(active(it.id)?C.borderGold:"transparent"),background:active(it.id)?"rgba(212,165,90,.12)":"transparent",color:active(it.id)?C.goldLight:C.textMuted,fontSize:14,fontWeight:700,fontFamily:C.font,textAlign:"left",cursor:"pointer"}}><span style={{width:24,display:"flex",justifyContent:"center"}}>{it.icon}</span>{it.label}</button>;
+  return(<aside className="lc-side" style={{background:C.bgCard,borderRight:`1px solid ${C.border}`,display:"flex",flexDirection:"column",padding:"18px 14px"}}>
+    <button onClick={nav.map} style={{display:"flex",alignItems:"center",gap:10,background:"none",border:"none",padding:"4px 8px 18px",cursor:"pointer",textAlign:"left"}}><Lumi size={34} level={level}/><div><p style={{color:C.text,fontSize:17,fontWeight:800,fontFamily:C.fontDisplay,margin:0,letterSpacing:.3}}>Lumicamp</p><p style={{color:C.textDim,fontSize:11,fontFamily:C.font,margin:0}}>{T.altitude} {level} · {pct}% {T.toSummit}</p></div></button>
+    <nav style={{display:"flex",flexDirection:"column",gap:4}}>{items.map(it=><Item key={it.id} it={it}/>)}</nav>
+    <div style={{flex:1}}/>
+    {user&&<Item it={{id:"team",label:T.team,icon:<span style={{fontSize:17,lineHeight:1}}>👥</span>,go:nav.team}}/>}
+    <Item it={{id:"profile",label:user?T.profile:T.signIn,icon:<span style={{fontSize:17,lineHeight:1}}>{user?"👤":"🔑"}</span>,go:user?nav.profile:onSignIn}}/>
+    <div style={{display:"flex",alignItems:"center",gap:8,padding:"12px 8px 0",borderTop:`1px solid ${C.border}`,marginTop:10}}>
+      <span title={T.dayStreak} style={{display:"flex",alignItems:"center",gap:4,color:C.textMuted,fontSize:12,fontWeight:700,fontFamily:C.font}}>🔥 {streak}</span>
+      <div style={{flex:1}}/>
+      <button onClick={onToggleTheme} aria-label={dk?T.lightMode:T.darkMode} style={{background:"none",border:`1px solid ${C.border}`,borderRadius:10,width:32,height:32,cursor:"pointer",fontSize:14}}>{dk?"☀️":"🌙"}</button>
+      <LangSelector onChangeLang={nav.lang} compact/>
+    </div>
+    {user&&name&&<p style={{color:C.textDim,fontSize:11,fontFamily:C.font,margin:"10px 8px 0",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{name}</p>}
+  </aside>);
+};
+
 // Daily streak reminder — a local notification scheduled on the device
 // (@capacitor/local-notifications). No server, no push infrastructure needed.
 const REMIND_KEY="lumicamp_reminder";
@@ -2473,6 +2546,7 @@ const Tutorial = ({onComplete}) => {
 export default function Lumicamp(){
   const [loading,setLoading]=useState(true);const [user,setUser]=useState(null);const [profile,setProfile]=useState(null);const [progress,setProgress]=useState(()=>mergeProgress(getLocalProgress()));
   const [screen,setScreen]=useState("map");const [activeLoc,setActiveLoc]=useState(null);const [routeToken,setRouteToken]=useState("");const [chatSeed,setChatSeed]=useState("");
+  const isDesktop=useIsDesktop();
   const [showTutorial,setShowTutorial]=useState(()=>!localStorage.getItem("lumicamp_tutorial_seen"));
   const [showAuthPrompt,setShowAuthPrompt]=useState(false);
   const [showNamePrompt,setShowNamePrompt]=useState(false);
@@ -2718,5 +2792,18 @@ export default function Lumicamp(){
   </>;
 
   const nameStep=<NameStep open={!!user&&showNamePrompt&&!showAuthPrompt} user={user} onSave={saveDisplayName} loading={savingName}/>;
-  return<><style>{getCss()}</style>{content}{nameStep}{authOverlay}</>;
+  const nav={
+    map:goMap,
+    challenge:()=>{analytics.track("challenge_open");setScreen("challenge")},
+    news:()=>{analytics.track("news_open");setScreen("news")},
+    tools:()=>{analytics.track("tools_open");setScreen("tools")},
+    chat:()=>{analytics.track("chat_open",{from:"nav"});setChatSeed("");setScreen("chat")},
+    team:()=>setScreen("team"),
+    profile:()=>setScreen("profile"),
+    lang:changeLang,
+  };
+  const shell=isDesktop
+    ?<div className="lc-shell"><DesktopNav screen={screen} user={user} profile={profile} progress={progress} nav={nav} onToggleTheme={toggleTheme} onSignIn={()=>setShowAuthPrompt(true)}/><main className="lc-main">{content}</main></div>
+    :content;
+  return<><style>{getCss()}</style>{shell}{nameStep}{authOverlay}</>;
 }

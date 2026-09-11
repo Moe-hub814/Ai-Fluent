@@ -1,10 +1,17 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { background: #FFFCF5; }
 
-/* Desktop: Lumicamp is a phone-first app. On wide screens keep it a readable
-   column instead of stretching cards across a 1500px window (testers use
-   desktop Chrome). Fixed overlays (sign-in sheet, bottom bar) span the
-   viewport on purpose; the bar's content is centered in JS. */
-@media (min-width: 760px) {
-  #root { max-width: 720px; margin: 0 auto; box-shadow: 0 0 0 1px rgba(128,128,128,.12), 0 0 60px rgba(0,0,0,.18); min-height: 100vh; }
+/* Desktop shell (≥1024px): sidebar + main. Lumicamp is phone-first, but
+   company pilots run on laptops, so wide screens get a real app frame instead
+   of a phone column. The map fills the main area; reading screens sit in a
+   comfortable column. Fixed overlays (sign-in sheet) still span the viewport. */
+@media (min-width: 1024px) {
+  .lc-shell { display: flex; min-height: 100vh; }
+  .lc-side { width: 248px; flex-shrink: 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .lc-main { flex: 1; min-width: 0; position: relative; }
+  .lc-main > *:not(.lc-map) { max-width: 960px; margin: 0 auto; }
+  .lc-mobile-only { display: none !important; }
+}
+@media (max-width: 1023px) {
+  .lc-desktop-only { display: none !important; }
 }
